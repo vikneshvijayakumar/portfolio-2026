@@ -44,7 +44,7 @@ export const zones: Zone[] = [
   {
     id: "case-studies",
     label: "Case Studies",
-    desktopCenter: { x: 960, y: 980 },
+    desktopCenter: { x: 160, y: 230 },
     mobileEyebrow: "Selected Work",
     mobileTitle: "Projects designed for complex, high-stakes workflows.",
     mobileBody:
@@ -53,7 +53,7 @@ export const zones: Zone[] = [
   {
     id: "about",
     label: "About Me",
-    desktopCenter: { x: 2500, y: 1500 },
+    desktopCenter: { x: 1700, y: 750 },
     mobileEyebrow: "About",
     mobileTitle: "I turn complex workflows and ambiguous ideas into simple, shipped products.",
     mobileBody:
@@ -62,7 +62,7 @@ export const zones: Zone[] = [
   {
     id: "how-i-work",
     label: "How I Work",
-    desktopCenter: { x: 3584, y: 1752 },
+    desktopCenter: { x: 2934, y: 1002 },
     mobileEyebrow: "Process",
     mobileTitle: "A systems-minded design approach grounded in real constraints.",
     mobileBody:
@@ -71,7 +71,7 @@ export const zones: Zone[] = [
   {
     id: "experience",
     label: "Experience",
-    desktopCenter: { x: 960, y: 2600 },
+    desktopCenter: { x: 160, y: 1850 },
     mobileEyebrow: "History",
     mobileTitle: "Over a decade across enterprise and startups",
     mobileBody:
@@ -90,7 +90,7 @@ export const projects: Project[] = [
     note: "Modular logic",
     tone: "Paper frame / operational clarity",
     image: "output-builder.webp",
-    desktopPosition: { x: 3300, y: 1400, rotation: 4.4 },
+    desktopPosition: { x: 2550, y: 650, rotation: 4.4 },
   },
   {
     title: "Form Builder",
@@ -103,7 +103,7 @@ export const projects: Project[] = [
     note: "Legacy-to-React migration",
     tone: "Pinned note / setup workflow",
     image: "form-builder.webp",
-    desktopPosition: { x: 3950, y: 1510, rotation: -5.6 },
+    desktopPosition: { x: 3200, y: 760, rotation: -5.6 },
   },
   {
     title: "Form Taking",
@@ -116,7 +116,7 @@ export const projects: Project[] = [
     note: "Guided completion patterns",
     tone: "Folded paper / step-by-step flow",
     image: "form-taking.webp",
-    desktopPosition: { x: 3240, y: 2000, rotation: -2.8 },
+    desktopPosition: { x: 2490, y: 1250, rotation: -2.8 },
   },
   {
     title: "Dashboard",
@@ -129,7 +129,7 @@ export const projects: Project[] = [
     note: "Signal over noise",
     tone: "Utility board / modular reporting",
     image: "dashboard.webp",
-    desktopPosition: { x: 3900, y: 2180, rotation: 3.4 },
+    desktopPosition: { x: 3150, y: 1430, rotation: 3.4 },
     type: "case-study",
   },
 
@@ -173,7 +173,7 @@ export const experience = [
     period: "Aug 2023 – Jan 2026",
     summary:
       "Led redesign of complex admin workflows across form setup, output setup, and form taking in a .NET-to-React migration.",
-    desktopPosition: { x: 1500, y: 1200, rotation: -12.5 },
+    desktopPosition: { x: 700, y: 450, rotation: -12.5 },
     logoColor: "#e74c3c"
   },
   {
@@ -182,7 +182,7 @@ export const experience = [
     period: "Apr 2023 – Jul 2023",
     summary:
       "Delivered MVPs for AI and B2B startups globally while balancing production speed with product quality.",
-    desktopPosition: { x: 1000, y: 1280, rotation: 9.6 },
+    desktopPosition: { x: 200, y: 530, rotation: 9.6 },
     logoColor: "#14a800"
   },
   {
@@ -191,7 +191,7 @@ export const experience = [
     period: "Mar 2015 – Jul 2023",
     summary:
       "Designed AI-powered healthcare products, led a seven-person design team, and built standards for shipping at scale.",
-    desktopPosition: { x: 1550, y: 1600, rotation: 14.2 },
+    desktopPosition: { x: 750, y: 850, rotation: 14.2 },
     logoColor: "#2980b9"
   },
   {
@@ -200,7 +200,7 @@ export const experience = [
     period: "2014 – 2015",
     summary:
       "Designed a leave management workflow for Kissflow, a low-code workflow platform, improving usability for day-to-day administrative tasks.",
-    desktopPosition: { x: 1050, y: 1650, rotation: -7.4 },
+    desktopPosition: { x: 250, y: 900, rotation: -7.4 },
     logoColor: "#53469B"
   },
 ];

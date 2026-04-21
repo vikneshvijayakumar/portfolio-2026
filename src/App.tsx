@@ -36,14 +36,23 @@ const projectImages: Record<string, string> = {
 };
 
 const STAGE = {
-  width: 5000,
-  height: 3600,
+  width: 4350,
+  height: 2100,
 };
 
 const MOBILE_BREAKPOINT = 900;
 const MIN_ZOOM = 0.62;
 const MAX_ZOOM = 1.45;
-const DEFAULT_ZOOM = typeof window !== "undefined" && window.innerWidth > 2000 ? 0.9 : 0.8;
+const DEFAULT_ZOOM =
+  typeof window !== "undefined"
+    ? window.innerWidth > 2000
+      ? 0.9
+      : window.innerWidth > 1500
+        ? 0.82
+        : window.innerWidth > 1200
+          ? 0.72
+          : 0.66
+    : 0.8;
 
 type Camera = {
   x: number;
@@ -185,16 +194,19 @@ function App() {
     const saved = window.localStorage.getItem("viknesh-theme");
     return saved === "ink" ? "ink" : "paper";
   });
-  const [isLoaded, setIsLoaded] = useState(skipIntro || navigator.webdriver);
+  const [isLoaded, setIsLoaded] = useState(true || skipIntro || navigator.webdriver);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   const [activeZone, setActiveZone] = useState<ZoneId>("about");
-  const [camera, setCamera] = useState<Camera>(() =>
-    centerCamera(
-      zones.find((zone) => zone.id === "about")!,
-      window.innerWidth,
-      window.innerHeight,
-    ),
-  );
+  const [isEntering, setIsEntering] = useState(true);
+  const [camera, setCamera] = useState<Camera>(() => {
+    // Initial Wide-Angle View (Better framed)
+    const initScale = 0.40;
+    return {
+      x: window.innerWidth / 2 - (STAGE.width / 2) * initScale,
+      y: window.innerHeight / 2 - (STAGE.height / 2) * initScale,
+      scale: initScale,
+    };
+  });
   const [isWheelNavigating, setIsWheelNavigating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isInertia, setIsInertia] = useState(false);
@@ -227,6 +239,20 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (isLoaded && isEntering) {
+      // Small delay to ensure the DOM has updated with the starting positions
+      const timer = window.setTimeout(() => {
+        moveToZone("about");
+        // Keep isEntering true for the duration of the zoom so the CSS transition stays active
+        window.setTimeout(() => {
+          setIsEntering(false);
+        }, 4100);
+      }, 300);
+      return () => window.clearTimeout(timer);
+    }
+  }, [isLoaded, isEntering, isMobile]);
+
+  useEffect(() => {
     window.localStorage.setItem("viknesh-theme", theme);
     document.documentElement.dataset.theme = theme;
   }, [theme]);
@@ -251,13 +277,28 @@ function App() {
   useEffect(() => {
     if (isMobile) return;
 
+    let mouseX = 0;
+    let mouseY = 0;
+    let rafId: number;
+
     const handleMouseMove = (e: MouseEvent) => {
-      document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
-      document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+
+    const updateMousePos = () => {
+      document.documentElement.style.setProperty("--mouse-x", `${mouseX}px`);
+      document.documentElement.style.setProperty("--mouse-y", `${mouseY}px`);
+      rafId = requestAnimationFrame(updateMousePos);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    rafId = requestAnimationFrame(updateMousePos);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(rafId);
+    };
   }, [isMobile]);
 
   useEffect(() => {
@@ -595,13 +636,11 @@ function App() {
             onPointerCancel={handlePointerUp}
           >
             <div
-              className={
-                isDragging || isWheelNavigating || isInertia
-                  ? "stage is-dragging"
-                  : "stage"
-              }
+              className={`stage ${isDragging || isWheelNavigating || isInertia ? "is-dragging" : ""
+                } ${isEntering ? "is-entering" : ""}`}
               style={{
                 height: STAGE.height,
+                width: STAGE.width,
                 transform: `translate3d(${camera.x}px, ${camera.y}px, 0) scale(${camera.scale})`,
               }}
             >
@@ -628,22 +667,22 @@ function App() {
               <SocialStrip />
             </div>
             <div className="bottom-dock__right">
-              <div 
-                className="made-with-card" 
-                data-interactive="true" 
-                dangerouslySetInnerHTML={{ 
+              <div
+                className="made-with-card"
+                data-interactive="true"
+                dangerouslySetInnerHTML={{
                   __html: antigravityBadge
                     .replace('<svg', '<svg viewBox="0 0 174 36"')
                     .replace(/width="174"|height="36"/g, '')
-                    .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"') 
-                }} 
+                    .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+                }}
               />
             </div>
           </div>
         </>
       ) : null}
 
-      <Preloader isLoaded={isLoaded} />
+      {/* <Preloader isLoaded={isLoaded} /> */}
 
       <header className="toolbar" data-interactive="true">
         <div className="toolbar__panel toolbar__panel--left">
@@ -869,8 +908,8 @@ const SkillsCard = memo(function SkillsCard({ mobile = false }: { mobile?: boole
   const style = mobile
     ? undefined
     : {
-      left: 2250,
-      top: 2170,
+      left: 1450,
+      top: 1420,
     };
 
 
@@ -1081,7 +1120,7 @@ const ProjectCard = memo(function ProjectCard({ project, mobile = false }: { pro
           {project.title === "Output Builder" ? (
             <span className="project-card__company">
               {project.company} {project.year}
-              <span 
+              <span
                 className="project-card__metadata-arrow"
                 dangerouslySetInnerHTML={{ __html: topArrowSvg.replace('stroke="#000"', 'stroke="currentColor"') }}
               />
@@ -1138,7 +1177,7 @@ const ClockWidget = memo(function ClockWidget({ mobile = false }: { mobile?: boo
             />
           ))}
         </div>
-        
+
         <div className="clock-widget__hand hour" style={{ transform: `rotate(${hourDeg}deg)` }} />
         <div className="clock-widget__hand minute" style={{ transform: `rotate(${minDeg}deg)` }} />
         <div className="clock-widget__hand second" style={{ transform: `rotate(${secDeg}deg)` }} />
@@ -1155,11 +1194,13 @@ const ClockWidget = memo(function ClockWidget({ mobile = false }: { mobile?: boo
 const BadgesCluster = memo(function BadgesCluster({ mobile = false }: { mobile?: boolean }) {
   return (
     <div className={mobile ? "badges-cluster is-mobile" : "badges-cluster"} data-interactive="true">
-      <a href="https://www.upwork.com/freelancers/~0124077c8ba1055975" target="_blank" rel="noreferrer" style={{ display: 'block' }}>
+      <a href="https://www.upwork.com/freelancers/~0124077c8ba1055975" target="_blank" rel="noreferrer" className="badge-link">
         <img src={upworkBadge} alt="Upwork Top Rated" className="badge-image badge-image--upwork" draggable="false" />
+        {!mobile && <span className="badge-tooltip">View Profile</span>}
       </a>
-      <a href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB" target="_blank" rel="noreferrer" style={{ display: 'block' }}>
+      <a href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB" target="_blank" rel="noreferrer" className="badge-link">
         <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" draggable="false" />
+        {!mobile && <span className="badge-tooltip">See Certificate</span>}
       </a>
     </div>
   );
@@ -1177,8 +1218,8 @@ const WorkCluster = memo(function WorkCluster({ mobile = false }: { mobile?: boo
             mobile
               ? undefined
               : {
-                left: 1400 + (index % 2) * 290,
-                top: 2000 + Math.floor(index / 2) * 320,
+                left: 600 + (index % 2) * 290,
+                top: 1250 + Math.floor(index / 2) * 320,
                 transform: `rotate(${rotations[index % 4]}deg)`
               }
           }

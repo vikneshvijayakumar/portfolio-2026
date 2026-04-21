@@ -78,8 +78,20 @@
 
 * {
   box-sizing: border-box;
-  transition-property: background-color, background, border-color, color, box-shadow, fill, stroke;
-  transition-duration: 180ms;
+}
+
+/* Base transitions for interactive elements */
+button, 
+a, 
+.made-with-card, 
+.principle-card, 
+.project-card, 
+.about-card, 
+.markdown-card, 
+.experience-folder,
+.theme-switch__inner {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 200ms;
   transition-timing-function: ease;
 }
 
@@ -103,7 +115,7 @@ body {
   color: var(--text);
   overflow: hidden;
   overscroll-behavior: none;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition: background 300ms ease, background-color 300ms ease, color 300ms ease;
 }
 
 button,
@@ -176,9 +188,13 @@ button {
   -webkit-mask-image:
     radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0, black 40px, transparent 600px),
     radial-gradient(circle, black 1px, transparent 1px);
+  mask-image:
+    radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0, black 40px, transparent 600px),
+    radial-gradient(circle, black 1px, transparent 1px);
   /* Matched to base dots */
 
   -webkit-mask-size: 100% 100%, 24px 24px;
+  mask-size: 100% 100%, 24px 24px;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 
@@ -195,6 +211,7 @@ button {
   animation: bgShift 12s ease infinite;
 
   -webkit-mask-image: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 600px);
+  mask-image: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 600px);
 
   filter: blur(100px) saturate(1.2);
   opacity: 0.12;
@@ -277,28 +294,80 @@ button {
 }
 
 .made-with-card svg {
-  height: 28px;
+  height: 32px;
   width: auto;
   display: block;
+  position: relative;
+  z-index: 2;
 }
 
 .made-with-card {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 10px 18px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  padding: 12px 24px;
+  background: var(--surface-strong);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 24px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(12px);
-  transition: transform 180ms ease, background-color 180ms ease;
+  transition: transform 240ms ease, background-color 180ms ease, box-shadow 240ms ease;
+  will-change: transform;
+  backface-visibility: hidden;
   text-decoration: none;
   color: var(--text);
+  overflow: visible;
+}
+
+.made-with-card::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  padding: 2px;
+  border-radius: inherit;
+  background: var(--lumos-gradient);
+  background-size: 200% 200%;
+  animation: bgShift 8s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.4;
+}
+
+.made-with-card::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background: var(--lumos-gradient);
+  background-size: 200% 200%;
+  animation: bgShift 12s ease infinite;
+  filter: blur(12px);
+  opacity: 0.1;
+  z-index: -1;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 240ms ease, filter 240ms ease;
 }
 
 .made-with-card:hover {
-  transform: translateY(-1px);
-  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  transform: translateY(-2px) scale(1.02);
+  background: color-mix(in srgb, var(--surface-strong) 96%, transparent);
+  border-color: transparent;
+  box-shadow: 0 28px 80px rgba(56, 39, 28, 0.16);
+}
+
+.made-with-card:hover::after {
+  opacity: 1;
+}
+
+.made-with-card:hover::before {
+  opacity: 0.65;
+  filter: blur(16px);
 }
 
 .bottom-dock__center {
@@ -708,13 +777,18 @@ button {
 .stage {
   position: absolute;
   left: 43px;
-  top: -143px;
-  width: 100%;
+  top: -53px;
   transform-origin: top left;
-  transition: transform 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
   -webkit-user-select: none;
   user-select: none;
+}
+
+.stage.is-entering {
+  transition: transform 2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .stage.is-dragging {
@@ -736,11 +810,16 @@ button {
 
 .about-card {
   position: absolute;
-  top: 1350px;
-  left: 2170px;
+  top: 600px;
+  left: 1370px;
   width: 520px;
   padding: 40px;
   border-radius: 34px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .about-card.is-mobile {
@@ -999,6 +1078,8 @@ button {
   height: 230px;
   cursor: pointer;
   z-index: 1;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .experience-folder:hover {
@@ -1097,10 +1178,10 @@ button {
   height: 160px;
   background: linear-gradient(135deg,
       color-mix(in srgb, var(--folder-color) 100%, transparent),
-      color-mix(in srgb, var(--folder-color) 50%, transparent));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+      color-mix(in srgb, var(--folder-color) 80%, transparent));
   border-radius: 4px 4px 14px 14px;
+  will-change: transform;
+  backface-visibility: hidden;
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, 0.3),
     0 -4px 12px rgba(0, 0, 0, 0.05);
@@ -1147,6 +1228,8 @@ button {
   gap: 32px;
   transition: transform 240ms ease;
   pointer-events: auto;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .project-card:hover {
@@ -1309,8 +1392,8 @@ button {
 /* === Analog Clock (Scaled 50%) === */
 .clock-widget {
   position: absolute;
-  left: 3100px;
-  top: 1150px;
+  left: 2450px;
+  top: 400px;
   width: 176px;
   height: 176px;
   padding: 10px;
@@ -1440,11 +1523,11 @@ button {
 
 .badges-cluster {
   position: absolute;
-  top: 1380px;
-  left: 2800px;
+  top: 630px;
+  left: 2150px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 80px;
 }
 
 .badges-cluster.is-mobile {
@@ -1455,6 +1538,56 @@ button {
   flex-direction: row;
   justify-content: center;
   gap: 24px;
+}
+
+.badge-link {
+  position: relative;
+  display: block;
+  text-decoration: none;
+}
+
+.badge-tooltip {
+  position: absolute;
+  bottom: calc(100% + 20px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: white;
+  color: #181818;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  /* Subtle border like the ref */
+  z-index: 10;
+}
+
+/* Speech Bubble Triangle */
+.badge-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid white;
+}
+
+.badge-link:hover .badge-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.badge-link:hover .badge-image {
+  transform: rotate(0) scale(1.05);
+  filter: drop-shadow(0 20px 48px rgba(0, 0, 0, 0.12));
 }
 
 .badge-image {
@@ -1629,9 +1762,10 @@ button {
   padding: 10px;
   border-radius: 24px;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  background: var(--surface-strong);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(12px);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .zoom-controls__button,
@@ -1777,8 +1911,8 @@ button {
 
 .floating-status {
   position: absolute;
-  top: 1150px;
-  left: 3400px;
+  top: 400px;
+  left: 2750px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -1805,6 +1939,8 @@ button {
   position: absolute;
   width: min(750px, 92vw);
   border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--ide-bg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1812,6 +1948,8 @@ button {
   font-size: 13px;
   color: var(--ide-text);
   z-index: 2;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .markdown-card.is-mobile {
