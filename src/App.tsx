@@ -10,6 +10,7 @@ import {
   type Zone,
   type ZoneId,
 } from "./content";
+import { OutputBuilder } from "./pages/OutputBuilder";
 import arrowSvg from "./assets/arrow.svg?raw";
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
@@ -152,6 +153,7 @@ function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (t
 
 function App() {
   const skipIntro = new URLSearchParams(window.location.search).has("skip-intro");
+  const [activeCaseStudy, setActiveCaseStudy] = useState<string | null>(null);
 
   const [theme, setTheme] = useState<"paper" | "ink">(() => {
     const saved = window.localStorage.getItem("viknesh-theme");
@@ -217,6 +219,19 @@ function App() {
   useEffect(() => {
     // No-op or keep if needed for other logic
   }, []);
+
+  const openCaseStudy = (id: string) => {
+    setActiveCaseStudy(id);
+    // Optional: push state to URL
+  };
+
+  const closeCaseStudy = () => {
+    setActiveCaseStudy(null);
+  };
+
+  if (activeCaseStudy === "output-builder") {
+    return <OutputBuilder onBack={closeCaseStudy} />;
+  }
 
   useEffect(() => {
     if (isEntering) {
@@ -664,7 +679,7 @@ function App() {
           <ExperienceStack isMobile={isMobile} />
           <ClockWidget />
           <BadgesCluster />
-          <ProjectCards />
+          <ProjectCards onOpenCaseStudy={openCaseStudy} />
           <WorkCluster />
           {!isMobile && <FloatingStatus />}
 
@@ -1087,7 +1102,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   );
 });
 
-const ProjectCards = memo(function ProjectCards() {
+const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCaseStudy: (id: string) => void }) {
   const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
@@ -1100,6 +1115,7 @@ const ProjectCards = memo(function ProjectCards() {
             key={project.title}
             project={project}
             index={index}
+            onOpen={onOpenCaseStudy}
           />
         );
       })}
@@ -1110,9 +1126,11 @@ const ProjectCards = memo(function ProjectCards() {
 const ProjectCard = memo(function ProjectCard({
   project,
   index = 0,
+  onOpen,
 }: {
   project: Project;
   index?: number;
+  onOpen: (id: string) => void;
 }) {
   const cardStyle = {
     left: project.desktopPosition.x,
@@ -1125,13 +1143,20 @@ const ProjectCard = memo(function ProjectCard({
     part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
   );
 
+  const handleClick = () => {
+    if (project.title === "Output Builder") {
+      onOpen("output-builder");
+    }
+  };
+
   return (
     <motion.article
       layout
       initial={{ rotate: rotate }}
       animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
       whileTap={{ scale: 0.98 }}
-      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""}`.trim()}
+      onClick={handleClick}
+      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
       style={cardStyle}
       data-interactive={project.year === "Coming Soon" ? "false" : "true"}
     >
@@ -1150,7 +1175,15 @@ const ProjectCard = memo(function ProjectCard({
         </p>
 
         <div className="project-card__footer-meta">
-          {project.year === "Coming Soon" ? (
+          {project.title === "Output Builder" ? (
+            <span className="project-card__company">
+              {project.company} {project.year}
+              <span
+                className="project-card__metadata-arrow"
+                dangerouslySetInnerHTML={{ __html: topArrowSvg.replace('stroke="#000"', 'stroke="currentColor"') }}
+              />
+            </span>
+          ) : project.year === "Coming Soon" ? (
             <span className="project-card__coming-soon">Coming Soon</span>
           ) : (
             <span className="project-card__company">
