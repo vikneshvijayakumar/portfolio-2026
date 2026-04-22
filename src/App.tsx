@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, memo } from "react";
-import { motion, AnimatePresence, useSpring, useTransform } from "motion/react";
+import { motion, useSpring, useTransform } from "motion/react";
 import {
   experience,
   projects,
@@ -10,6 +10,7 @@ import {
   type Zone,
   type ZoneId,
 } from "./content";
+import { OutputBuilderv3 } from "./pages/OutputBuilderv3";
 import arrowSvg from "./assets/arrow.svg?raw";
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
@@ -45,6 +46,8 @@ const STAGE = {
 const MOBILE_BREAKPOINT = 900;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1.5;
+const CASE_STUDY_PARAM = "case-study";
+const OUTPUT_BUILDER_V3 = "output-builder-v3";
 const DEFAULT_ZOOM =
   typeof window !== "undefined"
     ? window.innerWidth > 1400
@@ -60,6 +63,38 @@ type Camera = {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function readCaseStudyFromUrl() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const value = new URLSearchParams(window.location.search).get(CASE_STUDY_PARAM);
+  return value === OUTPUT_BUILDER_V3 ? value : null;
+}
+
+function writeCaseStudyToUrl(caseStudyId: string | null, historyMode: "push" | "replace" = "push") {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+
+  if (caseStudyId) {
+    url.searchParams.set(CASE_STUDY_PARAM, caseStudyId);
+  } else {
+    url.searchParams.delete(CASE_STUDY_PARAM);
+  }
+
+  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+
+  if (historyMode === "replace") {
+    window.history.replaceState({}, "", nextUrl);
+    return;
+  }
+
+  window.history.pushState({}, "", nextUrl);
 }
 
 function getCameraBounds(scale: number, viewportWidth: number, viewportHeight: number) {
@@ -152,6 +187,7 @@ function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (t
 
 function App() {
   const skipIntro = new URLSearchParams(window.location.search).has("skip-intro");
+  const [activeStandaloneCaseStudy, setActiveStandaloneCaseStudy] = useState<string | null>(readCaseStudyFromUrl);
 
   const [theme, setTheme] = useState<"paper" | "ink">(() => {
     const saved = window.localStorage.getItem("viknesh-theme");
@@ -217,6 +253,31 @@ function App() {
   useEffect(() => {
     // No-op or keep if needed for other logic
   }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveStandaloneCaseStudy(readCaseStudyFromUrl());
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const openStandaloneCaseStudy = (caseStudyId: string) => {
+    writeCaseStudyToUrl(caseStudyId);
+    setActiveStandaloneCaseStudy(caseStudyId);
+  };
+
+  const closeStandaloneCaseStudy = () => {
+    writeCaseStudyToUrl(null);
+    setActiveStandaloneCaseStudy(null);
+  };
+
+  if (activeStandaloneCaseStudy === OUTPUT_BUILDER_V3) {
+    return <OutputBuilderv3 onBack={closeStandaloneCaseStudy} />;
+  }
 
   useEffect(() => {
     if (isEntering) {
@@ -319,7 +380,7 @@ function App() {
 
       // For regular scrolling, decide if it's a canvas pan or an internal element scroll.
       const target = event.target as HTMLElement;
-      const isInternalScroll = target.closest(".markdown-card__viewport");
+      const isInternalScroll = target.closest(".markdown-card__viewport, .case-study-overlay, .case-study-content");
 
       if (!isInternalScroll) {
         event.preventDefault();
@@ -664,7 +725,7 @@ function App() {
           <ExperienceStack isMobile={isMobile} />
           <ClockWidget />
           <BadgesCluster />
-          <ProjectCards />
+          <ProjectCards onCaseStudyOpen={openStandaloneCaseStudy} />
           <WorkCluster />
           {!isMobile && <FloatingStatus />}
 
@@ -854,13 +915,13 @@ function ZoomControls({
 }
 
 const cardReveal = {
-  hidden: ({ rotate = 0 }) => ({
+  hidden: ({ rotate = 0 }: { rotate?: number }) => ({
     opacity: 0,
     y: 12,
     scale: 0.98,
     rotate: rotate
   }),
-  visible: ({ i, rotate = 0 }) => ({
+  visible: ({ index, rotate = 0 }: { index: number; rotate?: number }) => ({
     opacity: 1,
     y: 0,
     scale: 1,
@@ -869,7 +930,7 @@ const cardReveal = {
       type: "spring",
       stiffness: 260,
       damping: 32,
-      delay: 0.4 + i * 0.12,
+      delay: 0.4 + index * 0.12,
     },
   }),
 };
@@ -1011,8 +1072,8 @@ const SkillsCard = memo(function SkillsCard() {
       </div>
       <div className="markdown-card__viewport">
         <div className="markdown-card__gutter" aria-hidden="true">
-          {Array.from({ length: 14 }).map((_, i) => (
-            <div key={i}>{i + 1}</div>
+          {Array.from({ length: 14 }).map((_, index: number) => (
+            <div key={index}>{index + 1}</div>
           ))}
         </div>
         <div className="markdown-card__content">
@@ -1087,7 +1148,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   );
 });
 
-const ProjectCards = memo(function ProjectCards() {
+const ProjectCards = memo(function ProjectCards({ onCaseStudyOpen }: { onCaseStudyOpen: (id: string) => void }) {
   const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
@@ -1100,7 +1161,7 @@ const ProjectCards = memo(function ProjectCards() {
             key={project.title}
             project={project}
             index={index}
-
+            onCaseStudyOpen={onCaseStudyOpen}
           />
         );
       })}
@@ -1111,9 +1172,11 @@ const ProjectCards = memo(function ProjectCards() {
 const ProjectCard = memo(function ProjectCard({
   project,
   index = 0,
+  onCaseStudyOpen,
 }: {
   project: Project;
   index?: number;
+  onCaseStudyOpen: (id: string) => void;
 }) {
   const cardStyle = {
     left: project.desktopPosition.x,
@@ -1122,9 +1185,15 @@ const ProjectCard = memo(function ProjectCard({
 
   const rotate = project.desktopPosition.rotation;
 
-  const formattedSummary = project.summary.split(/(\d+%)/).map((part, i) =>
-    part.match(/\d+%/) ? <strong key={i}>{part}</strong> : part
+  const formattedSummary = project.summary.split(/(\d+%)/).map((part, idx) =>
+    part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
   );
+
+  const handleClick = () => {
+    if (project.title === "Output Builder") {
+      onCaseStudyOpen(OUTPUT_BUILDER_V3);
+    }
+  };
 
   return (
     <motion.article
@@ -1132,7 +1201,8 @@ const ProjectCard = memo(function ProjectCard({
       initial={{ rotate: rotate }}
       animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
       whileTap={{ scale: 0.98 }}
-      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""}`.trim()}
+      onClick={handleClick}
+      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
       style={cardStyle}
       data-interactive={project.year === "Coming Soon" ? "false" : "true"}
     >
@@ -1207,11 +1277,11 @@ const ClockWidget = memo(function ClockWidget() {
     >
       <div className="clock-widget__inner">
         <div className="clock-widget__graduations">
-          {Array.from({ length: 60 }).map((_, i) => (
+          {Array.from({ length: 60 }).map((_, index: number) => (
             <div
-              key={i}
-              className={`clock-widget__graduation ${i % 5 === 0 ? "is-major" : ""}`}
-              style={{ transform: `rotate(${i * 6}deg)` }}
+              key={index}
+              className={`clock-widget__graduation ${index % 5 === 0 ? "is-major" : ""}`}
+              style={{ transform: `rotate(${index * 6}deg)` }}
             />
           ))}
         </div>
