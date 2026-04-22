@@ -1143,7 +1143,10 @@ const ProjectCard = memo(function ProjectCard({
     part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
   );
 
-  const handleClick = () => {
+  const handleClick = (e?: any) => {
+    if (e && typeof e.stopPropagation === 'function') {
+      e.stopPropagation();
+    }
     if (project.title === "Output Builder") {
       onOpen("output-builder");
     }
@@ -1155,11 +1158,23 @@ const ProjectCard = memo(function ProjectCard({
       initial={{ rotate: rotate }}
       animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
       whileTap={{ scale: 0.98 }}
-      onClick={handleClick}
       className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
       style={cardStyle}
-      data-interactive={project.year === "Coming Soon" ? "false" : "true"}
     >
+      {project.title === "Output Builder" && (
+        <div
+          className="project-card__click-overlay"
+          onClick={handleClick}
+          onPointerUp={handleClick}
+          data-interactive="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 20,
+            cursor: "pointer",
+          }}
+        />
+      )}
       <div className="project-card__visual">
         <img
           src={projectImages[project.image]}
