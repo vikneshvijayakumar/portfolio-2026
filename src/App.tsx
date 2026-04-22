@@ -10,7 +10,6 @@ import {
   type Zone,
   type ZoneId,
 } from "./content";
-import { OutputBuilder } from "./pages/OutputBuilder";
 import arrowSvg from "./assets/arrow.svg?raw";
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
@@ -153,7 +152,6 @@ function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (t
 
 function App() {
   const skipIntro = new URLSearchParams(window.location.search).has("skip-intro");
-  const [activeCaseStudy, setActiveCaseStudy] = useState<string | null>(null);
 
   const [theme, setTheme] = useState<"paper" | "ink">(() => {
     const saved = window.localStorage.getItem("viknesh-theme");
@@ -219,19 +217,6 @@ function App() {
   useEffect(() => {
     // No-op or keep if needed for other logic
   }, []);
-
-  const openCaseStudy = (id: string) => {
-    setActiveCaseStudy(id);
-    // Optional: push state to URL
-  };
-
-  const closeCaseStudy = () => {
-    setActiveCaseStudy(null);
-  };
-
-  if (activeCaseStudy === "output-builder") {
-    return <OutputBuilder onBack={closeCaseStudy} />;
-  }
 
   useEffect(() => {
     if (isEntering) {
@@ -679,7 +664,7 @@ function App() {
           <ExperienceStack isMobile={isMobile} />
           <ClockWidget />
           <BadgesCluster />
-          <ProjectCards onOpenCaseStudy={openCaseStudy} />
+          <ProjectCards />
           <WorkCluster />
           {!isMobile && <FloatingStatus />}
 
@@ -1102,7 +1087,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   );
 });
 
-const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCaseStudy: (id: string) => void }) {
+const ProjectCards = memo(function ProjectCards() {
   const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
@@ -1115,7 +1100,6 @@ const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCas
             key={project.title}
             project={project}
             index={index}
-            onOpen={onOpenCaseStudy}
           />
         );
       })}
@@ -1126,11 +1110,9 @@ const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCas
 const ProjectCard = memo(function ProjectCard({
   project,
   index = 0,
-  onOpen,
 }: {
   project: Project;
   index?: number;
-  onOpen: (id: string) => void;
 }) {
   const cardStyle = {
     left: project.desktopPosition.x,
@@ -1143,38 +1125,16 @@ const ProjectCard = memo(function ProjectCard({
     part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
   );
 
-  const handleClick = (e?: any) => {
-    if (e && typeof e.stopPropagation === 'function') {
-      e.stopPropagation();
-    }
-    if (project.title === "Output Builder") {
-      onOpen("output-builder");
-    }
-  };
-
   return (
     <motion.article
       layout
       initial={{ rotate: rotate }}
       animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
       whileTap={{ scale: 0.98 }}
-      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
+      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""}`.trim()}
       style={cardStyle}
+      data-interactive={project.year === "Coming Soon" ? "false" : "true"}
     >
-      {project.title === "Output Builder" && (
-        <div
-          className="project-card__click-overlay"
-          onClick={handleClick}
-          onPointerUp={handleClick}
-          data-interactive="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 20,
-            cursor: "pointer",
-          }}
-        />
-      )}
       <div className="project-card__visual">
         <img
           src={projectImages[project.image]}
@@ -1190,15 +1150,7 @@ const ProjectCard = memo(function ProjectCard({
         </p>
 
         <div className="project-card__footer-meta">
-          {project.title === "Output Builder" ? (
-            <span className="project-card__company">
-              {project.company} {project.year}
-              <span
-                className="project-card__metadata-arrow"
-                dangerouslySetInnerHTML={{ __html: topArrowSvg.replace('stroke="#000"', 'stroke="currentColor"') }}
-              />
-            </span>
-          ) : project.year === "Coming Soon" ? (
+          {project.year === "Coming Soon" ? (
             <span className="project-card__coming-soon">Coming Soon</span>
           ) : (
             <span className="project-card__company">
