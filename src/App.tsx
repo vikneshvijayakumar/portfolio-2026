@@ -10,7 +10,6 @@ import {
   type Zone,
   type ZoneId,
 } from "./content";
-import { OutputBuilderv3 } from "./pages/OutputBuilderv3";
 import arrowSvg from "./assets/arrow.svg?raw";
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
@@ -46,8 +45,6 @@ const STAGE = {
 const MOBILE_BREAKPOINT = 900;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1.5;
-const CASE_STUDY_PARAM = "case-study";
-const OUTPUT_BUILDER_V3 = "output-builder-v3";
 const DEFAULT_ZOOM =
   typeof window !== "undefined"
     ? window.innerWidth > 1400
@@ -63,38 +60,6 @@ type Camera = {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
-}
-
-function readCaseStudyFromUrl() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const value = new URLSearchParams(window.location.search).get(CASE_STUDY_PARAM);
-  return value === OUTPUT_BUILDER_V3 ? value : null;
-}
-
-function writeCaseStudyToUrl(caseStudyId: string | null, historyMode: "push" | "replace" = "push") {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  const url = new URL(window.location.href);
-
-  if (caseStudyId) {
-    url.searchParams.set(CASE_STUDY_PARAM, caseStudyId);
-  } else {
-    url.searchParams.delete(CASE_STUDY_PARAM);
-  }
-
-  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
-
-  if (historyMode === "replace") {
-    window.history.replaceState({}, "", nextUrl);
-    return;
-  }
-
-  window.history.pushState({}, "", nextUrl);
 }
 
 function getCameraBounds(scale: number, viewportWidth: number, viewportHeight: number) {
@@ -187,7 +152,6 @@ function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (t
 
 function App() {
   const skipIntro = new URLSearchParams(window.location.search).has("skip-intro");
-  const [activeStandaloneCaseStudy, setActiveStandaloneCaseStudy] = useState<string | null>(readCaseStudyFromUrl);
 
   const [theme, setTheme] = useState<"paper" | "ink">(() => {
     const saved = window.localStorage.getItem("viknesh-theme");
@@ -253,31 +217,6 @@ function App() {
   useEffect(() => {
     // No-op or keep if needed for other logic
   }, []);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setActiveStandaloneCaseStudy(readCaseStudyFromUrl());
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
-
-  const openStandaloneCaseStudy = (caseStudyId: string) => {
-    writeCaseStudyToUrl(caseStudyId);
-    setActiveStandaloneCaseStudy(caseStudyId);
-  };
-
-  const closeStandaloneCaseStudy = () => {
-    writeCaseStudyToUrl(null);
-    setActiveStandaloneCaseStudy(null);
-  };
-
-  if (activeStandaloneCaseStudy === OUTPUT_BUILDER_V3) {
-    return <OutputBuilderv3 onBack={closeStandaloneCaseStudy} />;
-  }
 
   useEffect(() => {
     if (isEntering) {
@@ -380,7 +319,7 @@ function App() {
 
       // For regular scrolling, decide if it's a canvas pan or an internal element scroll.
       const target = event.target as HTMLElement;
-      const isInternalScroll = target.closest(".markdown-card__viewport, .case-study-overlay, .case-study-content");
+      const isInternalScroll = target.closest(".markdown-card__viewport");
 
       if (!isInternalScroll) {
         event.preventDefault();
@@ -725,7 +664,7 @@ function App() {
           <ExperienceStack isMobile={isMobile} />
           <ClockWidget />
           <BadgesCluster />
-          <ProjectCards onCaseStudyOpen={openStandaloneCaseStudy} />
+          <ProjectCards />
           <WorkCluster />
           {!isMobile && <FloatingStatus />}
 
@@ -1148,7 +1087,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   );
 });
 
-const ProjectCards = memo(function ProjectCards({ onCaseStudyOpen }: { onCaseStudyOpen: (id: string) => void }) {
+const ProjectCards = memo(function ProjectCards() {
   const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
@@ -1161,7 +1100,6 @@ const ProjectCards = memo(function ProjectCards({ onCaseStudyOpen }: { onCaseStu
             key={project.title}
             project={project}
             index={index}
-            onCaseStudyOpen={onCaseStudyOpen}
           />
         );
       })}
@@ -1172,11 +1110,9 @@ const ProjectCards = memo(function ProjectCards({ onCaseStudyOpen }: { onCaseStu
 const ProjectCard = memo(function ProjectCard({
   project,
   index = 0,
-  onCaseStudyOpen,
 }: {
   project: Project;
   index?: number;
-  onCaseStudyOpen: (id: string) => void;
 }) {
   const cardStyle = {
     left: project.desktopPosition.x,
@@ -1189,20 +1125,13 @@ const ProjectCard = memo(function ProjectCard({
     part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
   );
 
-  const handleClick = () => {
-    if (project.title === "Output Builder") {
-      onCaseStudyOpen(OUTPUT_BUILDER_V3);
-    }
-  };
-
   return (
     <motion.article
       layout
       initial={{ rotate: rotate }}
       animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
       whileTap={{ scale: 0.98 }}
-      onClick={handleClick}
-      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
+      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""}`.trim()}
       style={cardStyle}
       data-interactive={project.year === "Coming Soon" ? "false" : "true"}
     >
@@ -1221,15 +1150,7 @@ const ProjectCard = memo(function ProjectCard({
         </p>
 
         <div className="project-card__footer-meta">
-          {project.title === "Output Builder" ? (
-            <span className="project-card__company">
-              {project.company} {project.year}
-              <span
-                className="project-card__metadata-arrow"
-                dangerouslySetInnerHTML={{ __html: topArrowSvg.replace('stroke="#000"', 'stroke="currentColor"') }}
-              />
-            </span>
-          ) : project.year === "Coming Soon" ? (
+          {project.year === "Coming Soon" ? (
             <span className="project-card__coming-soon">Coming Soon</span>
           ) : (
             <span className="project-card__company">
