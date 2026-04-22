@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, memo } from "react";
+import { motion, AnimatePresence, useSpring, useTransform } from "motion/react";
 import {
   experience,
   projects,
@@ -27,6 +28,7 @@ import outputBuilderImg from "./assets/output-builder.webp";
 import googleEyesIcon from "./assets/👀-(Compressify.io).svg";
 import antigravityBadge from "./assets/madewithantigravity.svg?raw";
 import topArrowSvg from "./assets/top-right-arrow.svg?raw";
+import pinIcon from "./assets/pin.svg";
 
 const projectImages: Record<string, string> = {
   "dashboard.webp": dashboardImg,
@@ -36,22 +38,18 @@ const projectImages: Record<string, string> = {
 };
 
 const STAGE = {
-  width: 4350,
-  height: 2100,
+  width: 4500,
+  height: 2500,
 };
 
 const MOBILE_BREAKPOINT = 900;
-const MIN_ZOOM = 0.62;
-const MAX_ZOOM = 1.45;
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 1.5;
 const DEFAULT_ZOOM =
   typeof window !== "undefined"
-    ? window.innerWidth > 2000
-      ? 0.9
-      : window.innerWidth > 1500
-        ? 0.82
-        : window.innerWidth > 1200
-          ? 0.72
-          : 0.66
+    ? window.innerWidth > 1400
+      ? 0.82
+      : 0.72
     : 0.8;
 
 type Camera = {
@@ -107,10 +105,13 @@ function centerCamera(
   viewportHeight: number,
   scale: number = DEFAULT_ZOOM,
 ): Camera {
+  const isMobile = viewportWidth <= MOBILE_BREAKPOINT;
+  const center = (isMobile && zone.mobileCenter) ? zone.mobileCenter : zone.desktopCenter;
+
   return clampCamera(
     {
-      x: viewportWidth / 2 - zone.desktopCenter.x * scale,
-      y: viewportHeight / 2 - zone.desktopCenter.y * scale,
+      x: viewportWidth / 2 - center.x * scale,
+      y: viewportHeight / 2 - center.y * scale,
       scale,
     },
     viewportWidth,
@@ -138,52 +139,14 @@ function zoomAroundPoint(
 
 function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (theme: "paper" | "ink") => void }) {
   return (
-    <>
-      <svg display="none">
-        <symbol id="light" viewBox="0 0 24 24">
-          <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(0,12,12)" />
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(45,12,12)" />
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(90,12,12)" />
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(135,12,12)" />
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(180,12,12)" />
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(225,12,12)" />
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(270,12,12)" />
-            <line x1="12" y1="17" x2="12" y2="20" transform="rotate(315,12,12)" />
-          </g>
-          <circle fill="currentColor" cx="12" cy="12" r="5" />
-        </symbol>
-        <symbol id="dark" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M15.1,14.9c-3-0.5-5.5-3-6-6C8.8,7.1,9.1,5.4,9.9,4c0.4-0.8-0.4-1.7-1.2-1.4C4.6,4,1.8,7.9,2,12.5c0.2,5.1,4.4,9.3,9.5,9.5c4.5,0.2,8.5-2.6,9.9-6.6c0.3-0.8-0.6-1.7-1.4-1.2C18.6,14.9,16.9,15.2,15.1,14.9z" />
-        </symbol>
-      </svg>
-      <label className="theme-switch">
-        <input
-          className="theme-switch__input"
-          type="checkbox"
-          role="switch"
-          name="dark"
-          checked={theme === "ink"}
-          onChange={(e) => setTheme(e.target.checked ? "ink" : "paper")}
-        />
-        <svg className="theme-switch__icon" width="24px" height="24px" aria-hidden="true">
-          <use href="#light" />
-        </svg>
-        <svg className="theme-switch__icon" width="24px" height="24px" aria-hidden="true">
-          <use href="#dark" />
-        </svg>
-        <span className="theme-switch__inner"></span>
-        <span className="theme-switch__inner-icons">
-          <svg className="theme-switch__icon" width="24px" height="24px" aria-hidden="true">
-            <use href="#light" />
-          </svg>
-          <svg className="theme-switch__icon" width="24px" height="24px" aria-hidden="true">
-            <use href="#dark" />
-          </svg>
-        </span>
-        <span className="theme-switch__sr">Dark Mode</span>
-      </label>
-    </>
+    <button
+      className="theme-toggle-minimal"
+      onClick={() => setTheme(theme === "ink" ? "paper" : "ink")}
+      type="button"
+      aria-label={theme === "ink" ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      <InlineAssetSvg html={theme === "ink" ? sunSvg : moonSvg} />
+    </button>
   );
 }
 
@@ -194,10 +157,12 @@ function App() {
     const saved = window.localStorage.getItem("viknesh-theme");
     return saved === "ink" ? "ink" : "paper";
   });
-  const [isLoaded, setIsLoaded] = useState(true || skipIntro || navigator.webdriver);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= MOBILE_BREAKPOINT : false);
+  const [isTablet, setIsTablet] = useState(typeof window !== "undefined" ? (window.innerWidth > MOBILE_BREAKPOINT && window.innerWidth <= 1024) : false);
   const [activeZone, setActiveZone] = useState<ZoneId>("about");
   const [isEntering, setIsEntering] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [camera, setCamera] = useState<Camera>(() => {
     // Initial Wide-Angle View (Better framed)
     const initScale = 0.40;
@@ -226,28 +191,43 @@ function App() {
     target: HTMLElement;
   } | null>(null);
   const inertiaRafRef = useRef<number | null>(null);
+  const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchDistRef = useRef<number | null>(null);
   const mobileZoneRefs = useRef<Record<ZoneId, HTMLElement | null>>({
     "case-studies": null,
     about: null,
     "how-i-work": null,
     experience: null,
+    skills: null,
   });
 
+  const socialPos = useMemo(() => ({
+    x: 2160 + (isMobile ? 100 : 0) + (Math.random() * 60 - 30),
+    y: 1150 + (Math.random() * 40),
+    rotate: Math.random() * 6 - 4
+  }), [isMobile]);
+
+  const madeWithPos = useMemo(() => ({
+    x: 3060 + (Math.random() * 40 - 20),
+    y: 580 + (Math.random() * 40 - 20),
+    rotate: Math.random() * 6 - 3
+  }), []);
+
+  // Initial load effect removed as we now start loaded immediately
   useEffect(() => {
-    const timer = window.setTimeout(() => setIsLoaded(true), 2400);
-    return () => window.clearTimeout(timer);
+    // No-op or keep if needed for other logic
   }, []);
 
   useEffect(() => {
-    if (isLoaded && isEntering) {
-      // Small delay to ensure the DOM has updated with the starting positions
+    if (isEntering) {
+      // Start the zoom-in immediately to simulate a purposeful scroll entry
       const timer = window.setTimeout(() => {
-        moveToZone("about");
-        // Keep isEntering true for the duration of the zoom so the CSS transition stays active
+        moveToZone("about", 0.8);
+        // Duration reflects a purposeful, smooth zoom
         window.setTimeout(() => {
           setIsEntering(false);
-        }, 4100);
-      }, 300);
+        }, 1800);
+      }, 50);
       return () => window.clearTimeout(timer);
     }
   }, [isLoaded, isEntering, isMobile]);
@@ -260,19 +240,26 @@ function App() {
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= MOBILE_BREAKPOINT;
+      const tablet = window.innerWidth > MOBILE_BREAKPOINT && window.innerWidth <= 1024;
       setIsMobile(mobile);
+      setIsTablet(tablet);
 
-      if (!mobile) {
-        const currentZone = zones.find((zone) => zone.id === activeZone)!;
-        setCamera((currentCamera) =>
-          centerCamera(currentZone, window.innerWidth, window.innerHeight, currentCamera.scale),
-        );
-      }
+      const currentZone = zones.find((zone) => zone.id === activeZone)!;
+      setCamera((currentCamera) =>
+        centerCamera(currentZone, window.innerWidth, window.innerHeight, currentCamera.scale),
+      );
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [activeZone]);
+
+  useEffect(() => {
+    const isWin = navigator.platform.toLowerCase().includes("win");
+    if (isWin) {
+      document.documentElement.classList.add("os-windows");
+    }
+  }, []);
 
   useEffect(() => {
     if (isMobile) return;
@@ -316,7 +303,7 @@ function App() {
         event.preventDefault();
         scheduleWheelIdle();
         setCamera((currentCamera) => {
-          const scaleDelta = Math.exp(-event.deltaY * 0.0018);
+          const scaleDelta = Math.exp(-event.deltaY * 0.004);
           const nextScale = clamp(currentCamera.scale * scaleDelta, MIN_ZOOM, MAX_ZOOM);
           return zoomAroundPoint(
             currentCamera,
@@ -355,53 +342,26 @@ function App() {
     return () => window.removeEventListener("wheel", handleWheel);
   }, [isMobile]);
 
-  useEffect(() => {
-    if (!isMobile) {
-      return;
-    }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
-
-        if (visible?.target instanceof HTMLElement) {
-          setActiveZone(visible.target.dataset.zone as ZoneId);
-        }
-      },
-      {
-        rootMargin: "-25% 0px -35% 0px",
-        threshold: [0.2, 0.45, 0.65],
-      },
-    );
-
-    const refs = Object.values(mobileZoneRefs.current).filter(Boolean);
-    refs.forEach((node) => observer.observe(node!));
-
-    return () => observer.disconnect();
-  }, [isMobile]);
 
   const activeZoneIndex = zones.findIndex((zone) => zone.id === activeZone);
   const activeZoneMeta = zones[activeZoneIndex];
 
   const zoneSequence = useMemo(() => zones.map((zone) => zone.id), []);
 
-  const moveToZone = (zoneId: ZoneId) => {
+  const moveToZone = (zoneId: ZoneId, customScale?: number) => {
+    setIsNavigating(true);
     setActiveZone(zoneId);
 
-    if (isMobile) {
-      mobileZoneRefs.current[zoneId]?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-      return;
-    }
-
     const zone = zones.find((entry) => entry.id === zoneId)!;
-    setCamera((currentCamera) =>
-      centerCamera(zone, window.innerWidth, window.innerHeight, DEFAULT_ZOOM),
+    const targetZoom = customScale ?? (isMobile ? zone.targetScale?.mobile : zone.targetScale?.desktop) ?? DEFAULT_ZOOM;
+
+    setCamera(() =>
+      centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom),
     );
+
+    // Reset navigating flag after animation roughly finishes
+    setTimeout(() => setIsNavigating(false), 1000);
   };
 
   const moveMobileBy = (direction: -1 | 1) => {
@@ -418,7 +378,7 @@ function App() {
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (isMobile) return;
+    activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     const target = event.target as HTMLElement;
     // Don't prevent default for inputs/labels so they still focus/toggle
@@ -430,24 +390,58 @@ function App() {
     cancelInertia();
     setIsInertia(false);
 
-    setIsDragging(true);
-    dragStateRef.current = {
-      pointerId: event.pointerId,
-      lastX: event.clientX,
-      lastY: event.clientY,
-      startCamX: camera.x,
-      startCamY: camera.y,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      samples: [],
-      target: target,
-    };
-    stageRef.current?.setPointerCapture(event.pointerId);
+    if (activePointersRef.current.size === 1) {
+      setIsDragging(true);
+      dragStateRef.current = {
+        pointerId: event.pointerId,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        startCamX: camera.x,
+        startCamY: camera.y,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        samples: [],
+        target: target,
+      };
+      stageRef.current?.setPointerCapture(event.pointerId);
+    } else if (activePointersRef.current.size === 2) {
+      // Setup pinch zoom
+      const pts = Array.from(activePointersRef.current.values());
+      pinchDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      setIsDragging(false);
+      dragStateRef.current = null;
+    }
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!activePointersRef.current.has(event.pointerId)) return;
+    activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (activePointersRef.current.size === 2 && pinchDistRef.current !== null) {
+      const pts = Array.from(activePointersRef.current.values());
+      const newDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const midpointX = (pts[0].x + pts[1].x) / 2;
+      const midpointY = (pts[0].y + pts[1].y) / 2;
+
+      const zoomFactor = newDist / pinchDistRef.current;
+      pinchDistRef.current = newDist;
+
+      setCamera((currentCamera) => {
+        const nextScale = clamp(currentCamera.scale * zoomFactor, MIN_ZOOM, MAX_ZOOM);
+        return zoomAroundPoint(
+          currentCamera,
+          nextScale,
+          midpointX,
+          midpointY,
+          window.innerWidth,
+          window.innerHeight
+        );
+      });
+      return;
+    }
+
     const ds = dragStateRef.current;
-    if (isMobile || !ds || ds.pointerId !== event.pointerId) return;
+    if (!ds || ds.pointerId !== event.pointerId) return;
 
     const dx = event.clientX - ds.lastX;
     const dy = event.clientY - ds.lastY;
@@ -472,6 +466,11 @@ function App() {
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    activePointersRef.current.delete(event.pointerId);
+    if (activePointersRef.current.size < 2) {
+      pinchDistRef.current = null;
+    }
+
     const ds = dragStateRef.current;
     setIsDragging(false);
     if (!ds || ds.pointerId !== event.pointerId) return;
@@ -481,7 +480,7 @@ function App() {
     // If movement was tiny, it's a click, not a pan.
     const moveDist = Math.hypot(event.clientX - ds.startClientX, event.clientY - ds.startClientY);
     if (moveDist < 6) {
-      const interactive = ds.target.closest("a, button, label, input") as HTMLElement;
+      const interactive = ds.target.closest("a, button, label, input, [data-interactive='true']") as HTMLElement;
       if (interactive) {
         interactive.click();
       }
@@ -625,50 +624,77 @@ function App() {
         <div className="dynamic-grid-bg__color-layer" />
         <div className="dynamic-grid-bg__glow-layer" />
       </div>
-      {!isMobile ? (
-        <>
-          <main
-            ref={stageRef}
-            className="board"
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-          >
-            <div
-              className={`stage ${isDragging || isWheelNavigating || isInertia ? "is-dragging" : ""
-                } ${isEntering ? "is-entering" : ""}`}
-              style={{
-                height: STAGE.height,
-                width: STAGE.width,
-                transform: `translate3d(${camera.x}px, ${camera.y}px, 0) scale(${camera.scale})`,
-              }}
-            >
-              <AboutCard />
-              <SkillsCard />
-              <ExperienceStack />
-              <ClockWidget />
-              <BadgesCluster />
-              <ProjectCards />
-              <WorkCluster />
-              <FloatingStatus />
-            </div>
-          </main>
-          <div className="bottom-dock">
-            <div className="bottom-dock__left">
-              <ZoomControls
-                scale={camera.scale}
-                onZoomIn={() => adjustZoom(1)}
-                onZoomOut={() => adjustZoom(-1)}
-                onReset={resetZoom}
-              />
-            </div>
-            <div className="bottom-dock__center">
-              <SocialStrip />
-            </div>
-            <div className="bottom-dock__right">
-              <div
-                className="made-with-card"
+      <main
+        ref={stageRef}
+        className="board"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
+        <motion.div
+          className={`stage ${isDragging || isWheelNavigating || isInertia ? "is-dragging" : ""
+            } ${isEntering ? "is-entering" : ""}`}
+          initial={false}
+          animate={{
+            x: camera.x,
+            y: camera.y,
+            scale: camera.scale,
+          }}
+          transition={
+            isDragging || isWheelNavigating || isInertia
+              ? { type: false }
+              : isNavigating
+                ? { type: "spring", stiffness: 60, damping: 18, mass: 1 }
+                : {
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 20,
+                  mass: 1,
+                  restDelta: 0.001
+                }
+          }
+          style={{
+            height: STAGE.height,
+            width: STAGE.width,
+          }}
+        >
+          <AboutCard />
+          <SkillsCard />
+          <ExperienceStack isMobile={isMobile} />
+          <ClockWidget />
+          <BadgesCluster />
+          <ProjectCards />
+          <WorkCluster />
+          {!isMobile && <FloatingStatus />}
+
+          {isMobile && (
+            <>
+              {/* Social Strip as a Canvas Card */}
+              <motion.div
+                className="social-card-canvas"
+                style={{
+                  position: "absolute",
+                  left: socialPos.x,
+                  top: socialPos.y,
+                  rotate: socialPos.rotate,
+                  zIndex: 5,
+                }}
+              >
+                <img src={pinIcon} className="social-card-pin" alt="" draggable="false" />
+                <SocialStrip className="is-mobile" />
+              </motion.div>
+
+              {/* Made With Badge as a Canvas Card */}
+              <motion.div
+                className="made-with-card made-with-card--canvas"
+                style={{
+                  position: "absolute",
+                  left: madeWithPos.x,
+                  top: madeWithPos.y,
+                  rotate: madeWithPos.rotate,
+                  zIndex: 5,
+                }}
                 data-interactive="true"
                 dangerouslySetInnerHTML={{
                   __html: antigravityBadge
@@ -677,63 +703,115 @@ function App() {
                     .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
                 }}
               />
-            </div>
+            </>
+          )}
+        </motion.div>
+      </main>
+      <div className="bottom-dock">
+        {!isMobile && (
+          <div className="bottom-dock__left">
+            <ZoomControls
+              scale={camera.scale}
+              onZoomIn={() => adjustZoom(1)}
+              onZoomOut={() => adjustZoom(-1)}
+              onReset={resetZoom}
+            />
           </div>
-        </>
-      ) : null}
+        )}
+        <div className="bottom-dock__center">
+          {!isMobile ? <SocialStrip /> : <MobileZoneNav onMove={moveToZone} activeZone={activeZone} />}
+        </div>
+        <div className="bottom-dock__right">
+          {!isMobile && (
+            <div
+              className="made-with-card"
+              data-interactive="true"
+              dangerouslySetInnerHTML={{
+                __html: antigravityBadge
+                  .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
+                  .replace(/width="174"|height="36"/g, '')
+                  .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+              }}
+            />
+          )}
+        </div>
+      </div>
 
       {/* <Preloader isLoaded={isLoaded} /> */}
 
       <header className="toolbar" data-interactive="true">
         <div className="toolbar__panel toolbar__panel--left">
           <div className="toolbar__left">
-            <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
-            <div className="toolbar__identity">
-              <div className="toolbar__breadcrumbs">
-                <button
-                  className="toolbar__name-trigger"
-                  onClick={() => moveToZone("about")}
-                  type="button"
-                >
+            <button
+              className="toolbar__branding"
+              onClick={() => moveToZone("about")}
+              type="button"
+            >
+              <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
+              <div className="toolbar__identity">
+                <div className="toolbar__breadcrumbs">
                   <div className="toolbar__namegroup">
                     <span className="toolbar__name">Viknesh Vijayakumar</span>
                     <span className="toolbar__role">Senior Product Designer</span>
                   </div>
-                </button>
-                {activeZone !== "about" && (
-                  <div className="toolbar__active-trail">
-                    <span className="toolbar__separator">/</span>
-                    <span className="toolbar__sub">{activeZoneMeta.label}</span>
-                  </div>
-                )}
+                </div>
               </div>
+            </button>
+            {!isMobile && (
               <span className="availability-pill">
                 <span className="availability-pill__dot" />
                 Open for opportunities
               </span>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="toolbar__panel toolbar__panel--right">
+        <div className="toolbar__panel--right">
           <div className="toolbar__actions">
             <ThemeToggle theme={theme} setTheme={setTheme} />
-            <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
-              Download Resume
-            </a>
+            {!isMobile && (
+              <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
+                Download Resume
+              </a>
+            )}
           </div>
         </div>
       </header>
 
-      {isMobile ? (
-        <MobileExperience
-          activeZone={activeZoneMeta}
-          moveMobileBy={moveMobileBy}
-          zoneRefs={mobileZoneRefs}
-          moveToZone={moveToZone}
-        />
-      ) : null}
+      {/* Moved SocialStrip to Bottom Dock for desktop, so we don't need it as a floating article usually */}
     </div>
+  );
+}
+
+function WarpHUD({ activeZone, onSnap }: { activeZone: ZoneId; onSnap: (id: ZoneId) => void }) {
+  const navItems: { id: ZoneId; label: string; icon: string }[] = [
+    { id: "about", label: "Home", icon: "🏠" },
+    { id: "case-studies", label: "Projects", icon: "📂" },
+    { id: "how-i-work", label: "Process", icon: "🧠" },
+    { id: "experience", label: "History", icon: "💼" },
+  ];
+
+  return (
+    <nav className="warp-hud">
+      {navItems.map((item) => (
+        <button
+          key={item.id}
+          className={`warp-hud__item ${activeZone === item.id ? "is-active" : ""}`}
+          onClick={() => onSnap(item.id)}
+          type="button"
+        >
+          <span className="warp-hud__icon">{item.icon}</span>
+          <span className="warp-hud__label">{item.label}</span>
+          {activeZone === item.id && (
+            <motion.div
+              layoutId="warp-active"
+              className="warp-hud__indicator"
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
+        </button>
+      ))}
+    </nav>
   );
 }
 
@@ -748,13 +826,25 @@ function ZoomControls({
   onZoomOut: () => void;
   onReset: () => void;
 }) {
+  const animatedScale = useSpring(scale * 100, {
+    stiffness: 400,
+    damping: 40,
+    restDelta: 0.001
+  });
+
+  useEffect(() => {
+    animatedScale.set(scale * 100);
+  }, [scale, animatedScale]);
+
+  const displayValue = useTransform(animatedScale, (latest) => `${Math.round(latest)}%`);
+
   return (
     <div className="zoom-controls" data-interactive="true">
       <button className="zoom-controls__button" onClick={onZoomOut} type="button" aria-label="Zoom out">
         -
       </button>
       <button className="zoom-controls__readout" onClick={onReset} type="button" aria-label="Reset zoom">
-        {Math.round(scale * 100)}%
+        <motion.span>{displayValue}</motion.span>
       </button>
       <button className="zoom-controls__button" onClick={onZoomIn} type="button" aria-label="Zoom in">
         +
@@ -763,124 +853,35 @@ function ZoomControls({
   );
 }
 
-function MobileExperience({
-  activeZone,
-  moveMobileBy,
-  zoneRefs,
-  moveToZone,
-}: {
-  activeZone: Zone;
-  moveMobileBy: (direction: -1 | 1) => void;
-  zoneRefs: React.MutableRefObject<Record<ZoneId, HTMLElement | null>>;
-  moveToZone: (zoneId: ZoneId) => void;
-}) {
+const cardReveal = {
+  hidden: ({ rotate = 0 }) => ({
+    opacity: 0,
+    y: 12,
+    scale: 0.98,
+    rotate: rotate
+  }),
+  visible: ({ i, rotate = 0 }) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotate: rotate,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 32,
+      delay: 0.4 + i * 0.12,
+    },
+  }),
+};
+
+const AboutCard = memo(function AboutCard() {
   return (
-    <>
-      <div className="mobile-topnav" data-interactive="true">
-        <button
-          className="icon-button"
-          onClick={() => moveMobileBy(-1)}
-          type="button"
-          aria-label="Previous section"
-        >
-          <InlineAssetSvg html={arrowSvg} className="arrow-icon arrow-icon--left" />
-        </button>
-        <button
-          className="mobile-topnav__zone"
-          onClick={() => moveToZone(activeZone.id)}
-          type="button"
-        >
-          <span className="mobile-topnav__eyebrow">{activeZone.mobileEyebrow}</span>
-          <span className="mobile-topnav__title">{activeZone.label}</span>
-        </button>
-        <button
-          className="icon-button"
-          onClick={() => moveMobileBy(1)}
-          type="button"
-          aria-label="Next section"
-        >
-          <InlineAssetSvg html={arrowSvg} className="arrow-icon arrow-icon--right" />
-        </button>
-      </div>
-
-      <main className="mobile-flow">
-        <section
-          ref={(node) => {
-            zoneRefs.current.about = node;
-          }}
-          className="mobile-zone"
-          data-zone="about"
-        >
-          <div className="mobile-zone__intro">
-            <span className="mobile-zone__label">About</span>
-            <h1>{zones[1].mobileTitle}</h1>
-            <p>{zones[1].mobileBody}</p>
-          </div>
-          <AboutCard mobile />
-          <SkillsCard mobile />
-          <div className="mobile-note-stack">
-            <ClockWidget mobile />
-            <BadgesCluster mobile />
-          </div>
-        </section>
-
-        <section
-          ref={(node) => {
-            zoneRefs.current["case-studies"] = node;
-          }}
-          className="mobile-zone"
-          data-zone="case-studies"
-        >
-          <div className="mobile-zone__intro">
-            <span className="mobile-zone__label">Case Studies</span>
-            <h2>{zones[0].mobileTitle}</h2>
-            <p>{zones[0].mobileBody}</p>
-          </div>
-          <div className="mobile-projects">
-            {projects.map((project) => (
-              <ProjectCard key={project.title} project={project} mobile />
-            ))}
-          </div>
-        </section>
-
-        <section
-          ref={(node) => {
-            zoneRefs.current["how-i-work"] = node;
-          }}
-          className="mobile-zone"
-          data-zone="how-i-work"
-        >
-          <div className="mobile-zone__intro">
-            <span className="mobile-zone__label">How I Work</span>
-            <h2>{zones[2].mobileTitle}</h2>
-            <p>{zones[2].mobileBody}</p>
-          </div>
-          <WorkCluster mobile />
-        </section>
-
-        <section
-          ref={(node) => {
-            zoneRefs.current.experience = node;
-          }}
-          className="mobile-zone"
-          data-zone="experience"
-        >
-          <div className="mobile-zone__intro">
-            <span className="mobile-zone__label">Experience</span>
-            <h2>{zones[3].mobileTitle}</h2>
-            <p>{zones[3].mobileBody}</p>
-          </div>
-          <ExperienceStack mobile />
-          <SocialStrip mobile />
-        </section>
-      </main>
-    </>
-  );
-}
-
-const AboutCard = memo(function AboutCard({ mobile = false }: { mobile?: boolean }) {
-  return (
-    <section className={mobile ? "about-card is-mobile" : "about-card"} data-interactive="true">
+    <motion.section
+      className="about-card"
+      style={{ left: 1710, top: 630 }}
+      data-interactive="true"
+      whileTap={{ scale: 0.98 }}
+    >
       <div className="avatar-disc">
         <img src={profileImg} alt="Viknesh Vijayakumar" draggable="false" />
       </div>
@@ -898,19 +899,21 @@ const AboutCard = memo(function AboutCard({ mobile = false }: { mobile?: boolean
           Download Resume
         </a>
       </div>
-    </section>
+      <div className="about-card__copyright">
+        Copyright © {new Date().getFullYear()} — Viknesh Vijayakumar
+      </div>
+    </motion.section>
   );
 });
 
-const SkillsCard = memo(function SkillsCard({ mobile = false }: { mobile?: boolean }) {
+
+const SkillsCard = memo(function SkillsCard() {
   const [activeTab, setActiveTab] = useState(0);
 
-  const style = mobile
-    ? undefined
-    : {
-      left: 1450,
-      top: 1420,
-    };
+  const style = {
+    left: 1760,
+    top: 1500,
+  };
 
 
 
@@ -984,7 +987,11 @@ const SkillsCard = memo(function SkillsCard({ mobile = false }: { mobile?: boole
   );
 
   return (
-    <section className={mobile ? "markdown-card is-mobile" : "markdown-card"} style={style} data-interactive="true">
+    <motion.section
+      className="markdown-card"
+      style={style}
+      data-interactive="true"
+    >
       <div className="markdown-card__header">
         <div className="markdown-card__controls">
           <div className="markdown-card__dot markdown-card__dot--red" />
@@ -1013,42 +1020,49 @@ const SkillsCard = memo(function SkillsCard({ mobile = false }: { mobile?: boole
           {currentTab.content}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 });
 
-const ExperienceStack = memo(function ExperienceStack({ mobile = false }: { mobile?: boolean }) {
-  if (mobile) {
-    return (
-      <section className="experience-stack is-mobile" data-interactive="true">
-        <div className="experience-stack__label">Experience</div>
-        <div className="experience-stack__list">
-          {experience.map((item) => (
-            <article key={item.role + item.company}>
-              <div>
-                <strong>{item.role}</strong>
-                <span>{item.company}</span>
-              </div>
-              <time>{item.period}</time>
-              <p>{item.summary}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    );
-  }
+const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: boolean }) {
+  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
+  const stackCenter = { x: 450, y: 1750 }; // Center of experience zone on mobile
 
   return (
     <>
-      {experience.map((item) => {
+      {experience.map((item, index) => {
+        const desktopRotate = (item as any).desktopPosition?.rotation || 0;
+        const desktopX = (item as any).desktopPosition?.x || 0;
+        const desktopY = (item as any).desktopPosition?.y || 0;
+
+        let finalX = desktopX;
+        if (isMobile) {
+          if (item.company.includes("Upwork") || item.company === "Spiceblue") {
+            finalX = desktopX + 140; // Move them closer to the 700/750 cluster
+          }
+        }
+
+        const rotate = desktopRotate;
         const style = {
-          left: (item as any).desktopPosition?.x || 0,
-          top: (item as any).desktopPosition?.y || 0,
-          transform: `rotate(${(item as any).desktopPosition?.rotation || 0}deg)`,
+          left: finalX,
+          top: desktopY,
           "--folder-color": (item as any).logoColor || "#a886ff"
         } as React.CSSProperties;
+
+        const isOpen = openFolderId === item.role + item.company;
+
         return (
-          <article key={item.role + item.company} className="experience-folder" style={style} data-interactive="true">
+          <motion.article
+            key={item.role + item.company}
+            initial={{ rotate: rotate }}
+            animate={{ rotate: rotate, left: style.left, top: style.top }}
+            transition={{ type: "spring", stiffness: 400, damping: 35 }}
+            whileTap={{ scale: 0.98 }}
+            className={`experience-folder ${isOpen ? "is-open" : ""}`}
+            style={style}
+            data-interactive="true"
+            onClick={() => setOpenFolderId(isOpen ? null : item.role + item.company)}
+          >
             <div className="experience-folder__back">
               <div className="experience-folder__tab"></div>
             </div>
@@ -1066,7 +1080,7 @@ const ExperienceStack = memo(function ExperienceStack({ mobile = false }: { mobi
               </div>
               <span className="experience-folder__period">{item.period}</span>
             </div>
-          </article>
+          </motion.article>
         );
       })}
     </>
@@ -1074,31 +1088,51 @@ const ExperienceStack = memo(function ExperienceStack({ mobile = false }: { mobi
 });
 
 const ProjectCards = memo(function ProjectCards() {
+  const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
-      {projects.map((project) => (
-        <ProjectCard key={project.title} project={project} />
-      ))}
+      {projects.map((project, index) => {
+        const desktopX = project.desktopPosition.x;
+        const desktopY = project.desktopPosition.y;
+
+        return (
+          <ProjectCard
+            key={project.title}
+            project={project}
+            index={index}
+
+          />
+        );
+      })}
     </>
   );
 });
 
-const ProjectCard = memo(function ProjectCard({ project, mobile = false }: { project: Project; mobile?: boolean }) {
-  const cardStyle = mobile
-    ? undefined
-    : {
-      left: project.desktopPosition.x,
-      top: project.desktopPosition.y,
-      transform: `rotate(${project.desktopPosition.rotation}deg)`,
-    };
+const ProjectCard = memo(function ProjectCard({
+  project,
+  index = 0,
+}: {
+  project: Project;
+  index?: number;
+}) {
+  const cardStyle = {
+    left: project.desktopPosition.x,
+    top: project.desktopPosition.y,
+  };
+
+  const rotate = project.desktopPosition.rotation;
 
   const formattedSummary = project.summary.split(/(\d+%)/).map((part, i) =>
     part.match(/\d+%/) ? <strong key={i}>{part}</strong> : part
   );
 
   return (
-    <article
-      className={`project-card ${mobile ? "is-mobile" : ""} ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""}`.trim()}
+    <motion.article
+      layout
+      initial={{ rotate: rotate }}
+      animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
+      whileTap={{ scale: 0.98 }}
+      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""}`.trim()}
       style={cardStyle}
       data-interactive={project.year === "Coming Soon" ? "false" : "true"}
     >
@@ -1134,11 +1168,11 @@ const ProjectCard = memo(function ProjectCard({ project, mobile = false }: { pro
           )}
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 });
 
-const ClockWidget = memo(function ClockWidget({ mobile = false }: { mobile?: boolean }) {
+const ClockWidget = memo(function ClockWidget() {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -1166,7 +1200,11 @@ const ClockWidget = memo(function ClockWidget({ mobile = false }: { mobile?: boo
   });
 
   return (
-    <div className={mobile ? "clock-widget is-mobile" : "clock-widget"} data-interactive="true">
+    <motion.div
+      className="clock-widget"
+      data-interactive="true"
+      whileTap={{ scale: 0.98 }}
+    >
       <div className="clock-widget__inner">
         <div className="clock-widget__graduations">
           {Array.from({ length: 60 }).map((_, i) => (
@@ -1183,63 +1221,77 @@ const ClockWidget = memo(function ClockWidget({ mobile = false }: { mobile?: boo
         <div className="clock-widget__hand second" style={{ transform: `rotate(${secDeg}deg)` }} />
 
         <div className="clock-widget__metadata">
-          <span>Local time</span>
+          <span>Chennai, India</span>
           <strong>{displayTime}</strong>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
 
-const BadgesCluster = memo(function BadgesCluster({ mobile = false }: { mobile?: boolean }) {
+const BadgesCluster = memo(function BadgesCluster() {
   return (
-    <div className={mobile ? "badges-cluster is-mobile" : "badges-cluster"} data-interactive="true">
+    <motion.div
+      className="badges-cluster"
+      data-interactive="true"
+      whileTap={{ scale: 0.98 }}
+    >
       <a href="https://www.upwork.com/freelancers/~0124077c8ba1055975" target="_blank" rel="noreferrer" className="badge-link">
         <img src={upworkBadge} alt="Upwork Top Rated" className="badge-image badge-image--upwork" draggable="false" />
-        {!mobile && <span className="badge-tooltip">View Profile</span>}
+        <span className="badge-tooltip">View Profile</span>
       </a>
       <a href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB" target="_blank" rel="noreferrer" className="badge-link">
         <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" draggable="false" />
-        {!mobile && <span className="badge-tooltip">See Certificate</span>}
+        <span className="badge-tooltip">See Certificate</span>
       </a>
-    </div>
+    </motion.div>
   );
 });
 
-const WorkCluster = memo(function WorkCluster({ mobile = false }: { mobile?: boolean }) {
+const WorkCluster = memo(function WorkCluster() {
   const rotations = [-2, 3, 1, -4];
+  const mobileRefPoint = { x: 800, y: 850 };
+
   return (
-    <section className={mobile ? "work-cluster is-mobile" : "work-cluster"} data-interactive="true">
-      {workPrinciples.map((item, index) => (
-        <article
-          key={item.index}
-          className={`principle-card principle-card--${item.accent}`}
-          style={
-            mobile
-              ? undefined
-              : {
-                left: 600 + (index % 2) * 290,
-                top: 1250 + Math.floor(index / 2) * 320,
-                transform: `rotate(${rotations[index % 4]}deg)`
-              }
-          }
-        >
-          <div className="principle-card__header">
-            <span>{item.index}</span>
-          </div>
-          <div className="principle-card__body">
-            <h3>{item.title}</h3>
-            <p>{item.copy}</p>
-          </div>
-        </article>
-      ))}
+    <section className="work-cluster" data-interactive="true">
+      {workPrinciples.map((item, index) => {
+        const desktopRotate = rotations[index % 4];
+        const desktopPos = {
+          left: 910 + (index % 2) * 290,
+          top: 1430 + Math.floor(index / 2) * 320,
+        };
+
+        const rotate = desktopRotate;
+        const style = desktopPos;
+
+        return (
+          <motion.article
+            key={item.index}
+            layout
+            initial={{ rotate: rotate }}
+            animate={{ rotate: rotate, left: style.left, top: style.top }}
+            transition={{ type: "spring", stiffness: 450, damping: 35 }}
+            whileTap={{ scale: 0.98 }}
+            className={`principle-card principle-card--${item.accent}`}
+            style={style}
+          >
+            <div className="principle-card__header">
+              <span>{item.index}</span>
+            </div>
+            <div className="principle-card__body">
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+          </motion.article>
+        );
+      })}
     </section>
   );
 });
 
-const SocialStrip = memo(function SocialStrip({ mobile = false }: { mobile?: boolean }) {
+const SocialStrip = memo(function SocialStrip({ className = "" }: { className?: string }) {
   return (
-    <footer className={mobile ? "social-strip is-mobile" : "social-strip"} data-interactive="true">
+    <footer className={`social-strip ${className}`} data-interactive="true">
       <a href={toolbarLinks.dribbble} target="_blank" rel="noreferrer">
         <img src={dribbbleIcon} alt="" width={22} height={22} draggable="false" />
         <span>vikneshvijayakumar</span>
@@ -1248,29 +1300,103 @@ const SocialStrip = memo(function SocialStrip({ mobile = false }: { mobile?: boo
         <img src={linkedinIcon} alt="" width={22} height={22} draggable="false" />
         <span>vikneshvijayakumar</span>
       </a>
-      <a href={toolbarLinks.whatsapp} target="_blank" rel="noreferrer">
-        <img src={whatsappIcon} alt="" width={22} height={22} draggable="false" />
-        <span>+91 81488 36036</span>
-      </a>
-      <CopyEmailButton email="hello@viknesh.me" />
+      <CopyContactButton
+        text="+91 81488 36036"
+        icon={whatsappIcon}
+        copyValue="+918148836036"
+      />
+      <CopyContactButton
+        text="hello@viknesh.me"
+        icon={emailIcon}
+        copyValue="hello@viknesh.me"
+      />
     </footer>
   );
 });
 
-function CopyEmailButton({ email }: { email: string }) {
+const MobileZoneNav = memo(function MobileZoneNav({ onMove, activeZone }: { onMove: (id: ZoneId) => void, activeZone: ZoneId }) {
+  const navItems: { id: ZoneId; label: string }[] = [
+    { id: "about", label: "About" },
+    { id: "case-studies", label: "Case Studies" },
+    { id: "experience", label: "Employment" },
+    { id: "how-i-work", label: "Principles" },
+    { id: "skills", label: "Skills" },
+  ];
+
+  const currentIndex = navItems.findIndex(item => item.id === activeZone);
+  const currentItem = navItems[currentIndex] || navItems[0];
+
+  const handlePrev = () => {
+    const nextIndex = (currentIndex - 1 + navItems.length) % navItems.length;
+    onMove(navItems[nextIndex].id);
+  };
+
+  const handleNext = () => {
+    const nextIndex = (currentIndex + 1) % navItems.length;
+    onMove(navItems[nextIndex].id);
+  };
+
+  const prevIndex = (currentIndex - 1 + navItems.length) % navItems.length;
+  const nextIndex = (currentIndex + 1) % navItems.length;
+  const prevItem = navItems[prevIndex];
+  const nextItem = navItems[nextIndex];
+
+  return (
+    <motion.nav
+      className="mobile-zone-stepper"
+      data-interactive="true"
+      onPanEnd={(_, info) => {
+        if (info.offset.x > 30) handlePrev();
+        else if (info.offset.x < -30) handleNext();
+      }}
+    >
+      <button className="mobile-zone-stepper__arrow" onClick={handlePrev} type="button" aria-label="Previous section">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <div className="mobile-zone-stepper__label-viewport">
+        <motion.div
+          className="mobile-zone-stepper__label-track"
+          animate={{ x: (2 - currentIndex) * 110 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        >
+          {navItems.map((item, idx) => (
+            <span
+              key={item.id}
+              className={`mobile-zone-stepper__title ${idx === currentIndex ? "is-active" : "is-ghost"}`}
+              onClick={() => onMove(item.id)}
+            >
+              {item.label}
+            </span>
+          ))}
+        </motion.div>
+      </div>
+
+      <button className="mobile-zone-stepper__arrow" onClick={handleNext} type="button" aria-label="Next section">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </motion.nav>
+  );
+});
+
+function CopyContactButton({ text, icon, copyValue }: { text: string; icon: string; copyValue: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigator.clipboard.writeText(email);
+    navigator.clipboard.writeText(copyValue);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <button className="social-strip__email" onClick={handleCopy} type="button">
-      <img src={emailIcon} alt="" width={22} height={22} draggable="false" />
-      <span>{email}</span>
+    <button className="social-strip__copy-btn" onClick={handleCopy} type="button">
+      <img src={icon} alt="" width={22} height={22} draggable="false" />
+      <span>{text}</span>
       <div className={`tooltip ${copied ? "is-copied" : ""}`}>
         <div className="tooltip__content">
           <span className="tooltip__label">Click to copy</span>
@@ -1348,7 +1474,9 @@ const FloatingStatus = memo(function FloatingStatus() {
   }, []);
 
   return (
-    <div className="floating-status">
+    <motion.div
+      className="floating-status"
+    >
       <svg
         ref={svgRef}
         id="eyes"
@@ -1392,8 +1520,8 @@ const FloatingStatus = memo(function FloatingStatus() {
           />
         </g>
       </svg>
-      <strong>Open for opportunities</strong>
-    </div>
+      <p>Open for opportunities</p>
+    </motion.div>
   );
 });
 
