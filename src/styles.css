@@ -328,15 +328,7 @@ button {
   }
 }
 
-[data-theme="ink"] .dynamic-grid-bg__color-layer {
-  opacity: 0.35;
-  filter: saturate(0.9) brightness(0.6);
-}
-
-[data-theme="ink"] .dynamic-grid-bg__glow-layer {
-  opacity: 0.08;
-  filter: saturate(1) brightness(0.7);
-}
+/* Dark mode keeps the same prism punch as the footer — no dimming. */
 
 @keyframes bgShiftOnly {
   0% {
@@ -1850,6 +1842,13 @@ button {
 .social-strip__copy-btn:hover {
   background: color-mix(in srgb, var(--surface-strong) 88%, transparent);
   transform: translateY(-1px);
+}
+
+/* Light mode: stronger hover for visibility */
+:root:not([data-theme="ink"]) .social-strip a:hover,
+:root:not([data-theme="ink"]) .social-strip__copy-btn:hover {
+  background: var(--surface-strong);
+  box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.12);
 }
 
 @media (max-width: 1360px) {

@@ -22,7 +22,7 @@ import emailIcon from "../assets/email.svg?raw";
 import linkedinIcon from "../assets/linkedin.svg?raw";
 import whatsappIcon from "../assets/whatsapp.svg?raw";
 import arrowRightIcon from "../assets/arrow-right.svg?raw";
-
+import { toolbarLinks } from "../content";
 
 // ---------- Motion primitives ----------
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -358,14 +358,31 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
   const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    let rafId = 0;
+    let pendingX = 0;
+    let pendingY = 0;
     const handleMove = (e: MouseEvent) => {
       if (!footerRef.current) return;
       const rect = footerRef.current.getBoundingClientRect();
-      footerRef.current.style.setProperty("--f-mouse-x", `${e.clientX - rect.left}px`);
-      footerRef.current.style.setProperty("--f-mouse-y", `${e.clientY - rect.top}px`);
+      if (e.clientY < rect.top || e.clientY > rect.bottom) return;
+      pendingX = e.clientX - rect.left;
+      pendingY = e.clientY - rect.top;
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        const el = footerRef.current;
+        if (!el) return;
+        el.style.setProperty("--footer-mouse-x", `${pendingX}px`);
+        el.style.setProperty("--footer-mouse-y", `${pendingY}px`);
+        el.style.setProperty("--footer-mouse-x-px", `${pendingX}px`);
+        el.style.setProperty("--footer-mouse-y-px", `${pendingY}px`);
+      });
     };
-    window.addEventListener("mousemove", handleMove);
-    return () => window.removeEventListener("mousemove", handleMove);
+    window.addEventListener("mousemove", handleMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   useEffect(() => {
@@ -399,7 +416,7 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: EASE, delay: 0.2 }}
-        whileHover={{ y: -1, scale: 1.05 }}
+        whileHover={{ y: -1 }}
         whileTap={{ scale: 0.95 }}
       >
         <span className="ob-back__arrow" aria-hidden="true">
@@ -934,7 +951,6 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
           viewport={{ once: true, margin: "0px 0px 200px 0px" }}
           transition={{ duration: 0.4, ease: EASE }}
         >
-          {/* Landing page style background layers */}
           <div className="ob-footer__bg">
             <div className="ob-footer__bg-dots" />
             <div className="ob-footer__bg-color" />
@@ -946,15 +962,9 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
             <p className="ob-footer__sub">
               Looking for roles where I can work on complex systems, collaborate deeply with engineering, and drive real product impact.
             </p>
-            <motion.button
-              className="ob-footer__cta"
-              type="button"
-              whileHover={{ y: -1, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            >
+            <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
               Download Resume
-            </motion.button>
+            </a>
           </div>
         </motion.footer>
       </div>

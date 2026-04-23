@@ -154,25 +154,25 @@
   z-index: 30;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  height: 44px;
-  padding: 0 20px 0 12px;
+  height: 48px;
+  padding: 0 24px 0 20px;
   border-radius: var(--radius-lg);
-  background: var(--surface-strong);
+  background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 24px rgba(var(--shadow-rgb), 0.12);
   color: var(--text);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 240ms ease;
 }
 
 .ob-back:hover {
-  background: var(--white);
+  background: var(--surface-strong);
   border-color: rgba(var(--text-rgb), 0.2);
+  box-shadow: 0 16px 28px rgba(var(--shadow-rgb), 0.14);
 }
 
 .ob-back__arrow {
@@ -180,7 +180,7 @@
   align-items: center;
   justify-content: center;
   color: var(--primary-dark);
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
   margin-top: -1px;
 }
@@ -608,6 +608,11 @@
   text-wrap: balance;
 }
 
+:root[data-theme="ink"] .ob-insight {
+  background: var(--surface);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
 /* ---------- 04 Strategy / sticky notes ---------- */
 .ob-sticky-wall {
   display: grid;
@@ -957,40 +962,58 @@
   opacity: 0.8;
 }
 
+/* Colored dots that light up under cursor — mirrors .dynamic-grid-bg__color-layer */
 .ob-footer__bg-color {
   position: absolute;
   inset: 0;
   background: var(--lumos-gradient);
   background-size: 400% 400%;
   animation: bgShift 12s ease infinite;
+  filter: saturate(1.8);
+  opacity: 0.85;
 
   -webkit-mask-image:
-    radial-gradient(circle at var(--f-mouse-x, 50%) var(--f-mouse-y, 50%), black 0, black 40px, transparent 600px),
+    radial-gradient(circle at var(--footer-mouse-x, 50%) var(--footer-mouse-y, 50%),
+        black 0, black 20px, transparent 50px),
     radial-gradient(circle, black 1px, transparent 1px);
   mask-image:
-    radial-gradient(circle at var(--f-mouse-x, 50%) var(--f-mouse-y, 50%), black 0, black 40px, transparent 600px),
+    radial-gradient(circle at var(--footer-mouse-x, 50%) var(--footer-mouse-y, 50%),
+        black 0, black 20px, transparent 50px),
     radial-gradient(circle, black 1px, transparent 1px);
-
   -webkit-mask-size: 100% 100%, 24px 24px;
   mask-size: 100% 100%, 24px 24px;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
-
-  opacity: 0.15;
 }
 
+/* Atmospheric halo — transform-based for performance, mirrors .dynamic-grid-bg__glow-layer */
 .ob-footer__bg-glow {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 900px;
+  height: 900px;
+
   background: var(--lumos-gradient);
-  background-size: 400% 400%;
-  animation: bgShift 12s ease infinite;
+  filter: saturate(1.6);
 
-  -webkit-mask-image: radial-gradient(circle at var(--f-mouse-x, 50%) var(--f-mouse-y, 50%), black 0%, transparent 600px);
-  mask-image: radial-gradient(circle at var(--f-mouse-x, 50%) var(--f-mouse-y, 50%), black 0%, transparent 600px);
+  -webkit-mask-image: radial-gradient(circle,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.3) 25%,
+      transparent 55%);
+  mask-image: radial-gradient(circle,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.3) 25%,
+      transparent 55%);
 
-  filter: blur(100px) saturate(1.2);
-  opacity: 0.08;
+  opacity: 0.12;
+
+  transform: translate3d(
+    calc(var(--footer-mouse-x-px, 50%) - 450px),
+    calc(var(--footer-mouse-y-px, 50%) - 450px),
+    0
+  );
+  will-change: transform;
 }
 
 .ob-footer__inner {
