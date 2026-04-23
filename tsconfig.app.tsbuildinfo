@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/content.ts","./src/main.tsx","./src/vite-env.d.ts","./src/pages/outputbuilder.tsx","./src/pages/outputbuilderv2.tsx","./src/pages/outputbuilderv3.tsx"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/content.ts","./src/main.tsx","./src/vite-env.d.ts","./src/pages/outputbuilder.tsx"],"version":"5.9.3"}

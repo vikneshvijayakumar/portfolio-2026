@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState, memo } from "react";
-import { motion, useSpring, useTransform } from "motion/react";
+import { useEffect, useMemo, useRef, useState, memo, lazy, Suspense } from "react";
+import { motion, useSpring, useTransform, AnimatePresence } from "motion/react";
 import {
   experience,
   projects,
@@ -10,6 +10,7 @@ import {
   type Zone,
   type ZoneId,
 } from "./content";
+const OutputBuilder = lazy(() => import("./pages/OutputBuilder"));
 import arrowSvg from "./assets/arrow.svg?raw";
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
@@ -29,6 +30,8 @@ import googleEyesIcon from "./assets/👀-(Compressify.io).svg";
 import antigravityBadge from "./assets/madewithantigravity.svg?raw";
 import topArrowSvg from "./assets/top-right-arrow.svg?raw";
 import pinIcon from "./assets/pin.svg";
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 
 const projectImages: Record<string, string> = {
   "dashboard.webp": dashboardImg,
@@ -42,15 +45,17 @@ const STAGE = {
   height: 2500,
 };
 
-const MOBILE_BREAKPOINT = 900;
+const MOBILE_BREAKPOINT = 720;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1.5;
-const DEFAULT_ZOOM =
-  typeof window !== "undefined"
-    ? window.innerWidth > 1400
-      ? 0.82
-      : 0.72
-    : 0.8;
+
+/*
+ * Default zoom scales with viewport size so the canvas feels right on
+ * small laptops and large monitors alike. Reactive (function, not const)
+ * so resize / rotate picks up the new value.
+ */
+const getDefaultZoom = (viewportWidth: number): number =>
+  viewportWidth >= 1728 ? 1.0 : viewportWidth > 1400 ? 0.82 : 0.72;
 
 type Camera = {
   x: number;
@@ -60,6 +65,18 @@ type Camera = {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+/*
+ * Core 2D camera transform helper: screen = world * scale + cameraOffset.
+ * Inverting it gives world coords for a given screen point, which is the
+ * piece needed for invariant-point zoom.
+ */
+function screenToWorld(screenX: number, screenY: number, camera: Camera) {
+  return {
+    x: (screenX - camera.x) / camera.scale,
+    y: (screenY - camera.y) / camera.scale,
+  };
 }
 
 function getCameraBounds(scale: number, viewportWidth: number, viewportHeight: number) {
@@ -103,11 +120,12 @@ function centerCamera(
   zone: Zone,
   viewportWidth: number,
   viewportHeight: number,
-  scale: number = DEFAULT_ZOOM,
+  scale: number = getDefaultZoom(viewportWidth),
 ): Camera {
   const isMobile = viewportWidth <= MOBILE_BREAKPOINT;
   const center = (isMobile && zone.mobileCenter) ? zone.mobileCenter : zone.desktopCenter;
 
+  // Place `center` (world coord) at the viewport midpoint.
   return clampCamera(
     {
       x: viewportWidth / 2 - center.x * scale,
@@ -119,6 +137,10 @@ function centerCamera(
   );
 }
 
+/*
+ * Zoom while keeping the world point under (originX, originY) pinned to
+ * the same screen position. Standard invariant-point zoom.
+ */
 function zoomAroundPoint(
   camera: Camera,
   nextScale: number,
@@ -127,14 +149,16 @@ function zoomAroundPoint(
   viewportWidth: number,
   viewportHeight: number,
 ): Camera {
-  const ratio = nextScale / camera.scale;
-  const nextCamera = {
-    x: originX - (originX - camera.x) * ratio,
-    y: originY - (originY - camera.y) * ratio,
-    scale: nextScale,
-  };
-
-  return clampCamera(nextCamera, viewportWidth, viewportHeight);
+  const world = screenToWorld(originX, originY, camera);
+  return clampCamera(
+    {
+      x: originX - world.x * nextScale,
+      y: originY - world.y * nextScale,
+      scale: nextScale,
+    },
+    viewportWidth,
+    viewportHeight,
+  );
 }
 
 function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (theme: "paper" | "ink") => void }) {
@@ -152,6 +176,7 @@ function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (t
 
 function App() {
   const skipIntro = new URLSearchParams(window.location.search).has("skip-intro");
+  const [activeCaseStudy, setActiveCaseStudy] = useState<string | null>(null);
 
   const [theme, setTheme] = useState<"paper" | "ink">(() => {
     const saved = window.localStorage.getItem("viknesh-theme");
@@ -193,6 +218,9 @@ function App() {
   const inertiaRafRef = useRef<number | null>(null);
   const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
   const pinchDistRef = useRef<number | null>(null);
+  // Double-tap tracking for touch devices — records end time/position of
+  // the last single-finger tap so we can detect a second tap close by.
+  const lastTapRef = useRef<{ t: number; x: number; y: number } | null>(null);
   const mobileZoneRefs = useRef<Record<ZoneId, HTMLElement | null>>({
     "case-studies": null,
     about: null,
@@ -218,11 +246,53 @@ function App() {
     // No-op or keep if needed for other logic
   }, []);
 
+  const openCaseStudy = (id: string) => {
+    setActiveCaseStudy(id);
+    window.location.hash = id;
+  };
+
+  const closeCaseStudy = () => {
+    setActiveCaseStudy(null);
+    window.history.pushState(null, "", window.location.pathname + window.location.search);
+  };
+
+  // Handle deep linking and browser navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash === "output-builder") {
+        setActiveCaseStudy(hash);
+      } else if (!hash) {
+        setActiveCaseStudy(null);
+      }
+    };
+
+    // Check hash on initial load
+    handleHashChange();
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (activeCaseStudy) {
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    } else {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    };
+  }, [activeCaseStudy]);
+
   useEffect(() => {
     if (isEntering) {
       // Start the zoom-in immediately to simulate a purposeful scroll entry
       const timer = window.setTimeout(() => {
-        moveToZone("about", 0.8);
+        moveToZone("about", getDefaultZoom(window.innerWidth));
         // Duration reflects a purposeful, smooth zoom
         window.setTimeout(() => {
           setIsEntering(false);
@@ -266,25 +336,28 @@ function App() {
 
     let mouseX = 0;
     let mouseY = 0;
-    let rafId: number;
+    let rafId: number | null = null;
+    const rootStyle = document.documentElement.style;
+
+    const commit = () => {
+      rafId = null;
+      rootStyle.setProperty("--mouse-x", `${mouseX}px`);
+      rootStyle.setProperty("--mouse-y", `${mouseY}px`);
+    };
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+      if (rafId === null) {
+        rafId = requestAnimationFrame(commit);
+      }
     };
 
-    const updateMousePos = () => {
-      document.documentElement.style.setProperty("--mouse-x", `${mouseX}px`);
-      document.documentElement.style.setProperty("--mouse-y", `${mouseY}px`);
-      rafId = requestAnimationFrame(updateMousePos);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    rafId = requestAnimationFrame(updateMousePos);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(rafId);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [isMobile]);
 
@@ -294,16 +367,30 @@ function App() {
     }
 
     const handleWheel = (event: WheelEvent) => {
-      // Check if we are zooming (pinch or ctrl+scroll)
+      if (activeCaseStudy) return;
+
+      const target = event.target as HTMLElement;
+      const isInternalScroll = target.closest(".markdown-card__viewport");
+      if (isInternalScroll) return;
+
+      event.preventDefault();
+      scheduleWheelIdle();
+
+      // Standard infinite-canvas convention (Figma, Miro, tldraw, Stitch):
+      //   - ctrlKey / metaKey => ZOOM
+      //     (browsers synthesize ctrlKey=true for trackpad pinch gestures,
+      //      and desktop users hold Cmd/Ctrl to zoom with a mouse wheel)
+      //   - no modifier       => PAN (deltaX horizontal, deltaY vertical)
+      //
+      // This removes the old trackpad-vs-mouse heuristic which misfired on
+      // vertical-only trackpad scrolls and triggered unwanted zoom.
       const isZoom = event.ctrlKey || event.metaKey;
 
-      // If we are pinching, we ALWAYS want to zoom the canvas regardless of where the cursor is.
-      // This prevents the browser's default full-page zoom.
       if (isZoom) {
-        event.preventDefault();
-        scheduleWheelIdle();
         setCamera((currentCamera) => {
-          const scaleDelta = Math.exp(-event.deltaY * 0.004);
+          // ctrlKey from browser pinch comes with large deltas; hold-to-zoom
+          // from a mouse wheel does too. A single intensity feels consistent.
+          const scaleDelta = Math.exp(-event.deltaY * 0.01);
           const nextScale = clamp(currentCamera.scale * scaleDelta, MIN_ZOOM, MAX_ZOOM);
           return zoomAroundPoint(
             currentCamera,
@@ -314,21 +401,16 @@ function App() {
             window.innerHeight,
           );
         });
-        return;
-      }
-
-      // For regular scrolling, decide if it's a canvas pan or an internal element scroll.
-      const target = event.target as HTMLElement;
-      const isInternalScroll = target.closest(".markdown-card__viewport");
-
-      if (!isInternalScroll) {
-        event.preventDefault();
-        scheduleWheelIdle();
+      } else {
+        // PAN — uses both axes. Mouse wheel (deltaX=0) = vertical pan only.
+        // Trackpad two-finger swipe uses both. Shift+wheel swaps axes per OS.
+        const panX = event.shiftKey && event.deltaX === 0 ? event.deltaY : event.deltaX;
+        const panY = event.shiftKey && event.deltaX === 0 ? 0 : event.deltaY;
         setCamera((currentCamera) =>
           clampCamera(
             {
-              x: currentCamera.x - event.deltaX,
-              y: currentCamera.y - event.deltaY,
+              x: currentCamera.x - panX,
+              y: currentCamera.y - panY,
               scale: currentCamera.scale,
             },
             window.innerWidth,
@@ -340,7 +422,7 @@ function App() {
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
-  }, [isMobile]);
+  }, [isMobile, activeCaseStudy]);
 
 
 
@@ -354,7 +436,7 @@ function App() {
     setActiveZone(zoneId);
 
     const zone = zones.find((entry) => entry.id === zoneId)!;
-    const targetZoom = customScale ?? (isMobile ? zone.targetScale?.mobile : zone.targetScale?.desktop) ?? DEFAULT_ZOOM;
+    const targetZoom = customScale ?? (isMobile ? zone.targetScale?.mobile : zone.targetScale?.desktop) ?? getDefaultZoom(window.innerWidth);
 
     setCamera(() =>
       centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom),
@@ -477,16 +559,56 @@ function App() {
 
     stageRef.current?.releasePointerCapture(event.pointerId);
 
-    // If movement was tiny, it's a click, not a pan.
+    // If movement was tiny, it's a click/tap, not a pan.
     const moveDist = Math.hypot(event.clientX - ds.startClientX, event.clientY - ds.startClientY);
     if (moveDist < 6) {
       const interactive = ds.target.closest("a, button, label, input, [data-interactive='true']") as HTMLElement;
       if (interactive) {
         interactive.click();
+        dragStateRef.current = null;
+        lastTapRef.current = null;
+        return;
       }
+
+      // Double-tap to zoom (touch/pen only — mouse uses wheel + Cmd).
+      if (event.pointerType === "touch" || event.pointerType === "pen") {
+        const now = performance.now();
+        const last = lastTapRef.current;
+        const DOUBLE_TAP_MS = 300;
+        const DOUBLE_TAP_PX = 40;
+
+        if (
+          last &&
+          now - last.t < DOUBLE_TAP_MS &&
+          Math.hypot(event.clientX - last.x, event.clientY - last.y) < DOUBLE_TAP_PX
+        ) {
+          // Second tap — toggle between zoomed-in and default.
+          lastTapRef.current = null;
+          setCamera((currentCamera) => {
+            const defaultZoom = getDefaultZoom(window.innerWidth);
+            const nearDefault = Math.abs(currentCamera.scale - defaultZoom) < 0.05;
+            const targetScale = nearDefault
+              ? clamp(defaultZoom * 1.8, MIN_ZOOM, MAX_ZOOM)
+              : defaultZoom;
+            return zoomAroundPoint(
+              currentCamera,
+              targetScale,
+              event.clientX,
+              event.clientY,
+              window.innerWidth,
+              window.innerHeight,
+            );
+          });
+        } else {
+          lastTapRef.current = { t: now, x: event.clientX, y: event.clientY };
+        }
+      }
+
       dragStateRef.current = null;
       return;
     }
+    // Any real drag invalidates pending double-tap state.
+    lastTapRef.current = null;
 
     // Compute average velocity from recent samples
     const samples = ds.samples;
@@ -509,7 +631,7 @@ function App() {
     if (speed < 1.5) return;
 
     // Start inertia loop
-    const FRICTION = 0.91; // lower = more friction, 0.91 ≈ Shruti's feel
+    const FRICTION = 0.84; // lower = more friction (more grounded feel)
     const MIN_SPEED = 0.4;
     let velX = vx;
     let velY = vy;
@@ -564,7 +686,10 @@ function App() {
       originY ?? (boardRect ? boardRect.top + boardRect.height / 2 : window.innerHeight / 2);
 
     setCamera((currentCamera) => {
-      const nextScale = clamp(currentCamera.scale + direction * 0.12, MIN_ZOOM, MAX_ZOOM);
+      // Multiplicative zoom: each click changes scale by a fixed ratio so
+      // the perceived zoom step is consistent at any current scale.
+      const factor = direction === 1 ? 1.2 : 1 / 1.2;
+      const nextScale = clamp(currentCamera.scale * factor, MIN_ZOOM, MAX_ZOOM);
       return zoomAroundPoint(
         currentCamera,
         nextScale,
@@ -578,34 +703,63 @@ function App() {
 
   const resetZoom = () => {
     const zone = zones.find((entry) => entry.id === activeZone)!;
-    setCamera(centerCamera(zone, window.innerWidth, window.innerHeight, DEFAULT_ZOOM));
+    setCamera(centerCamera(zone, window.innerWidth, window.innerHeight, getDefaultZoom(window.innerWidth)));
   };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (isMobile || !(event.metaKey || event.ctrlKey)) {
+      // Ignore if typing in an input
+      const target = event.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
         return;
       }
 
-      if (event.key === "=" || event.key === "+") {
-        event.preventDefault();
-        adjustZoom(1, window.innerWidth / 2, window.innerHeight / 2);
+      // Escape to close case studies is always allowed
+      if (event.key === "Escape" && activeCaseStudy) {
+        closeCaseStudy();
+        return;
       }
 
-      if (event.key === "-") {
-        event.preventDefault();
-        adjustZoom(-1, window.innerWidth / 2, window.innerHeight / 2);
+      if (activeCaseStudy || isMobile) return;
+
+      // Zoom Controls (Cmd/Ctrl + Key)
+      if (event.metaKey || event.ctrlKey) {
+        if (event.key === "=" || event.key === "+") {
+          event.preventDefault();
+          adjustZoom(1, window.innerWidth / 2, window.innerHeight / 2);
+        } else if (event.key === "-") {
+          event.preventDefault();
+          adjustZoom(-1, window.innerWidth / 2, window.innerHeight / 2);
+        } else if (event.key === "0") {
+          event.preventDefault();
+          resetZoom();
+        }
+        return;
       }
 
-      if (event.key === "0") {
+      // Navigation Controls (Direct Keys)
+      const currentIndex = zoneSequence.indexOf(activeZone);
+
+      if (event.key === "ArrowRight" || event.key === "l" || event.key === "L") {
         event.preventDefault();
-        resetZoom();
+        const nextIndex = (currentIndex + 1) % zoneSequence.length;
+        moveToZone(zoneSequence[nextIndex]);
+      } else if (event.key === "ArrowLeft" || event.key === "h" || event.key === "H") {
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + zoneSequence.length) % zoneSequence.length;
+        moveToZone(zoneSequence[prevIndex]);
+      } else if (["1", "2", "3", "4", "5"].includes(event.key)) {
+        const index = parseInt(event.key) - 1;
+        if (zoneSequence[index]) {
+          event.preventDefault();
+          moveToZone(zoneSequence[index]);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeZone, isMobile]);
+  }, [activeZone, isMobile, activeCaseStudy, zoneSequence]);
 
   useEffect(
     () => () => {
@@ -619,166 +773,179 @@ function App() {
   );
 
   return (
-    <div className="app-shell">
-      <div className="dynamic-grid-bg">
-        <div className="dynamic-grid-bg__color-layer" />
-        <div className="dynamic-grid-bg__glow-layer" />
-      </div>
-      <main
-        ref={stageRef}
-        className="board"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-      >
-        <motion.div
-          className={`stage ${isDragging || isWheelNavigating || isInertia ? "is-dragging" : ""
-            } ${isEntering ? "is-entering" : ""}`}
-          initial={false}
-          animate={{
-            x: camera.x,
-            y: camera.y,
-            scale: camera.scale,
-          }}
-          transition={
-            isDragging || isWheelNavigating || isInertia
-              ? { type: false }
-              : isNavigating
-                ? { type: "spring", stiffness: 60, damping: 18, mass: 1 }
-                : {
-                  type: "spring",
-                  stiffness: 120,
-                  damping: 20,
-                  mass: 1,
-                  restDelta: 0.001
-                }
+    <div className="app-container">
+      {activeCaseStudy === "output-builder" && (
+        <style>{`
+          html, body { 
+            overflow: hidden !important; 
+            height: 100% !important;
+            position: fixed !important;
+            width: 100% !important;
           }
-          style={{
-            height: STAGE.height,
-            width: STAGE.width,
-          }}
+        `}</style>
+      )}
+      <motion.div 
+        className="app-shell"
+        animate={{ 
+          scale: activeCaseStudy ? 0.97 : 1,
+          filter: activeCaseStudy ? "blur(4px) brightness(0.95)" : "blur(0px) brightness(1)",
+          opacity: activeCaseStudy ? 0.6 : 1
+        }}
+        transition={{ duration: 0.6, ease: EASE }}
+      >
+        <div className="dynamic-grid-bg">
+          <div className="dynamic-grid-bg__color-layer" />
+          <div className="dynamic-grid-bg__glow-layer" />
+        </div>
+        <main
+          ref={stageRef}
+          className="board"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         >
-          <AboutCard />
-          <SkillsCard />
-          <ExperienceStack isMobile={isMobile} />
-          <ClockWidget />
-          <BadgesCluster />
-          <ProjectCards />
-          <WorkCluster />
-          {!isMobile && <FloatingStatus />}
+          <motion.div
+            className={`stage ${isDragging || isWheelNavigating || isInertia ? "is-dragging" : ""
+              } ${isEntering ? "is-entering" : ""}`}
+            initial={false}
+            animate={{
+              x: camera.x,
+              y: camera.y,
+              scale: camera.scale,
+            }}
+            transition={
+              isDragging || isWheelNavigating || isInertia
+                ? { type: false }
+                : isNavigating
+                  ? { type: "spring", stiffness: 60, damping: 18, mass: 1 }
+                  : {
+                    type: "spring",
+                    stiffness: 120,
+                    damping: 20,
+                    mass: 1,
+                    restDelta: 0.001
+                  }
+            }
+            style={{
+              height: STAGE.height,
+              width: STAGE.width,
+            }}
+          >
+            <AboutCard />
+            <SkillsCard />
+            <ExperienceStack isMobile={isMobile} />
+            <ClockWidget />
+            <BadgesCluster />
+            <ProjectCards onOpenCaseStudy={openCaseStudy} />
+            <WorkCluster />
+            {!isMobile && <FloatingStatus />}
 
-          {isMobile && (
-            <>
-              {/* Social Strip as a Canvas Card */}
-              <motion.div
-                className="social-card-canvas"
-                style={{
-                  position: "absolute",
-                  left: socialPos.x,
-                  top: socialPos.y,
-                  rotate: socialPos.rotate,
-                  zIndex: 5,
-                }}
-              >
-                <img src={pinIcon} className="social-card-pin" alt="" draggable="false" />
-                <SocialStrip className="is-mobile" />
-              </motion.div>
+            {isMobile && (
+              <>
+                <motion.div
+                  className="social-card-canvas"
+                  style={{
+                    position: "absolute",
+                    left: socialPos.x,
+                    top: socialPos.y,
+                    rotate: socialPos.rotate,
+                    zIndex: 5,
+                  }}
+                >
+                  <img src={pinIcon} className="social-card-pin" alt="" draggable="false" />
+                  <SocialStrip className="is-mobile" />
+                </motion.div>
 
-              {/* Made With Badge as a Canvas Card */}
-              <motion.div
-                className="made-with-card made-with-card--canvas"
-                style={{
-                  position: "absolute",
-                  left: madeWithPos.x,
-                  top: madeWithPos.y,
-                  rotate: madeWithPos.rotate,
-                  zIndex: 5,
-                }}
+                <motion.div
+                  className="made-with-card made-with-card--canvas"
+                  style={{
+                    position: "absolute",
+                    left: madeWithPos.x,
+                    top: madeWithPos.y,
+                    rotate: madeWithPos.rotate,
+                    zIndex: 5,
+                  }}
+                  data-interactive="true"
+                  dangerouslySetInnerHTML={{
+                    __html: antigravityBadge
+                      .replace('<svg', '<svg viewBox="0 0 174 36"')
+                      .replace(/width="174"|height="36"/g, '')
+                      .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+                  }}
+                />
+              </>
+            )}
+          </motion.div>
+        </main>
+        <div className="bottom-dock">
+          {!isMobile && (
+            <div className="bottom-dock__left">
+              <ZoomControls
+                scale={camera.scale}
+                onZoomIn={() => adjustZoom(1)}
+                onZoomOut={() => adjustZoom(-1)}
+                onReset={resetZoom}
+              />
+            </div>
+          )}
+          <div className="bottom-dock__center">
+            {!isMobile ? <SocialStrip className="social-strip--footer" /> : <MobileZoneNav onMove={moveToZone} activeZone={activeZone} />}
+          </div>
+          <div className="bottom-dock__right">
+            {!isMobile && (
+              <div
+                className="made-with-card"
                 data-interactive="true"
                 dangerouslySetInnerHTML={{
                   __html: antigravityBadge
-                    .replace('<svg', '<svg viewBox="0 0 174 36"')
+                    .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
                     .replace(/width="174"|height="36"/g, '')
                     .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
                 }}
               />
-            </>
-          )}
-        </motion.div>
-      </main>
-      <div className="bottom-dock">
-        {!isMobile && (
-          <div className="bottom-dock__left">
-            <ZoomControls
-              scale={camera.scale}
-              onZoomIn={() => adjustZoom(1)}
-              onZoomOut={() => adjustZoom(-1)}
-              onReset={resetZoom}
-            />
+            )}
           </div>
-        )}
-        <div className="bottom-dock__center">
-          {!isMobile ? <SocialStrip /> : <MobileZoneNav onMove={moveToZone} activeZone={activeZone} />}
         </div>
-        <div className="bottom-dock__right">
-          {!isMobile && (
-            <div
-              className="made-with-card"
-              data-interactive="true"
-              dangerouslySetInnerHTML={{
-                __html: antigravityBadge
-                  .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
-                  .replace(/width="174"|height="36"/g, '')
-                  .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
-              }}
-            />
-          )}
-        </div>
-      </div>
 
-      {/* <Preloader isLoaded={isLoaded} /> */}
-
-      <header className="toolbar" data-interactive="true">
-        <div className="toolbar__panel toolbar__panel--left">
-          <div className="toolbar__left">
-            <button
-              className="toolbar__branding"
-              onClick={() => moveToZone("about")}
-              type="button"
-            >
-              <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
-              <div className="toolbar__identity">
-                <div className="toolbar__breadcrumbs">
-                  <div className="toolbar__namegroup">
-                    <span className="toolbar__name">Viknesh Vijayakumar</span>
-                    <span className="toolbar__role">Senior Product Designer</span>
-                  </div>
+        <header className="toolbar" data-interactive="true">
+          <div className="toolbar__panel toolbar__panel--left">
+            <div className="toolbar__left">
+              <button
+                className="toolbar__branding"
+                onClick={() => moveToZone("about")}
+                type="button"
+              >
+                <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
+                <div className="toolbar__identity">
+                  <span className="toolbar__name">Viknesh Vijayakumar</span>
+                  <span className="toolbar__role">Senior Product Designer</span>
                 </div>
-              </div>
-            </button>
-            {!isMobile && (
-              <span className="availability-pill">
-                <span className="availability-pill__dot" />
-                Open for opportunities
-              </span>
-            )}
+              </button>
+              {!isMobile && <AvailabilityPill />}
+            </div>
           </div>
-        </div>
 
-        <div className="toolbar__panel--right">
-          <div className="toolbar__actions">
-            <ThemeToggle theme={theme} setTheme={setTheme} />
-            {!isMobile && (
-              <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
-                Download Resume
-              </a>
-            )}
+          <div className="toolbar__panel toolbar__panel--right">
+            <div className="toolbar__actions">
+              <ThemeToggle theme={theme} setTheme={setTheme} />
+              {!isMobile && (
+                <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
+                  Download Resume
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
-
-      {/* Moved SocialStrip to Bottom Dock for desktop, so we don't need it as a floating article usually */}
+        </header>
+      </motion.div>
+      
+      <AnimatePresence>
+        {activeCaseStudy === "output-builder" && (
+          <Suspense fallback={null}>
+            <OutputBuilder onBack={closeCaseStudy} />
+          </Suspense>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -787,8 +954,9 @@ function WarpHUD({ activeZone, onSnap }: { activeZone: ZoneId; onSnap: (id: Zone
   const navItems: { id: ZoneId; label: string; icon: string }[] = [
     { id: "about", label: "Home", icon: "🏠" },
     { id: "case-studies", label: "Projects", icon: "📂" },
-    { id: "how-i-work", label: "Process", icon: "🧠" },
     { id: "experience", label: "History", icon: "💼" },
+    { id: "skills", label: "Skills", icon: "🛠️" },
+    { id: "how-i-work", label: "Process", icon: "🧠" },
   ];
 
   return (
@@ -1031,9 +1199,9 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   return (
     <>
       {experience.map((item, index) => {
-        const desktopRotate = (item as any).desktopPosition?.rotation || 0;
-        const desktopX = (item as any).desktopPosition?.x || 0;
-        const desktopY = (item as any).desktopPosition?.y || 0;
+        const desktopRotate = item.desktopPosition?.rotation ?? 0;
+        const desktopX = item.desktopPosition?.x ?? 0;
+        const desktopY = item.desktopPosition?.y ?? 0;
 
         let finalX = desktopX;
         if (isMobile) {
@@ -1046,7 +1214,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
         const style = {
           left: finalX,
           top: desktopY,
-          "--folder-color": (item as any).logoColor || "#a886ff"
+          "--folder-color": item.logoColor ?? "#a886ff"
         } as React.CSSProperties;
 
         const isOpen = openFolderId === item.role + item.company;
@@ -1054,14 +1222,21 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
         return (
           <motion.article
             key={item.role + item.company}
-            initial={{ rotate: rotate }}
+            initial={{ rotate: rotate, left: style.left, top: style.top }}
             animate={{ rotate: rotate, left: style.left, top: style.top }}
             transition={{ type: "spring", stiffness: 400, damping: 35 }}
             whileTap={{ scale: 0.98 }}
             className={`experience-folder ${isOpen ? "is-open" : ""}`}
             style={style}
             data-interactive="true"
+            tabIndex={0}
             onClick={() => setOpenFolderId(isOpen ? null : item.role + item.company)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setOpenFolderId(isOpen ? null : item.role + item.company);
+              }
+            }}
           >
             <div className="experience-folder__back">
               <div className="experience-folder__tab"></div>
@@ -1087,7 +1262,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   );
 });
 
-const ProjectCards = memo(function ProjectCards() {
+const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCaseStudy: (id: string) => void }) {
   const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
@@ -1100,6 +1275,7 @@ const ProjectCards = memo(function ProjectCards() {
             key={project.title}
             project={project}
             index={index}
+            onOpen={onOpenCaseStudy}
           />
         );
       })}
@@ -1110,9 +1286,11 @@ const ProjectCards = memo(function ProjectCards() {
 const ProjectCard = memo(function ProjectCard({
   project,
   index = 0,
+  onOpen,
 }: {
   project: Project;
   index?: number;
+  onOpen: (id: string) => void;
 }) {
   const cardStyle = {
     left: project.desktopPosition.x,
@@ -1125,16 +1303,44 @@ const ProjectCard = memo(function ProjectCard({
     part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
   );
 
+  const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    e?.stopPropagation();
+    if (project.title === "Output Builder") {
+      onOpen("output-builder");
+    }
+  };
+
   return (
     <motion.article
-      layout
-      initial={{ rotate: rotate }}
+      initial={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
       animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
+      whileHover={{ y: -8, rotate: 0 }}
       whileTap={{ scale: 0.98 }}
-      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""}`.trim()}
+      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
       style={cardStyle}
-      data-interactive={project.year === "Coming Soon" ? "false" : "true"}
+      onClick={handleClick}
+      tabIndex={project.title === "Output Builder" ? 0 : -1}
+      onKeyDown={(e) => {
+        if (project.title === "Output Builder" && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
     >
+      {project.title === "Output Builder" && (
+        <div
+          className="project-card__click-overlay"
+          onClick={handleClick}
+          onPointerUp={handleClick}
+          data-interactive="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 20,
+            cursor: "pointer",
+          }}
+        />
+      )}
       <div className="project-card__visual">
         <img
           src={projectImages[project.image]}
@@ -1150,7 +1356,15 @@ const ProjectCard = memo(function ProjectCard({
         </p>
 
         <div className="project-card__footer-meta">
-          {project.year === "Coming Soon" ? (
+          {project.title === "Output Builder" ? (
+            <span className="project-card__company">
+              {project.company} {project.year}
+              <span
+                className="project-card__metadata-arrow"
+                dangerouslySetInnerHTML={{ __html: topArrowSvg.replace('stroke="#000"', 'stroke="currentColor"') }}
+              />
+            </span>
+          ) : project.year === "Coming Soon" ? (
             <span className="project-card__coming-soon">Coming Soon</span>
           ) : (
             <span className="project-card__company">
@@ -1258,10 +1472,10 @@ const WorkCluster = memo(function WorkCluster() {
         return (
           <motion.article
             key={item.index}
-            layout
-            initial={{ rotate: rotate }}
+            initial={{ rotate: rotate, left: style.left, top: style.top }}
             animate={{ rotate: rotate, left: style.left, top: style.top }}
-            transition={{ type: "spring", stiffness: 450, damping: 35 }}
+            transition={{ type: "spring", stiffness: 800, damping: 45 }}
+            whileHover={{ y: -8, rotate: 0, scale: 1.04 }}
             whileTap={{ scale: 0.98 }}
             className={`principle-card principle-card--${item.accent}`}
             style={style}
@@ -1374,14 +1588,52 @@ const MobileZoneNav = memo(function MobileZoneNav({ onMove, activeZone }: { onMo
   );
 });
 
+const AvailabilityPill = memo(function AvailabilityPill() {
+  return (
+    <div className="availability-pill">
+      <span className="availability-pill__dot" />
+      <span>Open for opportunities</span>
+    </div>
+  );
+});
+
 function CopyContactButton({ text, icon, copyValue }: { text: string; icon: string; copyValue: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigator.clipboard.writeText(copyValue);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    
+    const performCopy = () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(copyValue)
+        .then(performCopy)
+        .catch(() => fallbackCopy(copyValue, performCopy));
+    } else {
+      fallbackCopy(copyValue, performCopy);
+    }
+  };
+
+  const fallbackCopy = (value: string, callback: () => void) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = value;
+    // Ensure it's not visible but part of the DOM
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    textArea.style.top = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      callback();
+    } catch (err) {
+      console.error('Fallback copy failed', err);
+    }
+    document.body.removeChild(textArea);
   };
 
   return (
@@ -1407,60 +1659,97 @@ const FloatingStatus = memo(function FloatingStatus() {
     const svg = svgRef.current;
     if (!svg) return;
 
-    const eyesData = [
-      { eye: svg.querySelector("#eye-left") as SVGGraphicsElement, pupil: pupilLeftRef.current, offsetX: 0 },
-      { eye: svg.querySelector("#eye-right") as SVGGraphicsElement, pupil: pupilRightRef.current, offsetX: 0 },
-    ];
-
-    const calcOffset = () => {
-      eyesData.forEach((props) => {
-        if (!props.pupil || !props.eye) return;
-        props.pupil.removeAttribute("transform");
-        const eyeRect = props.eye.getBoundingClientRect();
-        const pupilRect = props.pupil.getBoundingClientRect();
-        props.offsetX = (eyeRect.right - pupilRect.right - (pupilRect.left - eyeRect.left)) / 2;
-      });
+    type EyeGeom = {
+      eye: SVGGraphicsElement;
+      pupil: SVGPathElement;
+      offsetX: number;
+      centerX: number;
+      centerY: number;
+      maxDistX: number;
+      maxDistY: number;
     };
 
-    calcOffset();
+    const eyes: EyeGeom[] = [];
+    const leftEye = svg.querySelector("#eye-left") as SVGGraphicsElement | null;
+    const rightEye = svg.querySelector("#eye-right") as SVGGraphicsElement | null;
+    if (leftEye && pupilLeftRef.current) {
+      eyes.push({ eye: leftEye, pupil: pupilLeftRef.current, offsetX: 0, centerX: 0, centerY: 0, maxDistX: 0, maxDistY: 0 });
+    }
+    if (rightEye && pupilRightRef.current) {
+      eyes.push({ eye: rightEye, pupil: pupilRightRef.current, offsetX: 0, centerX: 0, centerY: 0, maxDistX: 0, maxDistY: 0 });
+    }
+    if (eyes.length === 0) return;
+
+    let ctmA = 1;
+    let ctmD = 1;
+
+    // Cache all geometry up-front; refresh only on resize/scroll, never in the mousemove path.
+    const recomputeGeometry = () => {
+      const ctm = svg.getScreenCTM();
+      if (ctm) {
+        ctmA = ctm.a || 1;
+        ctmD = ctm.d || 1;
+      }
+      for (const e of eyes) {
+        e.pupil.removeAttribute("transform");
+        const eyeRect = e.eye.getBoundingClientRect();
+        const pupilRect = e.pupil.getBoundingClientRect();
+        e.offsetX = (eyeRect.right - pupilRect.right - (pupilRect.left - eyeRect.left)) / 2;
+        e.centerX = eyeRect.left + eyeRect.width / 2;
+        e.centerY = eyeRect.top + eyeRect.height / 2;
+        e.maxDistX = pupilRect.width / 2;
+        e.maxDistY = pupilRect.height / 2;
+      }
+    };
+
+    recomputeGeometry();
+
+    let pointerX = 0;
+    let pointerY = 0;
+    let rafId: number | null = null;
+
+    const commit = () => {
+      rafId = null;
+      // Write phase only; all reads are pre-cached.
+      for (const e of eyes) {
+        const distX = pointerX - e.centerX;
+        const distY = pointerY - e.centerY;
+        const angle = Math.atan2(distY, distX);
+        const newPupilX =
+          e.offsetX + Math.min(e.maxDistX, Math.max(-e.maxDistX, Math.cos(angle) * e.maxDistX));
+        const newPupilY = Math.min(e.maxDistY, Math.max(-e.maxDistY, Math.sin(angle) * e.maxDistY));
+        e.pupil.setAttribute(
+          "transform",
+          `translate(${newPupilX / ctmA}, ${newPupilY / ctmD})`,
+        );
+      }
+    };
 
     const handleMouseMove = (ev: MouseEvent) => {
-      requestAnimationFrame(() => {
-        eyesData.forEach(({ eye, pupil, offsetX }) => {
-          if (!eye || !pupil) return;
-          const eyeRect = eye.getBoundingClientRect();
-          const centerX = eyeRect.left + eyeRect.width / 2;
-          const centerY = eyeRect.top + eyeRect.height / 2;
+      pointerX = ev.clientX;
+      pointerY = ev.clientY;
+      if (rafId === null) rafId = requestAnimationFrame(commit);
+    };
 
-          const distX = ev.clientX - centerX;
-          const distY = ev.clientY - centerY;
-
-          const pupilRect = pupil.getBoundingClientRect();
-          const maxDistX = pupilRect.width / 2;
-          const maxDistY = pupilRect.height / 2;
-
-          const angle = Math.atan2(distY, distX);
-
-          const newPupilX =
-            offsetX + Math.min(maxDistX, Math.max(-maxDistX, Math.cos(angle) * maxDistX));
-          const newPupilY = Math.min(maxDistY, Math.max(-maxDistY, Math.sin(angle) * maxDistY));
-
-          const svgCTM = svg.getScreenCTM();
-          if (!svgCTM) return;
-
-          const scaledPupilX = newPupilX / svgCTM.a;
-          const scaledPupilY = newPupilY / svgCTM.d;
-
-          pupil.setAttribute("transform", `translate(${scaledPupilX}, ${scaledPupilY})`);
-        });
+    // Recompute on layout changes. Scroll invalidates `centerX/centerY` since we use viewport coords.
+    let resizeRaf: number | null = null;
+    const scheduleRecompute = () => {
+      if (resizeRaf !== null) return;
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = null;
+        recomputeGeometry();
       });
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("resize", calcOffset);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("resize", scheduleRecompute);
+    window.addEventListener("scroll", scheduleRecompute, { passive: true, capture: true });
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("resize", calcOffset);
+      window.removeEventListener("resize", scheduleRecompute);
+      window.removeEventListener("scroll", scheduleRecompute, { capture: true } as EventListenerOptions);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
     };
   }, []);
 

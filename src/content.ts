@@ -46,16 +46,6 @@ export const toolbarLinks = {
 
 export const zones: Zone[] = [
   {
-    id: "case-studies",
-    label: "Case Studies",
-    desktopCenter: { x: 3200, y: 780 },
-    mobileEyebrow: "Selected Work",
-    mobileTitle: "Projects designed for complex, high-stakes workflows.",
-    mobileBody:
-      "A recruiter-friendly scan of the systems work: workflow redesign, modular outputs, guided form completion, and reporting surfaces that help teams act faster.",
-    targetScale: { desktop: 0.85, mobile: 0.68 }
-  },
-  {
     id: "about",
     label: "About Me",
     desktopCenter: { x: 2000, y: 1000 },
@@ -67,14 +57,24 @@ export const zones: Zone[] = [
     targetScale: { desktop: 0.85, mobile: 0.72 }
   },
   {
-    id: "how-i-work",
-    label: "How I Work",
-    desktopCenter: { x: 1038, y: 1500 },
-    mobileEyebrow: "Process",
-    mobileTitle: "A systems-minded design approach grounded in real constraints.",
+    id: "case-studies",
+    label: "Case Studies",
+    desktopCenter: { x: 3200, y: 780 },
+    mobileEyebrow: "Selected Work",
+    mobileTitle: "Projects designed for complex, high-stakes workflows.",
     mobileBody:
-      "The work starts with bottlenecks, moves alongside engineering, and stays accountable to edge cases, accessibility, and how the product is actually used in the wild.",
-    targetScale: { desktop: 0.88, mobile: 1.4 }
+      "A recruiter-friendly scan of the systems work: workflow redesign, modular outputs, guided form completion, and reporting surfaces that help teams act faster.",
+    targetScale: { desktop: 0.85, mobile: 0.68 }
+  },
+  {
+    id: "experience",
+    label: "Experience",
+    desktopCenter: { x: 1160, y: 680 },
+    mobileEyebrow: "History",
+    mobileTitle: "Over a decade across enterprise and startups",
+    mobileBody:
+      "A look into where I've worked and what I've done across healthtech, edtech, and B2B SaaS.",
+    targetScale: { desktop: 0.82, mobile: 1.2 }
   },
   {
     id: "skills",
@@ -86,14 +86,14 @@ export const zones: Zone[] = [
     targetScale: { desktop: 0.78, mobile: 0.78 }
   },
   {
-    id: "experience",
-    label: "Experience",
-    desktopCenter: { x: 1160, y: 680 },
-    mobileEyebrow: "History",
-    mobileTitle: "Over a decade across enterprise and startups",
+    id: "how-i-work",
+    label: "How I Work",
+    desktopCenter: { x: 1038, y: 1500 },
+    mobileEyebrow: "Process",
+    mobileTitle: "A systems-minded design approach grounded in real constraints.",
     mobileBody:
-      "A look into where I've worked and what I've done across healthtech, edtech, and B2B SaaS.",
-    targetScale: { desktop: 0.82, mobile: 1.2 }
+      "The work starts with bottlenecks, moves alongside engineering, and stays accountable to edge cases, accessibility, and how the product is actually used in the wild.",
+    targetScale: { desktop: 0.88, mobile: 1.4 }
   }
 ];
 
@@ -183,7 +183,16 @@ export const workPrinciples: WorkPrinciple[] = [
   },
 ];
 
-export const experience = [
+export type Experience = {
+  role: string;
+  company: string;
+  period: string;
+  summary: string;
+  desktopPosition: { x: number; y: number; rotation: number };
+  logoColor: string;
+};
+
+export const experience: Experience[] = [
   {
     role: "Product Designer",
     company: "Empyra",
