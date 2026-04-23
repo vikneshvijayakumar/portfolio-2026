@@ -180,7 +180,8 @@ function App() {
 
   const [theme, setTheme] = useState<"paper" | "ink">(() => {
     const saved = window.localStorage.getItem("viknesh-theme");
-    return saved === "ink" ? "ink" : "paper";
+    if (saved === "ink" || saved === "paper") return saved;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "ink" : "paper";
   });
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= MOBILE_BREAKPOINT : false);
   const [isTablet, setIsTablet] = useState(typeof window !== "undefined" ? (window.innerWidth > MOBILE_BREAKPOINT && window.innerWidth <= 1024) : false);
