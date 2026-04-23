@@ -206,6 +206,7 @@ button {
   min-height: 100vh;
   isolation: isolate;
   background: var(--canvas);
+  z-index: 0;
 }
 
 .dynamic-grid-bg {
@@ -265,11 +266,11 @@ button {
 
   -webkit-mask-image:
     radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        black 0, black 20px, transparent 50px),
+      black 0, black 20px, transparent 50px),
     radial-gradient(circle, black 1px, transparent 1px);
   mask-image:
     radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        black 0, black 20px, transparent 50px),
+      black 0, black 20px, transparent 50px),
     radial-gradient(circle, black 1px, transparent 1px);
   -webkit-mask-size: 100% 100%, 24px 24px;
   mask-size: 100% 100%, 24px 24px;
@@ -308,11 +309,9 @@ button {
 
   opacity: 0.12;
 
-  transform: translate3d(
-    calc(var(--mouse-x, 50vw) - 450px),
-    calc(var(--mouse-y, 50vh) - 450px),
-    0
-  );
+  transform: translate3d(calc(var(--mouse-x, 50vw) - 450px),
+      calc(var(--mouse-y, 50vh) - 450px),
+      0);
   will-change: transform;
 }
 
@@ -320,9 +319,11 @@ button {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -346,7 +347,7 @@ button {
 
 .zoom-controls,
 .bottom-dock {
-  z-index: 5;
+  z-index: 20;
 }
 
 [data-interactive="true"] {
@@ -357,11 +358,18 @@ button {
   position: fixed;
   left: 26px;
   right: 26px;
-  bottom: 32px;
+  bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   pointer-events: none;
+  z-index: 100;
+}
+
+.bottom-dock__left,
+.bottom-dock__right,
+.bottom-dock__center {
+  pointer-events: auto;
 }
 
 .bottom-dock__left,
@@ -380,6 +388,10 @@ button {
 
 .mobile-zone-stepper {
   display: flex;
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
   align-items: center;
   justify-content: space-between;
   background: var(--surface);
@@ -389,9 +401,9 @@ button {
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
   height: 64px;
-  width: calc(100vw - 32px);
-  margin: 0 16px;
   touch-action: none;
+  pointer-events: auto;
+  z-index: 100;
 }
 
 .mobile-zone-stepper__arrow {
@@ -509,7 +521,7 @@ button {
 
 .toolbar {
   position: fixed;
-  top: 18px;
+  top: 24px;
   left: 22px;
   right: 22px;
   display: flex;
@@ -517,6 +529,11 @@ button {
   justify-content: space-between;
   gap: var(--space-4);
   pointer-events: none;
+  z-index: 100;
+}
+
+.toolbar__panel {
+  pointer-events: auto;
 }
 
 .toolbar__panel {
@@ -534,6 +551,7 @@ button {
 
 @media (max-width: 900px) {
   .toolbar {
+    top: 16px;
     left: 16px;
     right: 16px;
     gap: 8px;
@@ -2477,7 +2495,9 @@ button {
  * whenever any JS updates --mouse-x / --mouse-y. Hide the dynamic layers
  * entirely so the body's static radial gradients show through unchanged.
  */
-@media (hover: none), (max-width: 900px) {
+@media (hover: none),
+(max-width: 900px) {
+
   /*
    * No cursor on touch devices \u2014 hide the spotlight entirely.
    * The static colorful dot layer stays visible so the canvas keeps its

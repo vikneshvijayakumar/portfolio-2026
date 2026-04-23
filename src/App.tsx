@@ -880,66 +880,68 @@ function App() {
             )}
           </motion.div>
         </main>
-        <div className="bottom-dock">
-          {!isMobile && (
-            <div className="bottom-dock__left">
-              <ZoomControls
-                scale={camera.scale}
-                onZoomIn={() => adjustZoom(1)}
-                onZoomOut={() => adjustZoom(-1)}
-                onReset={resetZoom}
-              />
-            </div>
-          )}
-          <div className="bottom-dock__center">
-            {!isMobile ? <SocialStrip className="social-strip--footer" /> : <MobileZoneNav onMove={moveToZone} activeZone={activeZone} />}
-          </div>
-          <div className="bottom-dock__right">
-            {!isMobile && (
-              <div
-                className="made-with-card"
-                data-interactive="true"
-                dangerouslySetInnerHTML={{
-                  __html: antigravityBadge
-                    .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
-                    .replace(/width="174"|height="36"/g, '')
-                    .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
-                }}
-              />
-            )}
+      </motion.div>
+
+      {/* Toolbar and mobile nav live OUTSIDE app-shell so CSS transforms on
+          the shell (scale/blur on case study open) never break position:fixed */}
+      <header className="toolbar" data-interactive="true">
+        <div className="toolbar__panel toolbar__panel--left">
+          <div className="toolbar__left">
+            <button
+              className="toolbar__branding"
+              onClick={() => moveToZone("about")}
+              type="button"
+            >
+              <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
+              <div className="toolbar__identity">
+                <span className="toolbar__name">Viknesh Vijayakumar</span>
+                <span className="toolbar__role">Senior Product Designer</span>
+              </div>
+            </button>
+            {!isMobile && <AvailabilityPill />}
           </div>
         </div>
 
-        <header className="toolbar" data-interactive="true">
-          <div className="toolbar__panel toolbar__panel--left">
-            <div className="toolbar__left">
-              <button
-                className="toolbar__branding"
-                onClick={() => moveToZone("about")}
-                type="button"
-              >
-                <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
-                <div className="toolbar__identity">
-                  <span className="toolbar__name">Viknesh Vijayakumar</span>
-                  <span className="toolbar__role">Senior Product Designer</span>
-                </div>
-              </button>
-              {!isMobile && <AvailabilityPill />}
-            </div>
+        <div className="toolbar__panel toolbar__panel--right">
+          <div className="toolbar__actions">
+            <ThemeToggle theme={theme} setTheme={setTheme} />
+            {!isMobile && (
+              <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
+                Download Resume
+              </a>
+            )}
           </div>
+        </div>
+      </header>
 
-          <div className="toolbar__panel toolbar__panel--right">
-            <div className="toolbar__actions">
-              <ThemeToggle theme={theme} setTheme={setTheme} />
-              {!isMobile && (
-                <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
-                  Download Resume
-                </a>
-              )}
-            </div>
+      {!isMobile && (
+        <div className="bottom-dock">
+          <div className="bottom-dock__left">
+            <ZoomControls
+              scale={camera.scale}
+              onZoomIn={() => adjustZoom(1)}
+              onZoomOut={() => adjustZoom(-1)}
+              onReset={resetZoom}
+            />
           </div>
-        </header>
-      </motion.div>
+          <div className="bottom-dock__center">
+            <SocialStrip className="social-strip--footer" />
+          </div>
+          <div className="bottom-dock__right">
+            <div
+              className="made-with-card"
+              data-interactive="true"
+              dangerouslySetInnerHTML={{
+                __html: antigravityBadge
+                  .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
+                  .replace(/width="174"|height="36"/g, '')
+                  .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+              }}
+            />
+          </div>
+        </div>
+      )}
+      {isMobile && <MobileZoneNav onMove={moveToZone} activeZone={activeZone} />}
       
       <AnimatePresence>
         {activeCaseStudy === "output-builder" && (
