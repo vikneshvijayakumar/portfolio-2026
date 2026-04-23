@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, memo, lazy, Suspense } from "react";
 import { motion, useSpring, useTransform, AnimatePresence } from "motion/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
   experience,
   projects,
@@ -947,6 +948,7 @@ function App() {
           </Suspense>
         )}
       </AnimatePresence>
+      <SpeedInsights />
     </div>
   );
 }
