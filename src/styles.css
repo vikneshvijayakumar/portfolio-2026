@@ -36,7 +36,7 @@
   --text: #1f1915;
   --text-soft: rgba(var(--text-rgb), 0.66);
   --border: rgba(48, 37, 27, 0.12);
-  --shadow: 0 24px 72px rgba(56, 39, 28, 0.12);
+  --shadow: 2px 4px 8px rgba(56, 39, 28, 0.12);
   --primary: #95d56e;
   --primary-dark: #538336;
   --primary-soft: rgba(149, 213, 110, 0.12);
@@ -114,7 +114,7 @@
   --shadow-rgb: 0, 0, 0;
   --paper-ink: #222222;
   --shadow-color: rgba(0, 0, 0, 0.08);
-  --shadow: 0 24px 72px rgba(0, 0, 0, 0.4);
+  --shadow: 2px 4px 8px rgba(0, 0, 0, 0.4);
   --logo-filter: invert(1) brightness(2);
 
   /* IDE Theme - Dark */
@@ -507,7 +507,7 @@ button {
 @media (hover: hover) {
   .made-with-card:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 32px 80px rgba(var(--shadow-rgb), 0.16);
+    box-shadow: 4px 8px 12px rgba(var(--shadow-rgb), 0.16);
   }
 
   .made-with-card:hover::after {
@@ -918,6 +918,7 @@ button {
   cursor: default;
 }
 
+/* Force GPU acceleration on the main wrapper */
 .stage {
   position: absolute;
   left: 43px;
@@ -925,12 +926,9 @@ button {
   transform-origin: top left;
   will-change: transform;
   backface-visibility: hidden;
+  transform: translateZ(0);
   -webkit-user-select: none;
   user-select: none;
-}
-
-.stage.is-dragging * {
-  pointer-events: none !important;
 }
 
 
@@ -1311,7 +1309,7 @@ button {
 
 @media (hover: hover) {
   .project-card:hover .project-card__visual {
-    box-shadow: 0 32px 80px rgba(56, 39, 28, 0.18);
+    box-shadow: 4px 8px 12px rgba(56, 39, 28, 0.18);
   }
 }
 

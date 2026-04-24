@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, memo, lazy, Suspense } from "react";
-import { motion, useSpring, useTransform, AnimatePresence } from "motion/react";
+import { motion, useSpring, useTransform, AnimatePresence, useMotionValue, useMotionValueEvent, animate } from "motion/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
   experience,
@@ -199,18 +199,10 @@ function App() {
   const [isLoaded, setIsLoaded] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isLegendOpen, setIsLegendOpen] = useState(false);
-  const [camera, setCamera] = useState<Camera>(() => {
-    // Initial Wide-Angle View (Better framed)
-    const initScale = 0.40;
-    return {
-      x: window.innerWidth / 2 - (STAGE.width / 2) * initScale,
-      y: window.innerHeight / 2 - (STAGE.height / 2) * initScale,
-      scale: initScale,
-    };
-  });
-  const [isWheelNavigating, setIsWheelNavigating] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isInertia, setIsInertia] = useState(false);
+  const camX = useMotionValue(0);
+  const camY = useMotionValue(0);
+  const camScale = useMotionValue(0.40);
+
   const stageRef = useRef<HTMLDivElement | null>(null);
   const wheelEndTimerRef = useRef<number | null>(null);
   // Drag + inertia state
@@ -246,17 +238,16 @@ function App() {
     : false;
   const modifierKey = isMac ? '⌘' : 'Ctrl';
 
-  const socialPos = useMemo(() => ({
-    x: 2160 + (isMobile ? 100 : 0) + (Math.random() * 60 - 30),
-    y: 1150 + (Math.random() * 40),
-    rotate: Math.random() * 6 - 4
-  }), [isMobile]);
-
-  const madeWithPos = useMemo(() => ({
-    x: 3060 + (Math.random() * 40 - 20),
-    y: 580 + (isMobile ? 100 : 0) + (Math.random() * 40 - 20),
-    rotate: Math.random() * 6 - 12
-  }), [isMobile]);
+  const socialPos = { 
+    x: 2190 + (isMobile ? 100 : 0), 
+    y: 1170, 
+    rotate: -1 
+  };
+  const madeWithPos = { 
+    x: 3080, 
+    y: 600 + (isMobile ? 100 : 0), 
+    rotate: -9 
+  };
 
   // Initial load effect removed as we now start loaded immediately
   useEffect(() => {
@@ -305,6 +296,14 @@ function App() {
     };
   }, [activeCaseStudy]);
 
+  // Initialize camera
+  useEffect(() => {
+    const initScale = 0.40;
+    camX.set(window.innerWidth / 2 - (STAGE.width / 2) * initScale);
+    camY.set(window.innerHeight / 2 - (STAGE.height / 2) * initScale);
+    camScale.set(initScale);
+  }, []);
+
   useEffect(() => {
     if (isEntering) {
       // Start the zoom-in immediately to simulate a purposeful scroll entry
@@ -332,9 +331,9 @@ function App() {
       setIsTablet(tablet);
 
       const currentZone = zones.find((zone) => zone.id === activeZone)!;
-      setCamera((currentCamera) =>
-        centerCamera(currentZone, window.innerWidth, window.innerHeight, currentCamera.scale),
-      );
+      const centered = centerCamera(currentZone, window.innerWidth, window.innerHeight, camScale.get());
+      camX.set(centered.x);
+      camY.set(centered.y);
     };
 
     window.addEventListener("resize", handleResize);
@@ -383,7 +382,7 @@ function App() {
       return;
     }
 
-    const handleWheel = (event: WheelEvent) => {
+    const onWheel = (event: WheelEvent) => {
       if (activeCaseStudy) return;
 
       const target = event.target as HTMLElement;
@@ -391,60 +390,49 @@ function App() {
       if (isInternalScroll) return;
 
       event.preventDefault();
-      scheduleWheelIdle();
-
-      // Standard infinite-canvas convention (Figma, Miro, tldraw, Stitch):
-      //   - ctrlKey / metaKey => ZOOM
-      //     (browsers synthesize ctrlKey=true for trackpad pinch gestures,
-      //      and desktop users hold Cmd/Ctrl to zoom with a mouse wheel)
-      //   - no modifier       => PAN (deltaX horizontal, deltaY vertical)
-      //
-      // This removes the old trackpad-vs-mouse heuristic which misfired on
-      // vertical-only trackpad scrolls and triggered unwanted zoom.
       const isZoom = event.ctrlKey || event.metaKey;
 
       if (isZoom) {
-        setCamera((currentCamera) => {
-          // ctrlKey from browser pinch comes with large deltas; hold-to-zoom
-          // from a mouse wheel does too. A single intensity feels consistent.
-          const scaleDelta = Math.exp(-event.deltaY * 0.01);
-          const nextScale = clamp(currentCamera.scale * scaleDelta, MIN_ZOOM, MAX_ZOOM);
-          return zoomAroundPoint(
-            currentCamera,
-            nextScale,
-            event.clientX,
-            event.clientY,
-            window.innerWidth,
-            window.innerHeight,
-          );
-        });
+        const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
+        const scaleDelta = Math.exp(-event.deltaY * 0.01);
+        const nextScale = clamp(currentCamera.scale * scaleDelta, MIN_ZOOM, MAX_ZOOM);
+        const zoomed = zoomAroundPoint(
+          currentCamera,
+          nextScale,
+          event.clientX,
+          event.clientY,
+          window.innerWidth,
+          window.innerHeight,
+        );
+        camX.set(zoomed.x);
+        camY.set(zoomed.y);
+        camScale.set(zoomed.scale);
       } else {
-        // PAN — uses both axes. Mouse wheel (deltaX=0) = vertical pan only.
-        // Trackpad two-finger swipe uses both. Shift+wheel swaps axes per OS.
         const panX = event.shiftKey && event.deltaX === 0 ? event.deltaY : event.deltaX;
         const panY = event.shiftKey && event.deltaX === 0 ? 0 : event.deltaY;
-        setCamera((currentCamera) =>
-          clampCamera(
-            {
-              x: currentCamera.x - panX,
-              y: currentCamera.y - panY,
-              scale: currentCamera.scale,
-            },
-            window.innerWidth,
-            window.innerHeight,
-          ),
+        const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
+        const panned = clampCamera(
+          {
+            x: currentCamera.x - panX,
+            y: currentCamera.y - panY,
+            scale: currentCamera.scale,
+          },
+          window.innerWidth,
+          window.innerHeight,
         );
+        camX.set(panned.x);
+        camY.set(panned.y);
       }
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
   }, [isMobile, activeCaseStudy]);
 
 
 
   const activeZoneIndex = zones.findIndex((zone) => zone.id === activeZone);
-  const activeZoneMeta = zones[activeZoneIndex];
+
 
   const zoneSequence = useMemo(() => zones.map((zone) => zone.id), []);
 
@@ -454,10 +442,11 @@ function App() {
 
     const zone = zones.find((entry) => entry.id === zoneId)!;
     const targetZoom = customScale ?? (isMobile ? zone.targetScale?.mobile : zone.targetScale?.desktop) ?? getDefaultZoom(window.innerWidth);
+    const target = centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom);
 
-    setCamera(() =>
-      centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom),
-    );
+    animate(camX, target.x, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
+    animate(camY, target.y, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
+    animate(camScale, target.scale, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
 
     // Reset navigating flag after animation roughly finishes
     setTimeout(() => setIsNavigating(false), 1000);
@@ -497,28 +486,24 @@ function App() {
 
     // Kill any running inertia so grab feels instant
     cancelInertia();
-    setIsInertia(false);
 
     if (activePointersRef.current.size === 1) {
       dragStateRef.current = {
         pointerId: event.pointerId,
         lastX: event.clientX,
         lastY: event.clientY,
-        startCamX: camera.x,
-        startCamY: camera.y,
+        startCamX: camX.get(),
+        startCamY: camY.get(),
         startClientX: event.clientX,
         startClientY: event.clientY,
         samples: [],
         target: target,
         hasMoved: false,
       };
-      // We don't setIsDragging(true) or setPointerCapture here yet.
-      // We wait for movement in handlePointerMove to distinguish a click from a pan.
     } else if (activePointersRef.current.size === 2) {
       // Setup pinch zoom
       const pts = Array.from(activePointersRef.current.values());
       pinchDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      setIsDragging(false);
       dragStateRef.current = null;
     }
   };
@@ -535,7 +520,6 @@ function App() {
       const moveDist = Math.hypot(event.clientX - ds.startClientX, event.clientY - ds.startClientY);
       if (moveDist > 4) {
         ds.hasMoved = true;
-        setIsDragging(true);
         stageRef.current?.setPointerCapture(event.pointerId);
         // Once we capture, we might want to kill inertia again just in case
         cancelInertia();
@@ -552,17 +536,19 @@ function App() {
       const zoomFactor = newDist / pinchDistRef.current;
       pinchDistRef.current = newDist;
 
-      setCamera((currentCamera) => {
-        const nextScale = clamp(currentCamera.scale * zoomFactor, MIN_ZOOM, MAX_ZOOM);
-        return zoomAroundPoint(
-          currentCamera,
-          nextScale,
-          midpointX,
-          midpointY,
-          window.innerWidth,
-          window.innerHeight
-        );
-      });
+      const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
+      const nextScale = clamp(currentCamera.scale * zoomFactor, MIN_ZOOM, MAX_ZOOM);
+      const zoomed = zoomAroundPoint(
+        currentCamera,
+        nextScale,
+        midpointX,
+        midpointY,
+        window.innerWidth,
+        window.innerHeight
+      );
+      camX.set(zoomed.x);
+      camY.set(zoomed.y);
+      camScale.set(zoomed.scale);
       return;
     }
 
@@ -581,13 +567,14 @@ function App() {
     const nextX = ds.startCamX + (event.clientX - ds.startClientX);
     const nextY = ds.startCamY + (event.clientY - ds.startClientY);
 
-    setCamera((currentCamera) =>
-      clampCamera(
-        { x: nextX, y: nextY, scale: currentCamera.scale },
-        window.innerWidth,
-        window.innerHeight,
-      ),
+    const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
+    const panned = clampCamera(
+      { x: nextX, y: nextY, scale: currentCamera.scale },
+      window.innerWidth,
+      window.innerHeight,
     );
+    camX.set(panned.x);
+    camY.set(panned.y);
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -597,17 +584,13 @@ function App() {
     }
 
     const ds = dragStateRef.current;
-    setIsDragging(false);
-    if (!ds || ds.pointerId !== event.pointerId) return;
+    if (!ds) return;
 
-    stageRef.current?.releasePointerCapture(event.pointerId);
-
-    // If movement was tiny, it's a click/tap, not a pan.
-    const moveDist = Math.hypot(event.clientX - ds.startClientX, event.clientY - ds.startClientY);
-    if (moveDist < 6) {
+    if (!ds.hasMoved) {
+      // It was a click, not a drag.
+      const now = performance.now();
       // Double-tap to zoom (touch/pen only — mouse uses wheel + Cmd).
       if (event.pointerType === "touch" || event.pointerType === "pen") {
-        const now = performance.now();
         const last = lastTapRef.current;
         const DOUBLE_TAP_MS = 300;
         const DOUBLE_TAP_PX = 40;
@@ -619,29 +602,33 @@ function App() {
         ) {
           // Second tap — toggle between zoomed-in and default.
           lastTapRef.current = null;
-          setCamera((currentCamera) => {
-            const defaultZoom = getDefaultZoom(window.innerWidth);
-            const nearDefault = Math.abs(currentCamera.scale - defaultZoom) < 0.05;
-            const targetScale = nearDefault
-              ? clamp(defaultZoom * 1.8, MIN_ZOOM, MAX_ZOOM)
-              : defaultZoom;
-            return zoomAroundPoint(
-              currentCamera,
-              targetScale,
-              event.clientX,
-              event.clientY,
-              window.innerWidth,
-              window.innerHeight,
-            );
-          });
+          const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
+          const defaultZoom = getDefaultZoom(window.innerWidth);
+          const nearDefault = Math.abs(currentCamera.scale - defaultZoom) < 0.05;
+          const targetScale = nearDefault
+            ? clamp(defaultZoom * 1.8, MIN_ZOOM, MAX_ZOOM)
+            : defaultZoom;
+          const zoomed = zoomAroundPoint(
+            currentCamera,
+            targetScale,
+            event.clientX,
+            event.clientY,
+            window.innerWidth,
+            window.innerHeight,
+          );
+          animate(camX, zoomed.x, { type: "spring", stiffness: 120, damping: 20 });
+          animate(camY, zoomed.y, { type: "spring", stiffness: 120, damping: 20 });
+          animate(camScale, zoomed.scale, { type: "spring", stiffness: 120, damping: 20 });
         } else {
           lastTapRef.current = { t: now, x: event.clientX, y: event.clientY };
         }
       }
-
       dragStateRef.current = null;
       return;
     }
+
+    stageRef.current?.releasePointerCapture(event.pointerId);
+
     // Any real drag invalidates pending double-tap state.
     lastTapRef.current = null;
 
@@ -666,51 +653,35 @@ function App() {
     if (speed < 1.5) return;
 
     // Start inertia loop
-    const FRICTION = 0.84; // lower = more friction (more grounded feel)
-    const MIN_SPEED = 0.4;
+    const friction = 0.84; // lower = more friction (more grounded feel)
     let velX = vx;
     let velY = vy;
 
     const tick = () => {
-      velX *= FRICTION;
-      velY *= FRICTION;
+      velX *= friction;
+      velY *= friction;
 
-      const currentSpeed = Math.hypot(velX, velY);
-      if (currentSpeed < MIN_SPEED) {
-        inertiaRafRef.current = null;
-        setIsInertia(false);
+      if (Math.abs(velX) < 0.1 && Math.abs(velY) < 0.1) {
         return;
       }
 
-      setCamera((currentCamera) =>
-        clampCamera(
-          {
-            x: currentCamera.x + velX,
-            y: currentCamera.y + velY,
-            scale: currentCamera.scale,
-          },
-          window.innerWidth,
-          window.innerHeight,
-        ),
+      const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
+      const next = clampCamera(
+        {
+          x: currentCamera.x + velX,
+          y: currentCamera.y + velY,
+          scale: currentCamera.scale,
+        },
+        window.innerWidth,
+        window.innerHeight,
       );
+      camX.set(next.x);
+      camY.set(next.y);
 
       inertiaRafRef.current = requestAnimationFrame(tick);
     };
 
     inertiaRafRef.current = requestAnimationFrame(tick);
-    setIsInertia(true);
-  };
-
-  const scheduleWheelIdle = () => {
-    if (wheelEndTimerRef.current) {
-      window.clearTimeout(wheelEndTimerRef.current);
-    }
-
-    setIsWheelNavigating(true);
-    wheelEndTimerRef.current = window.setTimeout(() => {
-      setIsWheelNavigating(false);
-      wheelEndTimerRef.current = null;
-    }, 120);
   };
 
   const adjustZoom = (direction: 1 | -1, originX?: number, originY?: number) => {
@@ -720,25 +691,28 @@ function App() {
     const focusY =
       originY ?? (boardRect ? boardRect.top + boardRect.height / 2 : window.innerHeight / 2);
 
-    setCamera((currentCamera) => {
-      // Multiplicative zoom: each click changes scale by a fixed ratio so
-      // the perceived zoom step is consistent at any current scale.
-      const factor = direction === 1 ? 1.2 : 1 / 1.2;
-      const nextScale = clamp(currentCamera.scale * factor, MIN_ZOOM, MAX_ZOOM);
-      return zoomAroundPoint(
-        currentCamera,
-        nextScale,
-        focusX,
-        focusY,
-        window.innerWidth,
-        window.innerHeight,
-      );
-    });
+    const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
+    const factor = direction === 1 ? 1.2 : 1 / 1.2;
+    const nextScale = clamp(currentCamera.scale * factor, MIN_ZOOM, MAX_ZOOM);
+    const zoomed = zoomAroundPoint(
+      currentCamera,
+      nextScale,
+      focusX,
+      focusY,
+      window.innerWidth,
+      window.innerHeight,
+    );
+    animate(camX, zoomed.x, { type: "spring", stiffness: 120, damping: 20 });
+    animate(camY, zoomed.y, { type: "spring", stiffness: 120, damping: 20 });
+    animate(camScale, zoomed.scale, { type: "spring", stiffness: 120, damping: 20 });
   };
 
   const resetZoom = () => {
     const zone = zones.find((entry) => entry.id === activeZone)!;
-    setCamera(centerCamera(zone, window.innerWidth, window.innerHeight, getDefaultZoom(window.innerWidth)));
+    const target = centerCamera(zone, window.innerWidth, window.innerHeight, getDefaultZoom(window.innerWidth));
+    animate(camX, target.x, { type: "spring", stiffness: 120, damping: 20 });
+    animate(camY, target.y, { type: "spring", stiffness: 120, damping: 20 });
+    animate(camScale, target.scale, { type: "spring", stiffness: 120, damping: 20 });
   };
 
   useEffect(() => {
@@ -809,7 +783,6 @@ function App() {
         window.clearTimeout(wheelEndTimerRef.current);
       }
       cancelInertia();
-      setIsInertia(false);
     },
     [],
   );
@@ -853,30 +826,13 @@ function App() {
           onPointerCancel={handlePointerUp}
         >
           <motion.div
-            className={`stage ${isDragging || isWheelNavigating || isInertia ? "is-dragging" : ""
-              } ${isEntering ? "is-entering" : ""}`}
-            initial={false}
-            animate={{
-              x: camera.x,
-              y: camera.y,
-              scale: camera.scale,
-            }}
-            transition={
-              isDragging || isWheelNavigating || isInertia
-                ? { type: false }
-                : isNavigating
-                  ? { type: "spring", stiffness: 60, damping: 18, mass: 1 }
-                  : {
-                    type: "spring",
-                    stiffness: 120,
-                    damping: 20,
-                    mass: 1,
-                    restDelta: 0.001
-                  }
-            }
+            className={`stage ${isEntering ? "is-entering" : ""}`}
             style={{
               height: STAGE.height,
               width: STAGE.width,
+              x: camX,
+              y: camY,
+              scale: camScale,
             }}
           >
             <AboutCard />
@@ -966,7 +922,7 @@ function App() {
         <div className="bottom-dock">
           <div className="bottom-dock__left">
             <ZoomControls
-              scale={camera.scale}
+              scale={camScale}
               onZoomIn={() => adjustZoom(1)}
               onZoomOut={() => adjustZoom(-1)}
               onReset={resetZoom}
@@ -1057,20 +1013,20 @@ function ZoomControls({
   onZoomOut,
   onReset,
 }: {
-  scale: number;
+  scale: any; // MotionValue<number>
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
 }) {
-  const animatedScale = useSpring(scale * 100, {
+  const animatedScale = useSpring(scale.get() * 100, {
     stiffness: 400,
     damping: 40,
     restDelta: 0.001
   });
 
-  useEffect(() => {
-    animatedScale.set(scale * 100);
-  }, [scale, animatedScale]);
+  useMotionValueEvent(scale, "change", (latest: number) => {
+    animatedScale.set(latest * 100);
+  });
 
   const displayValue = useTransform(animatedScale, (latest) => `${Math.round(latest)}%`);
 

@@ -22,12 +22,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  background:
-    radial-gradient(800px 600px at 80% 8%, var(--glow-d), transparent 60%),
-    radial-gradient(700px 500px at 10% 30%, var(--glow-b), transparent 65%),
-    radial-gradient(900px 700px at 90% 60%, var(--glow-c), transparent 70%),
-    radial-gradient(600px 500px at 20% 85%, var(--glow-a), transparent 70%),
-    var(--canvas);
+  background: var(--canvas);
 }
 
 /* ---------- Typography primitives ---------- */
