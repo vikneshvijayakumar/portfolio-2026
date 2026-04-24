@@ -794,17 +794,17 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
                     whileHover={{ y: -4 }}
                     transition={{ type: "spring", stiffness: 300, damping: 24 }}
                   >
-                    <ThemedIcon raw={w.icon} size={40} />
-                    <h4 className="ob-workflow-title">{w.title}</h4>
-                    <p className="ob-body">{w.body}</p>
+                    <ThemedIcon raw={w.icon} size={40} className="ob-workflow-card__icon" />
+                    <div className="ob-workflow-card__content">
+                      <h4 className="ob-workflow-title">{w.title}</h4>
+                      <p className="ob-body">{w.body}</p>
+                    </div>
                   </motion.article>
                   {i < NEW_WORKFLOW.length - 1 && (
                     <motion.span
                       className="ob-workflow-arrow"
                       aria-hidden="true"
                       variants={staggerChild}
-                      animate={{ x: [0, 4, 0] }}
-                      transition={{ duration: 2.4, ease: "easeInOut", repeat: Infinity }}
                     >
                       <ThemedIcon raw={arrowRightIcon} size={24} />
                     </motion.span>

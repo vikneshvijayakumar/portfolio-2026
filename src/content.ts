@@ -41,7 +41,7 @@ export const toolbarLinks = {
   dribbble: "https://dribbble.com/vikneshvijayakumar",
   inspiration: "https://viknesh.me",
   resume:
-    "https://drive.google.com/file/d/1jm3c7Q2JV9GQ8LPBZptbj7xsT4Tl5cy4/view",
+    "https://drive.google.com/file/d/16Iyt5Sfy_c8Jv3_tKE_pivnKhpe1QpYo/view?usp=sharing",
 };
 
 export const zones: Zone[] = [

@@ -564,9 +564,15 @@ function App() {
     // If movement was tiny, it's a click/tap, not a pan.
     const moveDist = Math.hypot(event.clientX - ds.startClientX, event.clientY - ds.startClientY);
     if (moveDist < 6) {
-      const interactive = ds.target.closest("a, button, label, input, [data-interactive='true']") as HTMLElement;
+      const clickable = ds.target.closest("a, button, label, input") as HTMLElement;
+      if (clickable) {
+        clickable.click();
+        dragStateRef.current = null;
+        lastTapRef.current = null;
+        return;
+      }
+      const interactive = ds.target.closest("[data-interactive='true']") as HTMLElement;
       if (interactive) {
-        interactive.click();
         dragStateRef.current = null;
         lastTapRef.current = null;
         return;
@@ -1092,19 +1098,6 @@ const SkillsCard = memo(function SkillsCard() {
 
   const tabs = [
     {
-      id: "leadership",
-      label: "leadership-skills.md",
-      version: "1.0.0",
-      content: (
-        <>
-          <div className="markdown-card__line"><span className="md-h2">DESIGN_LEADERSHIP_PROTOCOL</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Collaboration</span>: Prioritize cross-functional alignment and stakeholder buy-in.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Team Management</span>: Execute mentoring and design direction for teams (up to 7+).</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Process</span>: Operate within Agile methodologies and maintain high-fidelity client communication.</div>
-        </>
-      )
-    },
-    {
       id: "systems",
       label: "systems-craft.md",
       version: "1.0.0-Finalv5",
@@ -1113,23 +1106,13 @@ const SkillsCard = memo(function SkillsCard() {
           <div className="markdown-card__line"><span className="md-h2">SYSTEMS_AND_CRAFT_RULES</span></div>
           <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Architecture</span>: Always utilize Design Thinking and Information Architecture (IA) as the foundation.</div>
           <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Scalability</span>: Reference and extend professional design systems.</div>
-          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span><span className="md-italic">*Standard Kits*</span>: MUI, shadcn, UntitledUI.</div>
+          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span><span className="md-italic">Standard Kits</span>: MUI, shadcn, UntitledUI.</div>
           <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Prototyping_Engine</span>: </div>
           <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Static/Interactive: Figma</div>
           <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Motion/Interaction: Jitter</div>
-        </>
-      )
-    },
-    {
-      id: "accessibility",
-      label: "accessibility.md",
-      version: "1.0.0",
-      content: (
-        <>
-          <div className="markdown-card__line"><span className="md-h2">ACCESSIBILITY_VALIDATION</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Compliance</span>: All outputs must strictly adhere to WCAG 2.2 standards.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Evaluation</span>: Perform heuristic analysis on all UI components.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">UX_Copy</span>: Optimize for clarity via UX Writing and intuitive interaction design.</div>
+          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Vibe Coding</span>: </div>
+          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Agentic IDE: Antigravity, Codex, Windsurf, Open Code</div>
+          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Chat Agents: Gemini, ChatGPT, Claude</div>
         </>
       )
     },
@@ -1143,6 +1126,32 @@ const SkillsCard = memo(function SkillsCard() {
           <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Enterprise</span>: Optimized for SaaS complexity and high-density data visualization.</div>
           <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">AI_Integration</span>: Specialized in HITL (Human-in-the-Loop) design patterns.</div>
           <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Verticals</span>: Healthcare UX, EdTech, and high-stakes Investor Demos.</div>
+        </>
+      )
+    },
+    {
+      id: "leadership",
+      label: "leadership-skills.md",
+      version: "1.0.0",
+      content: (
+        <>
+          <div className="markdown-card__line"><span className="md-h2">DESIGN_LEADERSHIP_PROTOCOL</span></div>
+          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Collaboration</span>: Prioritize cross-functional alignment and stakeholder buy-in.</div>
+          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Team Management</span>: Execute mentoring and design direction for teams (up to 7+).</div>
+          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Process</span>: Operate within Agile methodologies and maintain high-fidelity client communication.</div>
+        </>
+      )
+    },
+    {
+      id: "accessibility",
+      label: "accessibility.md",
+      version: "1.0.0",
+      content: (
+        <>
+          <div className="markdown-card__line"><span className="md-h2">ACCESSIBILITY_VALIDATION</span></div>
+          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Compliance</span>: All outputs must strictly adhere to WCAG 2.2 standards.</div>
+          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Evaluation</span>: Perform heuristic analysis on all UI components.</div>
+          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">UX_Copy</span>: Optimize for clarity via UX Writing and intuitive interaction design.</div>
         </>
       )
     }
@@ -1184,7 +1193,7 @@ const SkillsCard = memo(function SkillsCard() {
       </div>
       <div className="markdown-card__viewport">
         <div className="markdown-card__gutter" aria-hidden="true">
-          {Array.from({ length: 14 }).map((_, index: number) => (
+          {Array.from({ length: 15 }).map((_, index: number) => (
             <div key={index}>{index + 1}</div>
           ))}
         </div>
@@ -1200,6 +1209,17 @@ const SkillsCard = memo(function SkillsCard() {
 const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: boolean }) {
   const [openFolderId, setOpenFolderId] = useState<string | null>(null);
   const stackCenter = { x: 450, y: 1750 }; // Center of experience zone on mobile
+
+  useEffect(() => {
+    if (!openFolderId) return;
+    const handleOutside = (e: PointerEvent) => {
+      if (!(e.target as HTMLElement).closest(".experience-folder")) {
+        setOpenFolderId(null);
+      }
+    };
+    window.addEventListener("pointerdown", handleOutside);
+    return () => window.removeEventListener("pointerdown", handleOutside);
+  }, [openFolderId]);
 
   return (
     <>

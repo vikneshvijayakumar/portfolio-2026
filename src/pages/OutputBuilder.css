@@ -422,6 +422,10 @@
   flex-shrink: 0;
 }
 
+.ob-legacy-connector svg {
+  animation: ob-arrow-flow 2.4s ease-in-out infinite;
+}
+
 /* Dashed coral box wrapping steps 2–5 */
 .ob-legacy-box-container {
   position: relative;
@@ -800,6 +804,16 @@
   min-height: 168px;
 }
 
+.ob-workflow-card__icon {
+  flex-shrink: 0;
+}
+
+.ob-workflow-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .ob-workflow-title {
 
   font-weight: 600;
@@ -814,6 +828,7 @@
   display: inline-flex;
   color: var(--primary-dark);
   justify-content: center;
+  align-items: center;
 }
 
 .ob-workflow-list {
@@ -835,6 +850,49 @@
   color: var(--text-soft);
 }
 
+@keyframes ob-arrow-flow {
+  0% {
+    transform: translateX(0);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: translateX(4px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 0.55;
+  }
+}
+
+.ob-workflow-arrow {
+  animation: ob-arrow-flow 2.4s ease-in-out infinite;
+}
+
+@media (max-width: 640px) {
+  .ob-workflow-arrow {
+    animation: ob-arrow-flow-vertical 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes ob-arrow-flow-vertical {
+  0% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+}
 
 /* ---------- 06 Impact — stat rail ---------- */
 .ob-impact-grid {
@@ -1089,10 +1147,38 @@
   }
 
   .ob-h1 {
-    font-size: 40px;
+    font-size: 48px;
   }
 
   .ob-h2 {
+    font-size: 36px;
+  }
+
+  .ob-overview-title {
+    font-size: 28px;
+  }
+
+  .ob-problem-title {
+    font-size: 20px;
+  }
+
+  .ob-feature__title {
+    font-size: 36px;
+  }
+
+  .ob-workflow-title {
+    font-size: 28px;
+  }
+
+  .ob-impact-title {
+    font-size: 28px;
+  }
+
+  .ob-impact-title .ob-accent {
+    font-size: 40px;
+  }
+
+  .ob-altcard__title {
     font-size: 28px;
   }
 
@@ -1125,8 +1211,8 @@
   .ob-legacy-connector {
     transform: rotate(90deg);
     padding: 16px 0;
-    justify-content: flex-start;
-    width: 32px;
+    justify-content: center;
+    width: 100%;
   }
 
   .ob-legacy-box {
@@ -1170,7 +1256,7 @@
   }
 
   .ob-insight__quote {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .ob-feature {
@@ -1196,7 +1282,26 @@
   }
 
   .ob-workflow-arrow {
-    display: none;
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+    padding: 8px 0;
+    animation: ob-arrow-flow-vertical 2.4s ease-in-out infinite;
+  }
+
+  .ob-workflow-arrow svg {
+    transform: rotate(90deg);
+    transform-origin: center;
+  }
+
+  .ob-workflow-card {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .ob-workflow-card__content {
+    flex: 1;
+    min-width: 0;
   }
 
   .ob-impact-grid {
@@ -1220,6 +1325,6 @@
   }
 
   .ob-footer__title {
-    font-size: 28px;
+    font-size: 36px;
   }
 }
