@@ -203,6 +203,7 @@ function App() {
   const camX = useMotionValue(0);
   const camY = useMotionValue(0);
   const camScale = useMotionValue(0.40);
+  const isKeyboardNav = useRef(false);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const wheelEndTimerRef = useRef<number | null>(null);
@@ -389,8 +390,14 @@ function App() {
       if (activeCaseStudy) return;
 
       const target = event.target as HTMLElement;
-      const isInternalScroll = target.closest(".markdown-card__viewport");
-      if (isInternalScroll) return;
+      const viewportEl = target.closest(".markdown-card__viewport") as HTMLElement | null;
+      if (viewportEl) {
+        event.preventDefault();
+        if (!event.ctrlKey && !event.metaKey) {
+          viewportEl.scrollTop += event.deltaY;
+        }
+        return;
+      }
 
       event.preventDefault();
       const isZoom = event.ctrlKey || event.metaKey;
@@ -438,6 +445,26 @@ function App() {
 
 
   const zoneSequence = useMemo(() => zones.map((zone) => zone.id), []);
+
+  const panToPoint = (worldX: number, worldY: number) => {
+    if (!isKeyboardNav.current) return;
+    const scale = camScale.get();
+    const cx = window.innerWidth / 2 - worldX * scale;
+    const cy = window.innerHeight / 2 - worldY * scale;
+    animate(camX, cx, { type: "spring", stiffness: 80, damping: 20, mass: 1 });
+    animate(camY, cy, { type: "spring", stiffness: 80, damping: 20, mass: 1 });
+  };
+
+  useEffect(() => {
+    const onKeyDown = () => { isKeyboardNav.current = true; };
+    const onPointerDown = () => { isKeyboardNav.current = false; };
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("pointerdown", onPointerDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("pointerdown", onPointerDown, true);
+    };
+  }, []);
 
   const moveToZone = (zoneId: ZoneId, customScale?: number) => {
     setIsNavigating(true);
@@ -808,86 +835,7 @@ function App() {
           }
         `}</style>
       )}
-      <motion.div
-        className="app-shell"
-        animate={{
-          scale: activeCaseStudy ? 0.98 : 1,
-          opacity: activeCaseStudy ? 0.5 : 1
-        }}
-        transition={{ duration: 0.6, ease: EASE }}
-      >
-        <div className="dynamic-grid-bg">
-          <div className="dynamic-grid-bg__color-layer" />
-          <div className="dynamic-grid-bg__glow-layer" />
-        </div>
-        <main
-          ref={stageRef}
-          className="board"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-        >
-          <motion.div
-            className={`stage ${isEntering ? "is-entering" : ""}`}
-            style={{
-              height: STAGE.height,
-              width: STAGE.width,
-              x: camX,
-              y: camY,
-              scale: camScale,
-            }}
-          >
-            <AboutCard />
-            <SkillsCard isMobile={isMobile} />
-            <ExperienceStack isMobile={isMobile} />
-            <ClockWidget />
-            <BadgesCluster />
-            <ProjectCards onOpenCaseStudy={openCaseStudy} />
-            <WorkCluster />
-            {!isMobile && <FloatingStatus />}
-
-            {isMobile && (
-              <>
-                <motion.div
-                  className="social-card-canvas"
-                  style={{
-                    position: "absolute",
-                    left: socialPos.x,
-                    top: socialPos.y,
-                    rotate: socialPos.rotate,
-                    zIndex: 5,
-                  }}
-                >
-                  <img src={pinIcon} className="social-card-pin" alt="" draggable="false" />
-                  <SocialStrip className="is-mobile" />
-                </motion.div>
-
-                <motion.div
-                  className="made-with-card made-with-card--canvas"
-                  style={{
-                    position: "absolute",
-                    left: madeWithPos.x,
-                    top: madeWithPos.y,
-                    rotate: madeWithPos.rotate,
-                    zIndex: 5,
-                  }}
-                  data-interactive="true"
-                  dangerouslySetInnerHTML={{
-                    __html: antigravityBadge
-                      .replace('<svg', '<svg viewBox="0 0 174 36"')
-                      .replace(/width="174"|height="36"/g, '')
-                      .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
-                  }}
-                />
-              </>
-            )}
-          </motion.div>
-        </main>
-      </motion.div>
-
-      {/* Toolbar and mobile nav live OUTSIDE app-shell so CSS transforms on
-          the shell (scale/blur on case study open) never break position:fixed */}
+      {/* Toolbar and footer rendered FIRST so they appear before canvas in tab order */}
       <header className="toolbar" data-interactive="true">
         <div className="toolbar__panel toolbar__panel--left">
           <div className="toolbar__left">
@@ -959,6 +907,84 @@ function App() {
         </div>
       )}
       {isMobile && <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile />}
+
+      <motion.div
+        className="app-shell"
+        animate={{
+          scale: activeCaseStudy ? 0.98 : 1,
+          opacity: activeCaseStudy ? 0.5 : 1
+        }}
+        transition={{ duration: 0.6, ease: EASE }}
+      >
+        <div className="dynamic-grid-bg">
+          <div className="dynamic-grid-bg__color-layer" />
+          <div className="dynamic-grid-bg__glow-layer" />
+        </div>
+        <main
+          ref={stageRef}
+          className="board"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          <motion.div
+            className={`stage ${isEntering ? "is-entering" : ""}`}
+            style={{
+              height: STAGE.height,
+              width: STAGE.width,
+              x: camX,
+              y: camY,
+              scale: camScale,
+            }}
+          >
+            <AboutCard />
+            <SkillsCard isMobile={isMobile} />
+            <ExperienceStack isMobile={isMobile} onFocusPoint={panToPoint} />
+            <ClockWidget />
+            <BadgesCluster />
+            <ProjectCards onOpenCaseStudy={openCaseStudy} onFocusPoint={panToPoint} />
+            <WorkCluster />
+            {!isMobile && <FloatingStatus />}
+
+            {isMobile && (
+              <>
+                <motion.div
+                  className="social-card-canvas"
+                  style={{
+                    position: "absolute",
+                    left: socialPos.x,
+                    top: socialPos.y,
+                    rotate: socialPos.rotate,
+                    zIndex: 5,
+                  }}
+                >
+                  <img src={pinIcon} className="social-card-pin" alt="" draggable="false" />
+                  <SocialStrip className="is-mobile" />
+                </motion.div>
+
+                <motion.div
+                  className="made-with-card made-with-card--canvas"
+                  style={{
+                    position: "absolute",
+                    left: madeWithPos.x,
+                    top: madeWithPos.y,
+                    rotate: madeWithPos.rotate,
+                    zIndex: 5,
+                  }}
+                  data-interactive="true"
+                  dangerouslySetInnerHTML={{
+                    __html: antigravityBadge
+                      .replace('<svg', '<svg viewBox="0 0 174 36"')
+                      .replace(/width="174"|height="36"/g, '')
+                      .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+                  }}
+                />
+              </>
+            )}
+          </motion.div>
+        </main>
+      </motion.div>
 
       <AnimatePresence>
         {activeCaseStudy === "output-builder" && (
@@ -1172,6 +1198,18 @@ const SkillsCard = memo(function SkillsCard({ isMobile }: { isMobile: boolean })
   ];
 
   const currentTab = tabs[activeTab];
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      e.stopPropagation();
+      if (e.ctrlKey || e.metaKey) e.preventDefault();
+    };
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
+  }, []);
 
   const commonHeader = (
     <>
@@ -1205,7 +1243,7 @@ const SkillsCard = memo(function SkillsCard({ isMobile }: { isMobile: boolean })
           </button>
         ))}
       </div>
-      <div className="markdown-card__viewport">
+      <div ref={viewportRef} className="markdown-card__viewport">
         <div className="markdown-card__gutter" aria-hidden="true">
           {Array.from({ length: 15 }).map((_, index: number) => (
             <div key={index}>{index + 1}</div>
@@ -1220,7 +1258,7 @@ const SkillsCard = memo(function SkillsCard({ isMobile }: { isMobile: boolean })
   );
 });
 
-const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: boolean }) {
+const ExperienceStack = memo(function ExperienceStack({ isMobile, onFocusPoint }: { isMobile: boolean; onFocusPoint: (worldX: number, worldY: number) => void }) {
   const [openFolderId, setOpenFolderId] = useState<string | null>(null);
   const lastToggleRef = useRef<number>(0);
   const stackCenter = { x: 450, y: 1750 }; // Center of experience zone on mobile
@@ -1278,6 +1316,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
             style={style}
             data-interactive="true"
             tabIndex={0}
+            onFocus={() => onFocusPoint(finalX, desktopY)}
             onClick={() => toggleFolder(folderId)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -1310,7 +1349,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   );
 });
 
-const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCaseStudy: (id: string, origin?: { x: number; y: number }) => void }) {
+const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy, onFocusPoint }: { onOpenCaseStudy: (id: string, origin?: { x: number; y: number }) => void; onFocusPoint: (worldX: number, worldY: number) => void }) {
   const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
@@ -1324,6 +1363,7 @@ const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCas
             project={project}
             index={index}
             onOpen={onOpenCaseStudy}
+            onFocusPoint={onFocusPoint}
           />
         );
       })}
@@ -1335,10 +1375,12 @@ const ProjectCard = memo(function ProjectCard({
   project,
   index = 0,
   onOpen,
+  onFocusPoint,
 }: {
   project: Project;
   index?: number;
   onOpen: (id: string, origin?: { x: number; y: number }) => void;
+  onFocusPoint: (worldX: number, worldY: number) => void;
 }) {
   const cardStyle = {
     left: project.desktopPosition.x,
@@ -1373,6 +1415,7 @@ const ProjectCard = memo(function ProjectCard({
       style={cardStyle}
       data-interactive="true"
       onClick={handleClick}
+      onFocus={project.title === "Output Builder" ? () => onFocusPoint(project.desktopPosition.x, project.desktopPosition.y) : undefined}
       tabIndex={project.title === "Output Builder" ? 0 : -1}
       onKeyDown={(e) => {
         if (project.title === "Output Builder" && (e.key === "Enter" || e.key === " ")) {
@@ -1526,11 +1569,7 @@ const ClockWidget = memo(function ClockWidget() {
 
 const BadgesCluster = memo(function BadgesCluster() {
   return (
-    <motion.div
-      className="badges-cluster"
-      data-interactive="true"
-      whileTap={{ scale: 0.98 }}
-    >
+    <div className="badges-cluster">
       <a href="https://www.upwork.com/freelancers/~0124077c8ba1055975" target="_blank" rel="noreferrer" className="badge-link">
         <img src={upworkBadge} alt="Upwork Top Rated" className="badge-image badge-image--upwork" draggable="false" />
         <span className="badge-tooltip">View Profile</span>
@@ -1539,7 +1578,7 @@ const BadgesCluster = memo(function BadgesCluster() {
         <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" draggable="false" />
         <span className="badge-tooltip">See Certificate</span>
       </a>
-    </motion.div>
+    </div>
   );
 });
 
