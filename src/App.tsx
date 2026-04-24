@@ -462,13 +462,16 @@ function App() {
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
     const target = event.target as HTMLElement;
-    // Don't prevent default for inputs/labels so they still focus/toggle
-    if (!target.closest("input, label, textarea, button, a")) {
-      event.preventDefault();
+
+    // If the tap starts on an interactive element, stay out of its way:
+    // don't track a drag, don't capture the pointer — let native click events flow.
+    if (target.closest("a, button, label, input, textarea, [data-interactive='true']")) {
+      return;
     }
+
+    activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    event.preventDefault();
 
     // Kill any running inertia so grab feels instant
     cancelInertia();
@@ -564,20 +567,6 @@ function App() {
     // If movement was tiny, it's a click/tap, not a pan.
     const moveDist = Math.hypot(event.clientX - ds.startClientX, event.clientY - ds.startClientY);
     if (moveDist < 6) {
-      const clickable = ds.target.closest("a, button, label, input") as HTMLElement;
-      if (clickable) {
-        clickable.click();
-        dragStateRef.current = null;
-        lastTapRef.current = null;
-        return;
-      }
-      const interactive = ds.target.closest("[data-interactive='true']") as HTMLElement;
-      if (interactive) {
-        dragStateRef.current = null;
-        lastTapRef.current = null;
-        return;
-      }
-
       // Double-tap to zoom (touch/pen only — mouse uses wheel + Cmd).
       if (event.pointerType === "touch" || event.pointerType === "pen") {
         const now = performance.now();
@@ -795,9 +784,9 @@ function App() {
       <motion.div 
         className="app-shell"
         animate={{ 
-          scale: activeCaseStudy ? 0.97 : 1,
-          filter: activeCaseStudy ? "blur(4px) brightness(0.95)" : "blur(0px) brightness(1)",
-          opacity: activeCaseStudy ? 0.6 : 1
+          scale: activeCaseStudy ? 0.99 : 1,
+          filter: activeCaseStudy ? "blur(1px) brightness(0.98)" : "blur(0px) brightness(1)",
+          opacity: activeCaseStudy ? 0.85 : 1
         }}
         transition={{ duration: 0.6, ease: EASE }}
       >
@@ -1208,7 +1197,15 @@ const SkillsCard = memo(function SkillsCard() {
 
 const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: boolean }) {
   const [openFolderId, setOpenFolderId] = useState<string | null>(null);
+  const lastToggleRef = useRef<number>(0);
   const stackCenter = { x: 450, y: 1750 }; // Center of experience zone on mobile
+
+  const toggleFolder = (id: string) => {
+    const now = performance.now();
+    if (now - lastToggleRef.current < 300) return; // debounce duplicate events within 300ms
+    lastToggleRef.current = now;
+    setOpenFolderId((prev) => (prev === id ? null : id));
+  };
 
   useEffect(() => {
     if (!openFolderId) return;
@@ -1242,11 +1239,12 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
           "--folder-color": item.logoColor ?? "#a886ff"
         } as React.CSSProperties;
 
-        const isOpen = openFolderId === item.role + item.company;
+        const folderId = item.role + item.company;
+        const isOpen = openFolderId === folderId;
 
         return (
           <motion.article
-            key={item.role + item.company}
+            key={folderId}
             initial={{ rotate: rotate, left: style.left, top: style.top }}
             animate={{ rotate: rotate, left: style.left, top: style.top }}
             transition={{ type: "spring", stiffness: 400, damping: 35 }}
@@ -1255,11 +1253,11 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
             style={style}
             data-interactive="true"
             tabIndex={0}
-            onClick={() => setOpenFolderId(isOpen ? null : item.role + item.company)}
+            onClick={() => toggleFolder(folderId)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                setOpenFolderId(isOpen ? null : item.role + item.company);
+                toggleFolder(folderId);
               }
             }}
           >
@@ -1343,6 +1341,7 @@ const ProjectCard = memo(function ProjectCard({
       whileTap={{ scale: 0.98 }}
       className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
       style={cardStyle}
+      data-interactive="true"
       onClick={handleClick}
       tabIndex={project.title === "Output Builder" ? 0 : -1}
       onKeyDown={(e) => {
@@ -1352,20 +1351,6 @@ const ProjectCard = memo(function ProjectCard({
         }
       }}
     >
-      {project.title === "Output Builder" && (
-        <div
-          className="project-card__click-overlay"
-          onClick={handleClick}
-          onPointerUp={handleClick}
-          data-interactive="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 20,
-            cursor: "pointer",
-          }}
-        />
-      )}
       <div className="project-card__visual">
         <img
           src={projectImages[project.image]}

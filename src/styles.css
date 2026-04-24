@@ -872,6 +872,16 @@ button {
   user-select: none;
 }
 
+/* Interactive elements opt out of touch-action: none so native tap → click fires on mobile */
+.board [data-interactive="true"],
+.board a,
+.board button,
+.board label,
+.board input,
+.board textarea {
+  touch-action: manipulation;
+}
+
 .board:active {
   cursor: default;
 }
