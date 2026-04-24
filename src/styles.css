@@ -88,6 +88,7 @@
   --md-bullet: #24292e;
   --tooltip-bg: #ffffff;
   --tooltip-text: #181818;
+  --tooltip-text-rgb: 24, 24, 24;
 }
 
 :root[data-theme="ink"] {
@@ -132,6 +133,7 @@
   --md-bullet: #d4d4d4;
   --tooltip-bg: #383838;
   --tooltip-text: #ffffff;
+  --tooltip-text-rgb: 255, 255, 255;
 }
 
 * {
@@ -376,6 +378,7 @@ button {
 .bottom-dock__right {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .made-with-card svg {
@@ -448,7 +451,7 @@ button {
 .mobile-zone-stepper__title {
   width: 110px;
   /* Safe width for 'Case Studies' */
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   white-space: nowrap;
   flex-shrink: 0;
@@ -463,8 +466,7 @@ button {
 
 .mobile-zone-stepper__title.is-ghost {
   color: var(--text-soft);
-  opacity: 0.2;
-  font-size: 11px;
+  opacity: 0.6;
 }
 
 .made-with-card {
@@ -533,7 +535,7 @@ button {
   left: 24px;
   right: 24px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: var(--space-4);
   pointer-events: none;
@@ -558,20 +560,11 @@ button {
   justify-self: start;
 }
 
-.toolbar__panel--center {
-  justify-self: center;
-  padding: 8px;
-}
-
 .toolbar__panel--right {
   justify-self: end;
 }
 
-@media (max-width: 1200px) {
-  .toolbar__panel--center {
-    max-width: min(100%, 560px);
-  }
-}
+/* Center panel removed */
 
 @media (max-width: 720px) {
   .toolbar {
@@ -808,7 +801,8 @@ button {
   border-radius: var(--radius-lg);
 }
 
-.theme-toggle-minimal {
+.theme-toggle-minimal,
+.legend-trigger {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -820,12 +814,23 @@ button {
   box-shadow: inset 0 1px 0 rgba(var(--white-rgb), 0.35);
   cursor: pointer;
   padding: 0;
-  transition: transform 200ms ease, background-color 200ms ease;
+  transition: transform 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+  flex-shrink: 0;
 }
 
-.theme-toggle-minimal:hover {
+.theme-toggle-minimal:hover,
+.legend-trigger:hover {
   transform: translateY(-1px);
   background: var(--surface);
+  box-shadow:
+    inset 0 1px 0 rgba(var(--white-rgb), 0.35),
+    var(--shadow-sm);
+}
+
+.legend-trigger.is-active {
+  background: var(--text);
+  color: var(--surface-strong);
+  transform: translateY(0);
 }
 
 .theme-toggle-minimal svg {
@@ -1181,35 +1186,37 @@ button {
 }
 
 @media (hover: hover) {
-  .experience-folder:hover .experience-folder__paper--3 {
-    transform: translateY(-16px) rotate(-3deg);
+  .experience-folder:not(.is-open):hover .experience-folder__paper--3 {
+    transform: translateY(-4px) rotate(-1deg);
   }
 
-  .experience-folder:hover .experience-folder__paper--2 {
-    transform: translateY(-40px) rotate(2deg);
+  .experience-folder:not(.is-open):hover .experience-folder__paper--2 {
+    transform: translateY(-8px) rotate(1deg);
   }
 
-  .experience-folder:hover .experience-folder__paper--main {
-    transform: translateY(-96px);
-    box-shadow: -16px 24px 48px rgba(var(--black-rgb), 0.4);
+  .experience-folder:not(.is-open):hover .experience-folder__paper--main {
+    transform: translateY(-16px);
+    box-shadow: -8px 12px 24px rgba(var(--black-rgb), 0.2);
   }
 }
 
-/* Click-to-toggle support */
+/* Click-to-toggle / Open state (Full extension) */
 .experience-folder.is-open {
-  z-index: 10;
+  z-index: 100;
+  /* Bring to front when open */
 }
 
 .experience-folder.is-open .experience-folder__paper--3 {
-  transform: translateY(-15px) rotate(-3deg);
+  transform: translateY(-20px) rotate(-3deg);
 }
 
 .experience-folder.is-open .experience-folder__paper--2 {
-  transform: translateY(-40px) rotate(2deg);
+  transform: translateY(-45px) rotate(2deg);
 }
 
 .experience-folder.is-open .experience-folder__paper--main {
-  transform: translateY(-100px);
+  transform: translateY(-110px);
+  box-shadow: -20px 30px 60px rgba(var(--black-rgb), 0.35);
 }
 
 
@@ -1595,44 +1602,72 @@ button {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.tooltip--bottom {
+  bottom: auto !important;
+  top: calc(100% + 18px);
+  transform: translateX(-50%) translateY(-8px);
+}
+
 /* Common Bubble Style */
 .badge-tooltip,
 .tooltip__content {
   background: var(--tooltip-bg) !important;
   color: var(--tooltip-text) !important;
-  padding: 0 20px;
-  border-radius: var(--radius-xl);
+  padding: 0 12px;
+  border-radius: var(--radius-lg);
   box-shadow:
     0 8px 24px rgba(var(--black-rgb), 0.12),
     0 0 0 1px rgba(var(--black-rgb), 0.05);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   display: flex;
   flex-direction: column;
+  height: 36px;
   transition: background-color 0.3s ease, transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .badge-tooltip {
-  height: 48px;
-  line-height: 48px;
   justify-content: center;
 }
 
 .tooltip__content {
-  height: 44px;
   overflow: hidden;
-  /* THE WINDOW */
 }
 
 .tooltip__label {
-  height: 44px;
-  line-height: 44px;
+  height: 36px;
+  line-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.tooltip__shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 5px;
+  margin-left: 10px;
+  background: rgba(var(--text-rgb), 0.06);
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: inherit;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+/* Tooltip internal shortcuts should be relative to tooltip text */
+.tooltip .tooltip__shortcut {
+  background: rgba(var(--tooltip-text-rgb), 0.06);
+  border-color: rgba(var(--tooltip-text-rgb), 0.1);
+  opacity: 0.6;
 }
 
 /* Triangle Pointer */
@@ -1649,17 +1684,40 @@ button {
   transition: border-top-color 0.3s ease;
 }
 
+.tooltip--bottom::after {
+  top: auto !important;
+  bottom: 100% !important;
+  border-top: none !important;
+  border-bottom: 9px solid var(--tooltip-bg) !important;
+}
+
 /* Hover & Copied Interactions */
 @media (hover: hover) {
+  .header-zone-nav__item:hover .tooltip--bottom {
+    opacity: 1 !important;
+    transform: translate(-50%, 10px) !important;
+    pointer-events: auto !important;
+  }
 
   .badge-link:hover .badge-tooltip,
   .social-strip__copy-btn:hover .tooltip,
-  .social-strip a:hover .tooltip {
+  .social-strip a:hover .tooltip,
+  .zoom-controls__button:hover .tooltip,
+  .zoom-controls__readout:hover .tooltip,
+  .warp-hud__item:hover .tooltip,
+  .header-zone-nav__item:hover .tooltip {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translate(-50%, -10px);
+    pointer-events: auto;
   }
 }
 
+.zoom-controls__button,
+.zoom-controls__readout,
+.warp-hud__item,
+.header-zone-nav__item {
+  position: relative;
+}
 
 .is-copied .tooltip,
 .is-copied .badge-tooltip {
@@ -1675,7 +1733,9 @@ button {
   transform: translateY(-100%);
 }
 
-.is-copied::after {
+.tooltip.is-copied::after,
+.is-copied .tooltip::after,
+.is-copied .badge-tooltip::after {
   border-top-color: var(--lime) !important;
 }
 
@@ -1699,15 +1759,28 @@ button {
 }
 
 /* Ensure 'Copied' state still overrides Dark Mode */
-.is-copied .tooltip__content {
+.is-copied.tooltip .tooltip__content,
+.is-copied .tooltip__content,
+[data-theme="ink"] .is-copied.tooltip .tooltip__content,
+[data-theme="ink"] .is-copied .tooltip__content,
+[data-theme="ink"] .is-copied .badge-tooltip {
   background: var(--lime) !important;
-}
-
-.is-copied .tooltip__label {
   color: var(--black) !important;
 }
 
-.is-copied::after {
+.is-copied.tooltip .tooltip__label,
+.is-copied .tooltip__label,
+[data-theme="ink"] .is-copied.tooltip .tooltip__label,
+[data-theme="ink"] .is-copied .tooltip__label {
+  color: var(--black) !important;
+}
+
+.is-copied.tooltip::after,
+.is-copied .tooltip::after,
+.is-copied .badge-tooltip::after,
+[data-theme="ink"] .is-copied.tooltip::after,
+[data-theme="ink"] .is-copied .tooltip::after,
+[data-theme="ink"] .is-copied .badge-tooltip::after {
   border-top-color: var(--lime) !important;
 }
 
@@ -1881,8 +1954,7 @@ button {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
+  overflow: visible;
 }
 
 .header-zone-nav::-webkit-scrollbar {
@@ -2593,6 +2665,112 @@ button {
 .badge-link:focus-visible .badge-tooltip {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Legend / Help Menu */
+.legend-wrapper {
+  position: fixed;
+  bottom: 84px;
+  right: 26px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .legend-wrapper {
+    display: none;
+  }
+}
+
+.legend-card {
+  width: 280px;
+  background: var(--surface-strong);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transform-origin: bottom right;
+  pointer-events: auto;
+}
+
+.legend-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 16px 0;
+  opacity: 0.9;
+}
+
+.legend-card__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.legend-card__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legend-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.legend-card__keys {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-card__key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  min-width: 22px;
+  padding: 0 6px;
+  background: rgba(var(--text-rgb), 0.05);
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.legend-card__plus {
+  font-size: 10px;
+  opacity: 0.4;
+}
+
+.legend-card__divider {
+  height: 1px;
+  background: var(--border);
+  width: 100%;
+}
+
+.legend-card__action {
+  font-weight: 400;
+}
+
+.legend-trigger {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.legend-trigger.is-active {
+  color: var(--surface-strong);
 }
 
 /* -------------------------------------------------------------------------- */

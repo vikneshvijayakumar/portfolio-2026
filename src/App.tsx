@@ -50,12 +50,12 @@ const MOBILE_BREAKPOINT = 720;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1.5;
 
-const zoneNavItems: { id: ZoneId; label: string }[] = [
-  { id: "about", label: "About" },
-  { id: "case-studies", label: "Case Studies" },
-  { id: "experience", label: "Experience" },
-  { id: "skills", label: "Skills" },
-  { id: "how-i-work", label: "Principles" },
+const zoneNavItems: { id: ZoneId; label: string; key: string }[] = [
+  { id: "about", label: "About", key: "1" },
+  { id: "case-studies", label: "Case Studies", key: "2" },
+  { id: "experience", label: "Experience", key: "3" },
+  { id: "skills", label: "Skills", key: "4" },
+  { id: "how-i-work", label: "Process", key: "5" },
 ];
 
 /*
@@ -198,6 +198,7 @@ function App() {
   const [isEntering, setIsEntering] = useState(true);
   const [isLoaded, setIsLoaded] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [camera, setCamera] = useState<Camera>(() => {
     // Initial Wide-Angle View (Better framed)
     const initScale = 0.40;
@@ -238,6 +239,11 @@ function App() {
     experience: null,
     skills: null,
   });
+
+  const isMac = typeof window !== 'undefined'
+    ? navigator.userAgent.toUpperCase().indexOf('MAC') >= 0
+    : false;
+  const modifierKey = isMac ? '⌘' : 'Ctrl';
 
   const socialPos = useMemo(() => ({
     x: 2160 + (isMobile ? 100 : 0) + (Math.random() * 60 - 30),
@@ -719,9 +725,16 @@ function App() {
         return;
       }
 
-      // Escape to close case studies is always allowed
-      if (event.key === "Escape" && activeCaseStudy) {
-        closeCaseStudy();
+      // Escape to close case studies or legend is always allowed
+      if (event.key === "Escape") {
+        if (activeCaseStudy) closeCaseStudy();
+        if (isLegendOpen) setIsLegendOpen(false);
+        return;
+      }
+
+      // Toggle legend on '?' (Shift + /)
+      if (event.key === "?" && !activeCaseStudy) {
+        setIsLegendOpen((prev) => !prev);
         return;
       }
 
@@ -778,7 +791,12 @@ function App() {
   );
 
   return (
-    <div className="app-container">
+    <div 
+      className="app-container"
+      onClick={() => {
+        if (isLegendOpen) setIsLegendOpen(false);
+      }}
+    >
       {activeCaseStudy === "output-builder" && (
         <style>{`
           html, body { 
@@ -901,18 +919,15 @@ function App() {
                 <span className="toolbar__role">Senior Product Designer</span>
               </div>
             </button>
-            {!isMobile && !isTablet && <AvailabilityPill />}
+            {!isMobile && (
+              <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile={false} />
+            )}
           </div>
         </div>
 
-        {!isMobile && (
-          <div className="toolbar__panel toolbar__panel--center">
-            <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile={false} />
-          </div>
-        )}
-
         <div className="toolbar__panel toolbar__panel--right">
           <div className="toolbar__actions">
+            {!isMobile && !isTablet && <AvailabilityPill />}
             <ThemeToggle theme={theme} setTheme={setTheme} />
             {!isMobile && !isTablet && (
               <a className="download-button toolbar__resume" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
@@ -947,6 +962,16 @@ function App() {
                   .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
               }}
             />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLegendOpen(!isLegendOpen);
+              }}
+              className={`legend-trigger ${isLegendOpen ? 'is-active' : ''}`}
+              aria-label="Show canvas controls"
+            >
+              ?
+            </button>
           </div>
         </div>
       )}
@@ -959,18 +984,23 @@ function App() {
           </Suspense>
         )}
       </AnimatePresence>
+
+      <Legend
+        isOpen={isLegendOpen}
+        modifierKey={modifierKey}
+      />
       <SpeedInsights />
     </div>
   );
 }
 
 function WarpHUD({ activeZone, onSnap }: { activeZone: ZoneId; onSnap: (id: ZoneId) => void }) {
-  const navItems: { id: ZoneId; label: string; icon: string }[] = [
-    { id: "about", label: "Home", icon: "🏠" },
-    { id: "case-studies", label: "Projects", icon: "📂" },
-    { id: "experience", label: "History", icon: "💼" },
-    { id: "skills", label: "Skills", icon: "🛠️" },
-    { id: "how-i-work", label: "Process", icon: "🧠" },
+  const navItems: { id: ZoneId; label: string; icon: string; key: string }[] = [
+    { id: "about", label: "Home", icon: "🏠", key: "1" },
+    { id: "case-studies", label: "Projects", icon: "📂", key: "2" },
+    { id: "skills", label: "Skills", icon: "🛠️", key: "3" },
+    { id: "experience", label: "History", icon: "💼", key: "4" },
+    { id: "how-i-work", label: "Process", icon: "🧠", key: "5" },
   ];
 
   return (
@@ -1859,6 +1889,75 @@ function Preloader({ isLoaded }: { isLoaded: boolean }) {
         <span>Portfolio @viknesh.me</span>
         <strong>Mapping systems into clarity</strong>
       </div>
+    </div>
+  );
+}
+
+function Legend({ isOpen, modifierKey }: { isOpen: boolean; modifierKey: string }) {
+  return (
+    <div className="legend-wrapper">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="legend-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="legend-card__title">Canvas Controls</h3>
+
+            <div className="legend-card__sections">
+              <div className="legend-card__section">
+                <div className="legend-card__row">
+                  <span className="legend-card__keys">
+                    <kbd className="legend-card__key">Click</kbd>
+                    <span className="legend-card__plus">+</span>
+                    <kbd className="legend-card__key">Drag</kbd>
+                  </span>
+                  <span className="legend-card__action">Pan Canvas</span>
+                </div>
+                <div className="legend-card__row">
+                  <span className="legend-card__keys">
+                    <kbd className="legend-card__key">←</kbd>
+                    <span className="legend-card__plus">/</span>
+                    <kbd className="legend-card__key">→</kbd>
+                  </span>
+                  <span className="legend-card__action">Switch Section</span>
+                </div>
+                <div className="legend-card__row">
+                  <span className="legend-card__keys">
+                    <kbd className="legend-card__key">1 - 5</kbd>
+                  </span>
+                  <span className="legend-card__action">Jump to Section</span>
+                </div>
+              </div>
+
+              <div className="legend-card__divider" />
+
+              <div className="legend-card__section">
+                <div className="legend-card__row">
+                  <span className="legend-card__keys">
+                    <kbd className="legend-card__key">{modifierKey}</kbd>
+                    <span className="legend-card__plus">+</span>
+                    <kbd className="legend-card__key">Scroll</kbd>
+                  </span>
+                  <span className="legend-card__action">Smooth Zoom</span>
+                </div>
+                <div className="legend-card__row">
+                  <span className="legend-card__keys">
+                    <kbd className="legend-card__key">{modifierKey}</kbd>
+                    <span className="legend-card__plus">+</span>
+                    <kbd className="legend-card__key">0</kbd>
+                  </span>
+                  <span className="legend-card__action">Reset Zoom</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
