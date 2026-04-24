@@ -751,7 +751,7 @@
 }
 
 .ob-video {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
 }
 
@@ -764,7 +764,7 @@
 }
 
 .ob-media__placeholder {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 10;
   background: var(--surface-strong);
   display: flex;
   flex-direction: column;
@@ -772,7 +772,6 @@
   justify-content: center;
   gap: 8px;
   color: var(--text-soft);
-
   font-size: 12px;
 }
 
@@ -1032,11 +1031,11 @@
 
   -webkit-mask-image:
     radial-gradient(circle at var(--footer-mouse-x, 50%) var(--footer-mouse-y, 50%),
-        black 0, black 20px, transparent 50px),
+      black 0, black 20px, transparent 50px),
     radial-gradient(circle, black 1px, transparent 1px);
   mask-image:
     radial-gradient(circle at var(--footer-mouse-x, 50%) var(--footer-mouse-y, 50%),
-        black 0, black 20px, transparent 50px),
+      black 0, black 20px, transparent 50px),
     radial-gradient(circle, black 1px, transparent 1px);
   -webkit-mask-size: 100% 100%, 24px 24px;
   mask-size: 100% 100%, 24px 24px;
@@ -1066,11 +1065,9 @@
 
   opacity: 0.12;
 
-  transform: translate3d(
-    calc(var(--footer-mouse-x-px, 50%) - 450px),
-    calc(var(--footer-mouse-y-px, 50%) - 450px),
-    0
-  );
+  transform: translate3d(calc(var(--footer-mouse-x-px, 50%) - 450px),
+      calc(var(--footer-mouse-y-px, 50%) - 450px),
+      0);
   will-change: transform;
 }
 
@@ -1199,35 +1196,52 @@
 
   .ob-legacy-flow-main {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .ob-legacy-step-wrap--first {
     width: 100%;
     flex: none;
-    padding: 0;
+    padding: 0 16px;
+    display: flex;
+    justify-content: center;
   }
 
   .ob-legacy-connector {
     transform: rotate(90deg);
     padding: 16px 0;
-    justify-content: center;
     width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   .ob-legacy-box {
     flex-direction: column;
     padding: 24px 16px;
+    align-items: center;
   }
 
   .ob-legacy-step-wrap {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    width: 100%;
   }
 
   .ob-legacy-step {
-    flex-direction: row;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .ob-legacy-step__title {
+    font-size: 16px;
+  }
+
+  .ob-legacy-step__body {
+    font-size: 14px;
+    max-width: 240px;
+    margin: 0 auto;
   }
 
   .ob-legacy-box-label {

@@ -50,6 +50,14 @@ const MOBILE_BREAKPOINT = 720;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1.5;
 
+const zoneNavItems: { id: ZoneId; label: string }[] = [
+  { id: "about", label: "About" },
+  { id: "case-studies", label: "Case Studies" },
+  { id: "experience", label: "Experience" },
+  { id: "skills", label: "Skills" },
+  { id: "how-i-work", label: "Principles" },
+];
+
 /*
  * Default zoom scales with viewport size so the canvas feels right on
  * small laptops and large monitors alike. Reactive (function, not const)
@@ -239,9 +247,9 @@ function App() {
 
   const madeWithPos = useMemo(() => ({
     x: 3060 + (Math.random() * 40 - 20),
-    y: 580 + (Math.random() * 40 - 20),
-    rotate: Math.random() * 6 - 3
-  }), []);
+    y: 580 + (isMobile ? 100 : 0) + (Math.random() * 40 - 20),
+    rotate: Math.random() * 6 - 12
+  }), [isMobile]);
 
   // Initial load effect removed as we now start loaded immediately
   useEffect(() => {
@@ -781,9 +789,9 @@ function App() {
           }
         `}</style>
       )}
-      <motion.div 
+      <motion.div
         className="app-shell"
-        animate={{ 
+        animate={{
           scale: activeCaseStudy ? 0.99 : 1,
           filter: activeCaseStudy ? "blur(1px) brightness(0.98)" : "blur(0px) brightness(1)",
           opacity: activeCaseStudy ? 0.85 : 1
@@ -830,7 +838,7 @@ function App() {
             }}
           >
             <AboutCard />
-            <SkillsCard />
+            <SkillsCard isMobile={isMobile} />
             <ExperienceStack isMobile={isMobile} />
             <ClockWidget />
             <BadgesCluster />
@@ -893,15 +901,21 @@ function App() {
                 <span className="toolbar__role">Senior Product Designer</span>
               </div>
             </button>
-            {!isMobile && <AvailabilityPill />}
+            {!isMobile && !isTablet && <AvailabilityPill />}
           </div>
         </div>
+
+        {!isMobile && (
+          <div className="toolbar__panel toolbar__panel--center">
+            <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile={false} />
+          </div>
+        )}
 
         <div className="toolbar__panel toolbar__panel--right">
           <div className="toolbar__actions">
             <ThemeToggle theme={theme} setTheme={setTheme} />
-            {!isMobile && (
-              <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
+            {!isMobile && !isTablet && (
+              <a className="download-button toolbar__resume" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
                 Download Resume
               </a>
             )}
@@ -936,8 +950,8 @@ function App() {
           </div>
         </div>
       )}
-      {isMobile && <MobileZoneNav onMove={moveToZone} activeZone={activeZone} />}
-      
+      {isMobile && <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile />}
+
       <AnimatePresence>
         {activeCaseStudy === "output-builder" && (
           <Suspense fallback={null}>
@@ -1075,15 +1089,13 @@ const AboutCard = memo(function AboutCard() {
 });
 
 
-const SkillsCard = memo(function SkillsCard() {
+const SkillsCard = memo(function SkillsCard({ isMobile }: { isMobile: boolean }) {
   const [activeTab, setActiveTab] = useState(0);
 
   const style = {
     left: 1760,
     top: 1500,
   };
-
-
 
   const tabs = [
     {
@@ -1159,7 +1171,7 @@ const SkillsCard = memo(function SkillsCard() {
 
   return (
     <motion.section
-      className="markdown-card"
+      className={`markdown-card ${isMobile ? "is-mobile" : ""}`}
       style={style}
       data-interactive="true"
     >
@@ -1529,72 +1541,90 @@ const SocialStrip = memo(function SocialStrip({ className = "" }: { className?: 
   );
 });
 
-const MobileZoneNav = memo(function MobileZoneNav({ onMove, activeZone }: { onMove: (id: ZoneId) => void, activeZone: ZoneId }) {
-  const navItems: { id: ZoneId; label: string }[] = [
-    { id: "about", label: "About" },
-    { id: "case-studies", label: "Case Studies" },
-    { id: "experience", label: "Employment" },
-    { id: "how-i-work", label: "Principles" },
-    { id: "skills", label: "Skills" },
-  ];
-
-  const currentIndex = navItems.findIndex(item => item.id === activeZone);
-  const currentItem = navItems[currentIndex] || navItems[0];
+const ZoneNav = memo(function ZoneNav({
+  onMove,
+  activeZone,
+  isMobile,
+}: {
+  onMove: (id: ZoneId) => void;
+  activeZone: ZoneId;
+  isMobile: boolean;
+}) {
+  const currentIndex = zoneNavItems.findIndex(item => item.id === activeZone);
 
   const handlePrev = () => {
-    const nextIndex = (currentIndex - 1 + navItems.length) % navItems.length;
-    onMove(navItems[nextIndex].id);
+    const nextIndex = (currentIndex - 1 + zoneNavItems.length) % zoneNavItems.length;
+    onMove(zoneNavItems[nextIndex].id);
   };
 
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % navItems.length;
-    onMove(navItems[nextIndex].id);
+    const nextIndex = (currentIndex + 1) % zoneNavItems.length;
+    onMove(zoneNavItems[nextIndex].id);
   };
 
-  const prevIndex = (currentIndex - 1 + navItems.length) % navItems.length;
-  const nextIndex = (currentIndex + 1) % navItems.length;
-  const prevItem = navItems[prevIndex];
-  const nextItem = navItems[nextIndex];
+  if (isMobile) {
+    return (
+      <motion.nav
+        className="mobile-zone-stepper"
+        data-interactive="true"
+        onPanEnd={(_, info) => {
+          if (info.offset.x > 30) handlePrev();
+          else if (info.offset.x < -30) handleNext();
+        }}
+      >
+        <button className="mobile-zone-stepper__arrow" onClick={handlePrev} type="button" aria-label="Previous section">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div className="mobile-zone-stepper__label-viewport">
+          <motion.div
+            className="mobile-zone-stepper__label-track"
+            animate={{ x: (2 - currentIndex) * 110 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            {zoneNavItems.map((item, idx) => (
+              <span
+                key={item.id}
+                className={`mobile-zone-stepper__title ${idx === currentIndex ? "is-active" : "is-ghost"}`}
+                onClick={() => onMove(item.id)}
+              >
+                {item.label}
+              </span>
+            ))}
+          </motion.div>
+        </div>
+
+        <button className="mobile-zone-stepper__arrow" onClick={handleNext} type="button" aria-label="Next section">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </motion.nav>
+    );
+  }
 
   return (
-    <motion.nav
-      className="mobile-zone-stepper"
-      data-interactive="true"
-      onPanEnd={(_, info) => {
-        if (info.offset.x > 30) handlePrev();
-        else if (info.offset.x < -30) handleNext();
-      }}
-    >
-      <button className="mobile-zone-stepper__arrow" onClick={handlePrev} type="button" aria-label="Previous section">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-
-      <div className="mobile-zone-stepper__label-viewport">
-        <motion.div
-          className="mobile-zone-stepper__label-track"
-          animate={{ x: (2 - currentIndex) * 110 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+    <nav className="header-zone-nav" aria-label="Primary">
+      {zoneNavItems.map((item) => (
+        <button
+          key={item.id}
+          className={`header-zone-nav__item ${activeZone === item.id ? "is-active" : ""}`}
+          onClick={() => onMove(item.id)}
+          type="button"
         >
-          {navItems.map((item, idx) => (
-            <span
-              key={item.id}
-              className={`mobile-zone-stepper__title ${idx === currentIndex ? "is-active" : "is-ghost"}`}
-              onClick={() => onMove(item.id)}
-            >
-              {item.label}
-            </span>
-          ))}
-        </motion.div>
-      </div>
-
-      <button className="mobile-zone-stepper__arrow" onClick={handleNext} type="button" aria-label="Next section">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
-    </motion.nav>
+          <span className="header-zone-nav__label">{item.label}</span>
+          {activeZone === item.id && (
+            <motion.span
+              layoutId="header-zone-nav-active"
+              className="header-zone-nav__indicator"
+              transition={{ type: "spring", stiffness: 420, damping: 34 }}
+            />
+          )}
+        </button>
+      ))}
+    </nav>
   );
 });
 
@@ -1612,7 +1642,7 @@ function CopyContactButton({ text, icon, copyValue }: { text: string; icon: stri
 
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     const performCopy = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

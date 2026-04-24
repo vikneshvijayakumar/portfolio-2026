@@ -48,18 +48,18 @@ export const zones: Zone[] = [
   {
     id: "about",
     label: "About Me",
-    desktopCenter: { x: 2000, y: 1000 },
-    mobileCenter: { x: 2000, y: 850 },
+    desktopCenter: { x: 2030, y: 950 },
+    mobileCenter: { x: 2030, y: 850 },
     mobileEyebrow: "About",
     mobileTitle: "I turn complex workflows and ambiguous ideas into simple, shipped products.",
     mobileBody:
       "10+ years building enterprise SaaS across healthcare, AI, and edtech, with a focus on systems that are used daily by internal teams where reliability matters as much as clarity.",
-    targetScale: { desktop: 0.85, mobile: 0.72 }
+    targetScale: { desktop: 0.95, mobile: 0.72 }
   },
   {
     id: "case-studies",
     label: "Case Studies",
-    desktopCenter: { x: 3200, y: 780 },
+    desktopCenter: { x: 3200, y: 900 },
     mobileEyebrow: "Selected Work",
     mobileTitle: "Projects designed for complex, high-stakes workflows.",
     mobileBody:
@@ -69,31 +69,34 @@ export const zones: Zone[] = [
   {
     id: "experience",
     label: "Experience",
-    desktopCenter: { x: 1160, y: 680 },
+    desktopCenter: { x: 1160, y: 900 },
+    mobileCenter: { x: 1100, y: 780 },
     mobileEyebrow: "History",
     mobileTitle: "Over a decade across enterprise and startups",
     mobileBody:
       "A look into where I've worked and what I've done across healthtech, edtech, and B2B SaaS.",
-    targetScale: { desktop: 0.82, mobile: 1.2 }
+    targetScale: { desktop: 0.90, mobile: 0.9 }
   },
   {
     id: "skills",
     label: "Skills",
     desktopCenter: { x: 2135, y: 1730 },
+    mobileCenter: { x: 2105, y: 1530 },
     mobileEyebrow: "Capabilities",
     mobileTitle: "Specialized in enterprise complexity and design systems.",
     mobileBody: "A deep dive into the technical and leadership skills I bring to the table, from design systems to accessibility validation.",
-    targetScale: { desktop: 0.78, mobile: 0.78 }
+    targetScale: { desktop: 1.2, mobile: 0.75 }
   },
   {
     id: "how-i-work",
     label: "How I Work",
-    desktopCenter: { x: 1038, y: 1500 },
+    desktopCenter: { x: 1220, y: 1700 },
+    mobileCenter: { x: 1100, y: 1500 },
     mobileEyebrow: "Process",
     mobileTitle: "A systems-minded design approach grounded in real constraints.",
     mobileBody:
       "The work starts with bottlenecks, moves alongside engineering, and stays accountable to edge cases, accessibility, and how the product is actually used in the wild.",
-    targetScale: { desktop: 0.88, mobile: 1.4 }
+    targetScale: { desktop: 1.2, mobile: 1.2 }
   }
 ];
 
