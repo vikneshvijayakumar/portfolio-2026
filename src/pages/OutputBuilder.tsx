@@ -123,6 +123,7 @@ function Reveal({ children, className, delay = 0 }: { children: ReactNode; class
 
 type OutputBuilderProps = {
   onBack: () => void;
+  origin?: { x: number; y: number } | null;
 };
 
 type MetaItem = { label: string; value: string };
@@ -393,7 +394,10 @@ const SocialIcon = ({ kind }: { kind: "email" | "whatsapp" | "linkedin" | "dribb
   );
 };
 
-function OutputBuilder({ onBack }: OutputBuilderProps) {
+function OutputBuilder({ onBack, origin }: OutputBuilderProps) {
+  const transformOrigin = origin
+    ? `${origin.x}px ${origin.y}px`
+    : "50% 50%";
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -451,13 +455,14 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Output Builder case study"
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 40 }}
-      transition={{ 
-        duration: 0.6, 
-        ease: EASE,
-        opacity: { duration: 0.4 } 
+      style={{ transformOrigin, willChange: "transform, opacity" }}
+      initial={{ opacity: 0, scale: 0.05, filter: "blur(8px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, scale: 0.05, filter: "blur(8px)" }}
+      transition={{
+        scale: { type: "spring", stiffness: 180, damping: 24, mass: 0.9 },
+        opacity: { duration: 0.35, ease: EASE },
+        filter: { duration: 0.35, ease: EASE },
       }}
     >
       {/* Floating back button */}

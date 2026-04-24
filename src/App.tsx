@@ -186,6 +186,7 @@ function ThemeToggle({ theme, setTheme }: { theme: "paper" | "ink"; setTheme: (t
 function App() {
   const skipIntro = new URLSearchParams(window.location.search).has("skip-intro");
   const [activeCaseStudy, setActiveCaseStudy] = useState<string | null>(null);
+  const [caseStudyOrigin, setCaseStudyOrigin] = useState<{ x: number; y: number } | null>(null);
 
   const [theme, setTheme] = useState<"paper" | "ink">(() => {
     const saved = window.localStorage.getItem("viknesh-theme");
@@ -254,7 +255,8 @@ function App() {
     // No-op or keep if needed for other logic
   }, []);
 
-  const openCaseStudy = (id: string) => {
+  const openCaseStudy = (id: string, origin?: { x: number; y: number }) => {
+    if (origin) setCaseStudyOrigin(origin);
     setActiveCaseStudy(id);
     window.location.hash = id;
   };
@@ -960,7 +962,7 @@ function App() {
       <AnimatePresence>
         {activeCaseStudy === "output-builder" && (
           <Suspense fallback={null}>
-            <OutputBuilder onBack={closeCaseStudy} />
+            <OutputBuilder onBack={closeCaseStudy} origin={caseStudyOrigin} />
           </Suspense>
         )}
       </AnimatePresence>
@@ -1307,7 +1309,7 @@ const ExperienceStack = memo(function ExperienceStack({ isMobile }: { isMobile: 
   );
 });
 
-const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCaseStudy: (id: string) => void }) {
+const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy }: { onOpenCaseStudy: (id: string, origin?: { x: number; y: number }) => void }) {
   const mobileStart = { x: 2300, y: 1000 };
   return (
     <>
@@ -1335,7 +1337,7 @@ const ProjectCard = memo(function ProjectCard({
 }: {
   project: Project;
   index?: number;
-  onOpen: (id: string) => void;
+  onOpen: (id: string, origin?: { x: number; y: number }) => void;
 }) {
   const cardStyle = {
     left: project.desktopPosition.x,
@@ -1351,7 +1353,12 @@ const ProjectCard = memo(function ProjectCard({
   const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
     e?.stopPropagation();
     if (project.title === "Output Builder") {
-      onOpen("output-builder");
+      const el = e?.currentTarget as HTMLElement | undefined;
+      const rect = el?.getBoundingClientRect();
+      const origin = rect
+        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        : undefined;
+      onOpen("output-builder", origin);
     }
   };
 
@@ -1435,6 +1442,7 @@ const getIstParts = () => {
 
 const ClockWidget = memo(function ClockWidget() {
   const [displayTime, setDisplayTime] = useState(() => getIstParts().display);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   // Snapshot the current time offsets ONCE on mount — hands are then driven
   // purely by CSS animation. No per-second React render, no state thrash.
@@ -1447,6 +1455,21 @@ const ClockWidget = memo(function ClockWidget() {
       hour: ((hours % 12) * 3600 + minutes * 60 + seconds),
     };
   }
+
+  // Pause hand animations when the clock is scrolled/panned off-screen so the
+  // compositor doesn't tick a GPU layer for an invisible widget.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        el.dataset.visible = entries[0]?.isIntersecting ? "true" : "false";
+      },
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // Update the readable text once per minute — cheap, no layout thrash.
   useEffect(() => {
@@ -1469,8 +1492,10 @@ const ClockWidget = memo(function ClockWidget() {
 
   return (
     <motion.div
+      ref={rootRef}
       className="clock-widget"
       data-interactive="true"
+      data-visible="true"
       whileTap={{ scale: 0.98 }}
     >
       <div className="clock-widget__inner">
@@ -1745,8 +1770,6 @@ const FloatingStatus = memo(function FloatingStatus() {
       eye: SVGGraphicsElement;
       pupil: SVGPathElement;
       offsetX: number;
-      centerX: number;
-      centerY: number;
       maxDistX: number;
       maxDistY: number;
     };
@@ -1755,30 +1778,24 @@ const FloatingStatus = memo(function FloatingStatus() {
     const leftEye = svg.querySelector("#eye-left") as SVGGraphicsElement | null;
     const rightEye = svg.querySelector("#eye-right") as SVGGraphicsElement | null;
     if (leftEye && pupilLeftRef.current) {
-      eyes.push({ eye: leftEye, pupil: pupilLeftRef.current, offsetX: 0, centerX: 0, centerY: 0, maxDistX: 0, maxDistY: 0 });
+      eyes.push({ eye: leftEye, pupil: pupilLeftRef.current, offsetX: 0, maxDistX: 0, maxDistY: 0 });
     }
     if (rightEye && pupilRightRef.current) {
-      eyes.push({ eye: rightEye, pupil: pupilRightRef.current, offsetX: 0, centerX: 0, centerY: 0, maxDistX: 0, maxDistY: 0 });
+      eyes.push({ eye: rightEye, pupil: pupilRightRef.current, offsetX: 0, maxDistX: 0, maxDistY: 0 });
     }
     if (eyes.length === 0) return;
 
     let ctmA = 1;
     let ctmD = 1;
 
-    // Cache all geometry up-front; refresh only on resize/scroll, never in the mousemove path.
+    // Cache intrinsic eye/pupil dimensions; these scale uniformly with CTM so
+    // they stay valid under canvas pan/zoom. Viewport center is re-read per frame.
     const recomputeGeometry = () => {
-      const ctm = svg.getScreenCTM();
-      if (ctm) {
-        ctmA = ctm.a || 1;
-        ctmD = ctm.d || 1;
-      }
       for (const e of eyes) {
         e.pupil.removeAttribute("transform");
         const eyeRect = e.eye.getBoundingClientRect();
         const pupilRect = e.pupil.getBoundingClientRect();
         e.offsetX = (eyeRect.right - pupilRect.right - (pupilRect.left - eyeRect.left)) / 2;
-        e.centerX = eyeRect.left + eyeRect.width / 2;
-        e.centerY = eyeRect.top + eyeRect.height / 2;
         e.maxDistX = pupilRect.width / 2;
         e.maxDistY = pupilRect.height / 2;
       }
@@ -1792,10 +1809,20 @@ const FloatingStatus = memo(function FloatingStatus() {
 
     const commit = () => {
       rafId = null;
-      // Write phase only; all reads are pre-cached.
+      // The canvas applies CSS transforms that don't fire scroll/resize, so we
+      // must re-read each eye's viewport position per frame. Pupil/eye intrinsic
+      // dimensions (offsetX, maxDistX/Y) stay cached since they scale uniformly.
+      const ctm = svg.getScreenCTM();
+      if (ctm) {
+        ctmA = ctm.a || 1;
+        ctmD = ctm.d || 1;
+      }
       for (const e of eyes) {
-        const distX = pointerX - e.centerX;
-        const distY = pointerY - e.centerY;
+        const eyeRect = e.eye.getBoundingClientRect();
+        const centerX = eyeRect.left + eyeRect.width / 2;
+        const centerY = eyeRect.top + eyeRect.height / 2;
+        const distX = pointerX - centerX;
+        const distY = pointerY - centerY;
         const angle = Math.atan2(distY, distX);
         const newPupilX =
           e.offsetX + Math.min(e.maxDistX, Math.max(-e.maxDistX, Math.cos(angle) * e.maxDistX));
@@ -1813,7 +1840,6 @@ const FloatingStatus = memo(function FloatingStatus() {
       if (rafId === null) rafId = requestAnimationFrame(commit);
     };
 
-    // Recompute on layout changes. Scroll invalidates `centerX/centerY` since we use viewport coords.
     let resizeRaf: number | null = null;
     const scheduleRecompute = () => {
       if (resizeRaf !== null) return;
@@ -1823,14 +1849,38 @@ const FloatingStatus = memo(function FloatingStatus() {
       });
     };
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    window.addEventListener("resize", scheduleRecompute);
-    window.addEventListener("scroll", scheduleRecompute, { passive: true, capture: true });
-    return () => {
+    // Only listen while the eyes are visible — avoids per-frame getBoundingClientRect
+    // reads when the user has panned/scrolled them off-screen.
+    let listening = false;
+    const attach = () => {
+      if (listening) return;
+      listening = true;
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+      window.addEventListener("resize", scheduleRecompute);
+    };
+    const detach = () => {
+      if (!listening) return;
+      listening = false;
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", scheduleRecompute);
-      window.removeEventListener("scroll", scheduleRecompute, { capture: true } as EventListenerOptions);
-      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) attach();
+        else detach();
+      },
+      { threshold: 0 },
+    );
+    io.observe(svg);
+
+    return () => {
+      io.disconnect();
+      detach();
       if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
     };
   }, []);
@@ -1886,24 +1936,6 @@ const FloatingStatus = memo(function FloatingStatus() {
     </motion.div>
   );
 });
-
-function Preloader({ isLoaded }: { isLoaded: boolean }) {
-  return (
-    <div className={isLoaded ? "preloader is-hidden" : "preloader"} aria-hidden={isLoaded}>
-      <div className="preloader__logo-container">
-        <div className="preloader__logo-glow" />
-        <div
-          className="preloader__logo-svg"
-          dangerouslySetInnerHTML={{ __html: logoSvg }}
-        />
-      </div>
-      <div className="preloader__copy">
-        <span>Portfolio @viknesh.me</span>
-        <strong>Mapping systems into clarity</strong>
-      </div>
-    </div>
-  );
-}
 
 function Legend({ isOpen, modifierKey }: { isOpen: boolean; modifierKey: string }) {
   return (
