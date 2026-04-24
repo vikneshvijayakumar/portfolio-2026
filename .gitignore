@@ -1,3 +1,16 @@
 node_modules
 dist
 .DS_Store
+
+# Documentation and Plans
+*_implementation_plan.md
+*-case-study.md
+output-builder.md
+Untitled
+scratch.html
+gemini-code-*.ts
+
+# Build artifacts
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
