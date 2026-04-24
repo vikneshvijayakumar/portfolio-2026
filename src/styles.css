@@ -1466,7 +1466,19 @@ button {
   width: 4px;
   background-color: var(--black);
   border-radius: 2px;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
 }
+
+@keyframes clock-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.clock-widget__hand.hour   { animation-name: clock-rotate; animation-duration: 43200s; }
+.clock-widget__hand.minute { animation-name: clock-rotate; animation-duration: 3600s; }
+.clock-widget__hand.second { animation-name: clock-rotate; animation-duration: 60s; }
 
 .clock-widget__hand.hour {
   height: 35px;
@@ -2795,20 +2807,19 @@ button {
  * entirely so the body's static radial gradients show through unchanged.
  */
 @media (hover: none),
-(max-width: 900px) {
+(pointer: coarse),
+(max-width: 900px),
+(prefers-reduced-motion: reduce) {
 
   /*
-   * No cursor on touch devices \u2014 hide the spotlight entirely.
-   * The static colorful dot layer stays visible so the canvas keeps its
-   * character; we just lose the interactive boost.
+   * No cursor / low-power / reduced-motion:
+   * The cursor-driven mask and full-viewport bgShift repaint dominate paint
+   * cost on weak GPUs and produce no visible effect without a cursor.
+   * Hide both dynamic layers entirely; the body's static gradients show through.
    */
-  .dynamic-grid-bg__glow-layer {
-    display: none;
-  }
-
-  /* Slight bump in opacity to compensate for missing spotlight boost */
+  .dynamic-grid-bg__glow-layer,
   .dynamic-grid-bg__color-layer {
-    opacity: 0.35;
+    display: none;
   }
 
   /*

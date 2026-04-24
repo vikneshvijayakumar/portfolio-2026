@@ -349,6 +349,7 @@ function App() {
 
   useEffect(() => {
     if (isMobile) return;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let mouseX = 0;
     let mouseY = 0;
@@ -807,9 +808,8 @@ function App() {
       <motion.div
         className="app-shell"
         animate={{
-          scale: activeCaseStudy ? 0.99 : 1,
-          filter: activeCaseStudy ? "blur(1px) brightness(0.98)" : "blur(0px) brightness(1)",
-          opacity: activeCaseStudy ? 0.85 : 1
+          scale: activeCaseStudy ? 0.98 : 1,
+          opacity: activeCaseStudy ? 0.5 : 1
         }}
         transition={{ duration: 0.6, ease: EASE }}
       >
@@ -1409,32 +1409,63 @@ const ProjectCard = memo(function ProjectCard({
   );
 });
 
-const ClockWidget = memo(function ClockWidget() {
-  const [now, setNow] = useState(new Date());
+const CLOCK_GRADUATIONS = Array.from({ length: 60 }, (_, index) => (
+  <div
+    key={index}
+    className={`clock-widget__graduation ${index % 5 === 0 ? "is-major" : ""}`}
+    style={{ transform: `rotate(${index * 6}deg)` }}
+  />
+));
 
+const getIstParts = () => {
+  const now = new Date();
+  const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  return {
+    seconds: ist.getSeconds() + ist.getMilliseconds() / 1000,
+    minutes: ist.getMinutes(),
+    hours: ist.getHours(),
+    display: now.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Kolkata",
+    }),
+  };
+};
+
+const ClockWidget = memo(function ClockWidget() {
+  const [displayTime, setDisplayTime] = useState(() => getIstParts().display);
+
+  // Snapshot the current time offsets ONCE on mount — hands are then driven
+  // purely by CSS animation. No per-second React render, no state thrash.
+  const offsetsRef = useRef<{ sec: number; min: number; hour: number } | null>(null);
+  if (offsetsRef.current === null) {
+    const { seconds, minutes, hours } = getIstParts();
+    offsetsRef.current = {
+      sec: seconds,
+      min: minutes * 60 + seconds,
+      hour: ((hours % 12) * 3600 + minutes * 60 + seconds),
+    };
+  }
+
+  // Update the readable text once per minute — cheap, no layout thrash.
   useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
+    const tick = () => setDisplayTime(getIstParts().display);
+    const now = new Date();
+    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    const timeout = setTimeout(() => {
+      tick();
+      const interval = setInterval(tick, 60_000);
+      (timeout as unknown as { interval?: number }).interval = interval as unknown as number;
+    }, msUntilNextMinute);
+    return () => {
+      clearTimeout(timeout);
+      const interval = (timeout as unknown as { interval?: number }).interval;
+      if (interval) clearInterval(interval);
+    };
   }, []);
 
-  // Time in IST (Chennai)
-  const istDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  const seconds = istDate.getSeconds();
-  const minutes = istDate.getMinutes();
-  const hours = istDate.getHours();
-
-  const secDeg = (seconds / 60) * 360;
-  const minDeg = ((minutes + seconds / 60) / 60) * 360;
-  const hourDeg = (((hours % 12) + minutes / 60) / 12) * 360;
-
-  const displayTime = now.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "Asia/Kolkata",
-  });
+  const { sec, min, hour } = offsetsRef.current;
 
   return (
     <motion.div
@@ -1443,19 +1474,20 @@ const ClockWidget = memo(function ClockWidget() {
       whileTap={{ scale: 0.98 }}
     >
       <div className="clock-widget__inner">
-        <div className="clock-widget__graduations">
-          {Array.from({ length: 60 }).map((_, index: number) => (
-            <div
-              key={index}
-              className={`clock-widget__graduation ${index % 5 === 0 ? "is-major" : ""}`}
-              style={{ transform: `rotate(${index * 6}deg)` }}
-            />
-          ))}
-        </div>
+        <div className="clock-widget__graduations">{CLOCK_GRADUATIONS}</div>
 
-        <div className="clock-widget__hand hour" style={{ transform: `rotate(${hourDeg}deg)` }} />
-        <div className="clock-widget__hand minute" style={{ transform: `rotate(${minDeg}deg)` }} />
-        <div className="clock-widget__hand second" style={{ transform: `rotate(${secDeg}deg)` }} />
+        <div
+          className="clock-widget__hand hour"
+          style={{ animationDelay: `${-hour}s` }}
+        />
+        <div
+          className="clock-widget__hand minute"
+          style={{ animationDelay: `${-min}s` }}
+        />
+        <div
+          className="clock-widget__hand second"
+          style={{ animationDelay: `${-sec}s` }}
+        />
 
         <div className="clock-widget__metadata">
           <span>Chennai, India</span>

@@ -47,6 +47,52 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
 };
 
+/**
+ * Only attaches the video source and begins playback once the element is near
+ * the viewport. Dramatically reduces upfront bandwidth/CPU on mobile where
+ * autoplaying every demo at once would fetch ~9MB of MP4.
+ */
+function LazyVideo({ src, className }: { src: string; className?: string }) {
+  const ref = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      el.src = src;
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (!el.src) el.src = src;
+            el.play().catch(() => {});
+          } else {
+            if (!el.paused) el.pause();
+          }
+        });
+      },
+      { rootMargin: "200px 0px", threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      className={className}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+    />
+  );
+}
+
 const staggerParent = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
@@ -358,6 +404,12 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
   const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && (
+      window.matchMedia("(hover: none)").matches ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )) return;
+
     let rafId = 0;
     let pendingX = 0;
     let pendingY = 0;
@@ -760,14 +812,7 @@ function OutputBuilder({ onBack }: OutputBuilderProps) {
                   >
                     <div className="ob-media__frame">
                       {f.videoPath ? (
-                        <video
-                          src={f.videoPath}
-                          className="ob-video"
-                          autoPlay
-                          muted
-                          loop
-                          playsInline
-                        />
+                        <LazyVideo src={f.videoPath} className="ob-video" />
                       ) : (
                         <div className="ob-media__placeholder">
                           <ThemedIcon raw={dataIcon} size={48} />

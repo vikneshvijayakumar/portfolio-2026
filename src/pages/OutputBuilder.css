@@ -1063,6 +1063,14 @@
   will-change: transform;
 }
 
+/* Disable the footer's cursor-driven prism on touch / low-power / reduced-motion. */
+@media (hover: none), (pointer: coarse), (max-width: 900px), (prefers-reduced-motion: reduce) {
+  .ob-footer__bg-color,
+  .ob-footer__bg-glow {
+    display: none;
+  }
+}
+
 .ob-footer__inner {
   max-width: 720px;
   margin: 0 auto;
