@@ -225,6 +225,7 @@ function App() {
     // Velocity samples: ring buffer of last 5 {dx, dy, t}
     samples: Array<{ dx: number; dy: number; t: number }>;
     target: HTMLElement;
+    hasMoved: boolean;
   } | null>(null);
   const inertiaRafRef = useRef<number | null>(null);
   const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
@@ -478,21 +479,27 @@ function App() {
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
 
-    // If the tap starts on an interactive element, stay out of its way:
-    // don't track a drag, don't capture the pointer — let native click events flow.
-    if (target.closest("a, button, label, input, textarea, [data-interactive='true']")) {
+    // 1. If the tap starts on a specific interactive control (link, button), let native events flow.
+    if (target.closest("a, button, label, input, textarea")) {
+      return;
+    }
+
+    // 2. If the tap starts on fixed UI chrome (toolbar, dock, legend), stay out of its way.
+    if (target.closest(".toolbar, .bottom-dock, .legend-wrapper, .mobile-zone-stepper")) {
       return;
     }
 
     activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    event.preventDefault();
+    
+    // NOTE: We don't call event.preventDefault() here anymore.
+    // This allows native click events to flow if the user just taps.
+    // Pointer capture and touch-action: none on the board handle the rest.
 
     // Kill any running inertia so grab feels instant
     cancelInertia();
     setIsInertia(false);
 
     if (activePointersRef.current.size === 1) {
-      setIsDragging(true);
       dragStateRef.current = {
         pointerId: event.pointerId,
         lastX: event.clientX,
@@ -503,8 +510,10 @@ function App() {
         startClientY: event.clientY,
         samples: [],
         target: target,
+        hasMoved: false,
       };
-      stageRef.current?.setPointerCapture(event.pointerId);
+      // We don't setIsDragging(true) or setPointerCapture here yet.
+      // We wait for movement in handlePointerMove to distinguish a click from a pan.
     } else if (activePointersRef.current.size === 2) {
       // Setup pinch zoom
       const pts = Array.from(activePointersRef.current.values());
@@ -518,6 +527,22 @@ function App() {
     if (!activePointersRef.current.has(event.pointerId)) return;
     activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
+    const ds = dragStateRef.current;
+    
+    // If we have a single pointer but haven't started "dragging" yet,
+    // check if the user has moved enough to commit to a pan.
+    if (ds && ds.pointerId === event.pointerId && !ds.hasMoved) {
+      const moveDist = Math.hypot(event.clientX - ds.startClientX, event.clientY - ds.startClientY);
+      if (moveDist > 4) {
+        ds.hasMoved = true;
+        setIsDragging(true);
+        stageRef.current?.setPointerCapture(event.pointerId);
+        // Once we capture, we might want to kill inertia again just in case
+        cancelInertia();
+      }
+    }
+
+    // Only update camera if we have panned or are in a multi-touch pinch.
     if (activePointersRef.current.size === 2 && pinchDistRef.current !== null) {
       const pts = Array.from(activePointersRef.current.values());
       const newDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
@@ -541,8 +566,7 @@ function App() {
       return;
     }
 
-    const ds = dragStateRef.current;
-    if (!ds || ds.pointerId !== event.pointerId) return;
+    if (!ds || ds.pointerId !== event.pointerId || !ds.hasMoved) return;
 
     const dx = event.clientX - ds.lastX;
     const dy = event.clientY - ds.lastY;
