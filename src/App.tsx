@@ -444,7 +444,8 @@ function App() {
     setActiveZone(zoneId);
 
     const zone = zones.find((entry) => entry.id === zoneId)!;
-    const targetZoom = customScale ?? (isMobile ? zone.targetScale?.mobile : zone.targetScale?.desktop) ?? getDefaultZoom(window.innerWidth);
+    const isSmallPhone = window.innerWidth <= 402;
+    const targetZoom = customScale ?? (isMobile ? (zone.targetScale?.mobile ?? getDefaultZoom(window.innerWidth)) - (isSmallPhone ? 0.15 : 0) : zone.targetScale?.desktop) ?? getDefaultZoom(window.innerWidth);
     const target = centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom);
 
     animate(camX, target.x, { type: "spring", stiffness: 60, damping: 18, mass: 1 });

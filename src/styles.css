@@ -18,6 +18,15 @@
   }
 }
 
+/* On small phones (Galaxy S23 ~360px, iPhone 17e ~402px) we proportionally
+   scale the entire UI down instead of re-laying out every component. `zoom`
+   works with position:fixed and pointer coordinates, unlike `transform: scale`. */
+@media (max-width: 402px) {
+  html {
+    zoom: 0.85;
+  }
+}
+
 :root {
   color-scheme: light;
   --space-1: 4px;
