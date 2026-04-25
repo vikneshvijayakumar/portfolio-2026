@@ -71,7 +71,6 @@
   --black-rgb: 0, 0, 0;
   --text-rgb: 31, 25, 21;
   --shadow-rgb: 56, 39, 28;
-  --clock-red: #ec231e;
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -232,7 +231,7 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, var(--canvas-grid) 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--canvas-grid) 1.25px, transparent 1.25px);
   background-size: 24px 24px;
   opacity: 1;
 }
@@ -271,19 +270,19 @@ button {
   background: var(--lumos-gradient);
   background-size: 400% 400%;
   animation: bgShift 12s ease infinite;
-  filter: saturate(1.8);
-  opacity: 0.85;
+  filter: saturate(2.4);
+  opacity: 0.95;
 
   -webkit-mask-image:
     radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
       black 0, black 20px, transparent 50px),
-    radial-gradient(circle, black 1px, transparent 1px);
+    radial-gradient(circle, black 1.25px, transparent 1.25px);
   mask-image:
     radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
       black 0, black 20px, transparent 50px),
-    radial-gradient(circle, black 1px, transparent 1px);
-  -webkit-mask-size: 100% 100%, 24px 24px;
-  mask-size: 100% 100%, 24px 24px;
+    radial-gradient(circle, black 1.25px, transparent 1.25px);
+  mask-size: auto, 24px 24px;
+  -webkit-mask-size: auto, 24px 24px;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 
@@ -306,7 +305,7 @@ button {
   z-index: 1;
 
   background: var(--lumos-gradient);
-  filter: saturate(1.6);
+  filter: saturate(2.0);
 
   -webkit-mask-image: radial-gradient(circle,
       rgba(0, 0, 0, 0.6) 0%,
@@ -317,7 +316,7 @@ button {
       rgba(0, 0, 0, 0.3) 25%,
       transparent 55%);
 
-  opacity: 0.12;
+  opacity: 0.18;
 
   transform: translate3d(calc(var(--mouse-x, 50vw) - 450px),
       calc(var(--mouse-y, 50vh) - 450px),
@@ -735,9 +734,7 @@ button {
 .availability-pill,
 .project-card__visual,
 .about-card,
-.markdown-card,
-.principle-card,
-.clock-widget {
+.markdown-card {
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -1329,6 +1326,10 @@ button {
   display: block;
 }
 
+.project-card__metadata-arrow svg path {
+  stroke: currentColor;
+}
+
 .project-card__footer-meta {
   display: flex;
   justify-content: flex-start;
@@ -1337,8 +1338,11 @@ button {
 
 .project-card__company {
   font-size: 1.15rem;
-  font-weight: 600;
   color: var(--text-soft);
+}
+
+.project-card__company.is-link {
+  color: var(--primary-dark);
 }
 
 .clock-widget span,
@@ -1375,181 +1379,34 @@ button {
 }
 
 
-/* === Analog Clock (Scaled 50%) === */
-.clock-widget {
+/* === Vanakkam Sticker === */
+.vanakkam-sticker {
   position: absolute;
-  left: 2760px;
+  left: 3060px;
   top: 580px;
-  width: 176px;
-  height: 176px;
-  padding: 8px;
-  background-color: #fffdf8;
-  border-radius: var(--radius-2xl);
-  box-shadow: 0 16px 32px rgba(var(--black-rgb), 0.1);
-  display: flex !important;
+  width: 180px;
+  height: 180px;
+  display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  /* White border is built-in to asset, so we only need the depth shadow */
+  filter: drop-shadow(0 16px 32px rgba(var(--black-rgb), 0.12));
 }
 
-.clock-widget.is-mobile {
+.vanakkam-sticker.is-mobile {
   position: relative;
   left: auto;
   top: auto;
-  width: 176px;
-  height: 176px;
   margin: 24px auto;
 }
 
-.clock-widget__inner {
-  position: relative;
+.vanakkam-sticker__image {
   width: 100%;
   height: 100%;
-  background: var(--white);
-  border: 2px solid var(--black);
-  border-radius: 100%;
-  box-shadow: 0 0 8px rgba(var(--black-rgb), 0.4) inset;
-}
-
-/* Pause compositor animations when the clock is panned off-screen (toggled by
-   IntersectionObserver) or when the user prefers reduced motion. */
-.clock-widget[data-visible="false"] .clock-widget__hand {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .clock-widget__hand {
-    animation-play-state: paused;
-  }
-}
-
-.clock-widget__hand {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 4px;
-  background-color: var(--black);
-  border-radius: 2px;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-/* Only the second hand moves perceptibly each frame; promote only it to a
-   compositor layer. Hour/minute updates are sub-perceptual and don't need one. */
-.clock-widget__hand.second {
-  will-change: transform;
-}
-
-@keyframes clock-rotate {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.clock-widget__hand.hour {
-  animation-name: clock-rotate;
-  animation-duration: 43200s;
-}
-
-.clock-widget__hand.minute {
-  animation-name: clock-rotate;
-  animation-duration: 3600s;
-}
-
-.clock-widget__hand.second {
-  animation-name: clock-rotate;
-  animation-duration: 60s;
-}
-
-.clock-widget__hand.hour {
-  height: 35px;
-  transform-origin: 50% 29px;
-  /* height - 6px offset */
-  margin-top: -29px;
-  margin-left: -2px;
-  z-index: 2;
-}
-
-.clock-widget__hand.minute {
-  height: 57px;
-  transform-origin: 50% 51px;
-  /* height - 6px offset */
-  margin-top: -51px;
-  margin-left: -2px;
-  z-index: 3;
-}
-
-.clock-widget__hand.second {
-  width: 1.5px;
-  height: 70px;
-  background-color: var(--clock-red);
-  transform-origin: 50% 64px;
-  /* height - 6px offset */
-  margin-top: -64px;
-  margin-left: -0.75px;
-  z-index: 4;
-}
-
-.clock-widget__hand.second::before {
-  content: "";
-  position: absolute;
-  bottom: 3px;
-  /* pivot position */
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background: inherit;
-  border-radius: 50%;
-  transform: translateX(-50%);
-  box-shadow: 0 1px 2px rgba(var(--black-rgb), 0.2);
-}
-
-.clock-widget__graduations {
-  position: absolute;
-  inset: 0;
-}
-
-.clock-widget__graduation {
+  object-fit: contain;
   display: block;
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  width: 1px;
-  height: 5px;
-  background-color: var(--black);
-  transform-origin: 50% 72px;
-  /* (176 - padding*2 - border*2) / 2 - top */
-}
-
-.clock-widget__graduation.is-major {
-  width: 2px;
-  height: 10px;
-  top: 2px;
-}
-
-.clock-widget__metadata {
-  position: absolute;
-  bottom: 20%;
-  left: 0;
-  right: 0;
-  text-align: center;
-  pointer-events: none;
-}
-
-.clock-widget__metadata span {
-  display: block;
-  font-size: 8.8px;
-  text-transform: uppercase;
-  color: rgba(31, 25, 21, 0.6);
-}
-
-.clock-widget__metadata strong {
-  font-size: 11px;
-  font-weight: 700;
-  color: #1f1915;
 }
 
 .badges-cluster {
@@ -1774,9 +1631,9 @@ button {
   box-shadow: 4px 8px 24px rgba(var(--black-rgb), 0.12), 0 1px 3px rgba(var(--black-rgb), 0.06);
   transition: box-shadow 240ms ease;
   transform-origin: center center;
-  border: none !important;
-  background: none !important;
-  backdrop-filter: none !important;
+  border: none;
+  background: none;
+  backdrop-filter: none;
 }
 
 .principle-card__header {
@@ -2108,25 +1965,37 @@ button {
 .floating-status {
   position: absolute;
   top: 580px;
-  left: 3060px;
+  left: 2760px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 0;
-  transform: rotate(-6deg);
-  pointer-events: none;
-  white-space: nowrap;
+  justify-content: center;
+  pointer-events: auto;
+  outline: none;
 }
 
-.floating-status__eyes {
-  width: 96px;
-  height: 96px;
+.floating-status__inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.floating-status__icon {
+  width: 160px;
+  height: 160px;
   flex-shrink: 0;
-  object-fit: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* New SVG has built-in stroke, so we only need a soft depth shadow */
+  filter: drop-shadow(0 16px 32px rgba(var(--black-rgb), 0.12));
 }
 
-.floating-status p {
-  font-weight: 500;
+.floating-status__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* Markdown IDE Card */
@@ -2501,7 +2370,9 @@ button {
   justify-content: center;
 }
 
-@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+@media (max-width: 1024px),
+(hover: none),
+(pointer: coarse) {
   .legend-trigger-wrapper {
     display: none;
   }

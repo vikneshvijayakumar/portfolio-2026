@@ -2,17 +2,21 @@ import { useEffect, useMemo, useRef, useState, memo, lazy, Suspense } from "reac
 import { motion, useSpring, useTransform, AnimatePresence, useMotionValue, useMotionValueEvent, animate } from "motion/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
-  experience,
-  projects,
   toolbarLinks,
-  workPrinciples,
   zones,
-  type Project,
   type Zone,
   type ZoneId,
 } from "./content";
+import { MOBILE_BREAKPOINT, STAGE, EASE } from "./utils/constants";
+
+import SkillsCard from "./components/SkillsCard";
+import Legend from "./components/Legend";
+
 const OutputBuilder = lazy(() => import("./pages/OutputBuilder"));
-import arrowSvg from "./assets/arrow.svg?raw";
+const ExperienceStack = lazy(() => import("./components/ExperienceStack"));
+const WorkCluster = lazy(() => import("./components/WorkCluster"));
+const ProjectCards = lazy(() => import("./components/ProjectCards"));
+
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
 import linkedinIcon from "./assets/linkedin.svg";
@@ -23,30 +27,30 @@ import sunSvg from "./assets/sun.svg?raw";
 import googleUxBadge from "./assets/google-ux.webp";
 import upworkBadge from "./assets/Upwork-TopRated-Badge.svg";
 import whatsappIcon from "./assets/whatsapp.svg";
-import dashboardImg from "./assets/dashboard.webp";
-import formBuilderImg from "./assets/form-builder.webp";
-import formTakingImg from "./assets/form-taking.webp";
-import outputBuilderImg from "./assets/output-builder.webp";
-import googleEyesIcon from "./assets/👀-(Compressify.io).svg";
 import antigravityBadge from "./assets/madewithantigravity.svg?raw";
 import topArrowSvg from "./assets/top-right-arrow.svg?raw";
 import pinIcon from "./assets/pin.svg";
-const EASE = [0.22, 1, 0.36, 1] as const;
+import lookoutSvgRaw from "./assets/lookout.svg?raw";
+import vanakkamBadge from "./assets/vanakkam.webp";
+
+const lookoutSvgRawProcessed = lookoutSvgRaw
+  .replace(/<svg[^>]*>/, '<svg id="lookout-sticker" viewBox="0 0 82 91" style="overflow:visible" xmlns="http://www.w3.org/2000/svg">')
+  .replace(/clip-path="url\(#a\)"/g, "")
+  .replace(/<path fill="#000101" d="([^"]+)"/, (_m, d) => {
+    const mIndices = [...d.matchAll(/[mM]/g)].map(m => m.index);
+    if (mIndices.length >= 2) {
+      const d1 = d.substring(0, mIndices[1]);
+      const d2_rel = d.substring(mIndices[1]);
+      // Convert relative 'm-16.29 1.04' to absolute 'M18.71 16.37' based on the first pupil's start (35, 15.33)
+      const d2_abs = d2_rel.replace(/^m\s*([\d.-]+)\s+([\d.-]+)/, (_m2: string, rx: string, ry: string) => {
+        return `M${(35 + parseFloat(rx)).toFixed(2)} ${(15.33 + parseFloat(ry)).toFixed(2)}`;
+      });
+      return `<path fill="#000101" d="${d1}" /><path fill="#000101" d="${d2_abs}"`;
+    }
+    return _m;
+  });
 
 
-const projectImages: Record<string, string> = {
-  "dashboard.webp": dashboardImg,
-  "form-builder.webp": formBuilderImg,
-  "form-taking.webp": formTakingImg,
-  "output-builder.webp": outputBuilderImg,
-};
-
-const STAGE = {
-  width: 4500,
-  height: 2500,
-};
-
-const MOBILE_BREAKPOINT = 720;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1.5;
 
@@ -57,6 +61,13 @@ const zoneNavItems: { id: ZoneId; label: string; key: string }[] = [
   { id: "skills", label: "Skills", key: "4" },
   { id: "how-i-work", label: "Principles", key: "5" },
 ];
+
+const LazySentinel = memo(function LazySentinel({ onReady }: { onReady: () => void }) {
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+  return null;
+});
 
 /*
  * Default zoom scales with viewport size so the canvas feels right on
@@ -193,8 +204,11 @@ function App() {
     if (saved === "ink" || saved === "paper") return saved;
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "ink" : "paper";
   });
+
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= MOBILE_BREAKPOINT : false);
   const [isTablet, setIsTablet] = useState(typeof window !== "undefined" ? (window.innerWidth > MOBILE_BREAKPOINT && window.innerWidth <= 1024) : false);
+  const [isLazyReady, setIsLazyReady] = useState(false);
+  const startAnimations = isMobile || isLazyReady;
   const [activeZone, setActiveZone] = useState<ZoneId>("about");
   const [isEntering, setIsEntering] = useState(true);
   const [isLoaded, setIsLoaded] = useState(true);
@@ -950,14 +964,17 @@ function App() {
               scale: camScale,
             }}
           >
-            <AboutCard />
-            <SkillsCard isMobile={isMobile} />
-            <ExperienceStack isMobile={isMobile} onFocusPoint={panToPoint} />
-            <ClockWidget />
-            <BadgesCluster />
-            <ProjectCards onOpenCaseStudy={openCaseStudy} onFocusPoint={panToPoint} />
-            <WorkCluster />
-            {!isMobile && <FloatingStatus />}
+            <AboutCard isStarted={startAnimations} isMobile={isMobile} />
+            <SkillsCard isMobile={isMobile} isStarted={startAnimations} />
+            <Suspense fallback={null}>
+              <LazySentinel onReady={() => setIsLazyReady(true)} />
+              <ExperienceStack isMobile={isMobile} onFocusPoint={panToPoint} isStarted={startAnimations} />
+              <ProjectCards onOpenCaseStudy={openCaseStudy} onFocusPoint={panToPoint} isMobile={isMobile} isStarted={startAnimations} />
+              <WorkCluster isMobile={isMobile} isStarted={startAnimations} />
+            </Suspense>
+            <VanakkamSticker isStarted={startAnimations} />
+            <BadgesCluster isMobile={isMobile} isStarted={startAnimations} />
+            {!isMobile && <FloatingStatus isStarted={startAnimations} />}
 
             {isMobile && (
               <>
@@ -971,7 +988,7 @@ function App() {
                     zIndex: 5,
                   }}
                 >
-                  <img src={pinIcon} className="social-card-pin" alt="" draggable="false" />
+                  <img src={pinIcon} className="social-card-pin" alt="" width={56} height={56} draggable="false" />
                   <SocialStrip className="is-mobile" />
                 </motion.div>
 
@@ -1072,16 +1089,28 @@ const cardReveal = {
   }),
 };
 
-const AboutCard = memo(function AboutCard() {
+const AboutCard = memo(function AboutCard({
+  isStarted = false,
+  isMobile = false,
+}: {
+  isStarted?: boolean;
+  isMobile?: boolean;
+}) {
   return (
     <motion.section
       className="about-card"
       style={{ left: 1710, top: 630 }}
       data-interactive="true"
       whileTap={{ scale: 0.98 }}
+      initial={isMobile ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+      animate={isStarted ? { opacity: 1, scale: 1 } : (isMobile ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 })}
+      transition={isMobile ? { duration: 0 } : {
+        opacity: { duration: 0.3, delay: 0 },
+        scale: { type: "spring", stiffness: 300, damping: 25, delay: 0 }
+      }}
     >
       <div className="avatar-disc">
-        <img src={profileImg} alt="Viknesh Vijayakumar" draggable="false" />
+        <img src={profileImg} alt="Viknesh Vijayakumar" width={120} height={120} draggable="false" />
       </div>
       <div className="about-card__header">
         <h1>Viknesh Vijayakumar</h1>
@@ -1105,501 +1134,75 @@ const AboutCard = memo(function AboutCard() {
 });
 
 
-const SkillsCard = memo(function SkillsCard({ isMobile }: { isMobile: boolean }) {
-  const [activeTab, setActiveTab] = useState(0);
 
-  const style = {
-    left: 1760,
-    top: 1500,
-  };
 
-  const tabs = [
-    {
-      id: "systems",
-      label: "systems-craft.md",
-      version: "1.0.0-Finalv5",
-      content: (
-        <>
-          <div className="markdown-card__line"><span className="md-h2">SYSTEMS_AND_CRAFT_RULES</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Architecture</span>: Always utilize Design Thinking and Information Architecture (IA) as the foundation.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Scalability</span>: Reference and extend professional design systems.</div>
-          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span><span className="md-italic">Standard Kits</span>: MUI, shadcn, UntitledUI.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Prototyping_Engine</span>: </div>
-          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Static/Interactive: Figma</div>
-          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Motion/Interaction: Jitter</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Vibe Coding</span>: </div>
-          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Agentic IDE: Antigravity, Codex, Windsurf, Open Code</div>
-          <div className="markdown-card__line">&nbsp;&nbsp;<span className="md-bullet">- </span>Chat Agents: Gemini, ChatGPT, Claude</div>
-        </>
-      )
-    },
-    {
-      id: "specialization",
-      label: "specialization.md",
-      version: "1.0.0",
-      content: (
-        <>
-          <div className="markdown-card__line"><span className="md-h2">DOMAIN_SPECIALIZATION</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Enterprise</span>: Optimized for SaaS complexity and high-density data visualization.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">AI_Integration</span>: Specialized in HITL (Human-in-the-Loop) design patterns.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Verticals</span>: Healthcare UX, EdTech, and high-stakes Investor Demos.</div>
-        </>
-      )
-    },
-    {
-      id: "leadership",
-      label: "leadership-skills.md",
-      version: "1.0.0",
-      content: (
-        <>
-          <div className="markdown-card__line"><span className="md-h2">DESIGN_LEADERSHIP_PROTOCOL</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Collaboration</span>: Prioritize cross-functional alignment and stakeholder buy-in.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Team Management</span>: Execute mentoring and design direction for teams (up to 7+).</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Process</span>: Operate within Agile methodologies and maintain high-fidelity client communication.</div>
-        </>
-      )
-    },
-    {
-      id: "accessibility",
-      label: "accessibility.md",
-      version: "1.0.0",
-      content: (
-        <>
-          <div className="markdown-card__line"><span className="md-h2">ACCESSIBILITY_VALIDATION</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Compliance</span>: All outputs must strictly adhere to WCAG 2.2 standards.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Evaluation</span>: Perform heuristic analysis on all UI components.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">UX_Copy</span>: Optimize for clarity via UX Writing and intuitive interaction design.</div>
-        </>
-      )
-    }
-  ];
 
-  const currentTab = tabs[activeTab];
-  const viewportRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = viewportRef.current;
-    if (!el) return;
-    const handler = (e: WheelEvent) => {
-      e.stopPropagation();
-      if (e.ctrlKey || e.metaKey) e.preventDefault();
-    };
-    el.addEventListener("wheel", handler, { passive: false });
-    return () => el.removeEventListener("wheel", handler);
-  }, []);
-
-  const commonHeader = (
-    <>
-      <div className="markdown-card__line"><span className="md-comment"># PRODUCT_DESIGNER_SPEC: @viknesh.me</span></div>
-      <div className="markdown-card__line"><span className="md-comment"># Version: {currentTab.version}</span></div>
-      <div className="markdown-card__line"><span className="md-comment"># Capability Level: Senior / Founding Designer</span></div>
-      <div className="markdown-card__line">&nbsp;</div>
-    </>
-  );
-
-  return (
-    <motion.section
-      className={`markdown-card ${isMobile ? "is-mobile" : ""}`}
-      style={style}
-      data-interactive="true"
-    >
-      <div className="markdown-card__header">
-        <div className="markdown-card__controls">
-          <div className="markdown-card__dot markdown-card__dot--red" />
-          <div className="markdown-card__dot markdown-card__dot--yellow" />
-          <div className="markdown-card__dot markdown-card__dot--green" />
-        </div>
-        {tabs.map((tab, idx) => (
-          <button
-            key={tab.id}
-            className={activeTab === idx ? "markdown-card__tab is-active" : "markdown-card__tab"}
-            onClick={() => setActiveTab(idx)}
-            type="button"
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div ref={viewportRef} className="markdown-card__viewport">
-        <div className="markdown-card__gutter" aria-hidden="true">
-          {Array.from({ length: 15 }).map((_, index: number) => (
-            <div key={index}>{index + 1}</div>
-          ))}
-        </div>
-        <div className="markdown-card__content">
-          {commonHeader}
-          {currentTab.content}
-        </div>
-      </div>
-    </motion.section>
-  );
-});
-
-const ExperienceStack = memo(function ExperienceStack({ isMobile, onFocusPoint }: { isMobile: boolean; onFocusPoint: (worldX: number, worldY: number) => void }) {
-  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
-  const lastToggleRef = useRef<number>(0);
-  const stackCenter = { x: 450, y: 1750 }; // Center of experience zone on mobile
-
-  const toggleFolder = (id: string) => {
-    const now = performance.now();
-    if (now - lastToggleRef.current < 300) return; // debounce duplicate events within 300ms
-    lastToggleRef.current = now;
-    setOpenFolderId((prev) => (prev === id ? null : id));
-  };
-
-  useEffect(() => {
-    if (!openFolderId) return;
-    const handleOutside = (e: PointerEvent) => {
-      if (!(e.target as HTMLElement).closest(".experience-folder")) {
-        setOpenFolderId(null);
-      }
-    };
-    window.addEventListener("pointerdown", handleOutside);
-    return () => window.removeEventListener("pointerdown", handleOutside);
-  }, [openFolderId]);
-
-  return (
-    <>
-      {experience.map((item, index) => {
-        const desktopRotate = item.desktopPosition?.rotation ?? 0;
-        const desktopX = item.desktopPosition?.x ?? 0;
-        const desktopY = item.desktopPosition?.y ?? 0;
-
-        let finalX = desktopX;
-        if (isMobile) {
-          if (item.company.includes("Upwork") || item.company === "Spiceblue") {
-            finalX = desktopX + 140; // Move them closer to the 700/750 cluster
-          }
-        }
-
-        const rotate = desktopRotate;
-        const style = {
-          left: finalX,
-          top: desktopY,
-          "--folder-color": item.logoColor ?? "#a886ff"
-        } as React.CSSProperties;
-
-        const folderId = item.role + item.company;
-        const isOpen = openFolderId === folderId;
-
-        return (
-          <motion.article
-            key={folderId}
-            initial={{ rotate: rotate, left: style.left, top: style.top }}
-            animate={{ rotate: rotate, left: style.left, top: style.top }}
-            transition={{ type: "spring", stiffness: 400, damping: 35 }}
-            whileTap={{ scale: 0.98 }}
-            className={`experience-folder ${isOpen ? "is-open" : ""}`}
-            style={style}
-            data-interactive="true"
-            tabIndex={0}
-            onFocus={() => onFocusPoint(finalX, desktopY)}
-            onClick={() => toggleFolder(folderId)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggleFolder(folderId);
-              }
-            }}
-          >
-            <div className="experience-folder__back">
-              <div className="experience-folder__tab"></div>
-            </div>
-            <div className="experience-folder__papers">
-              <div className="experience-folder__paper experience-folder__paper--3"></div>
-              <div className="experience-folder__paper experience-folder__paper--2"></div>
-              <div className="experience-folder__paper experience-folder__paper--main">
-                <p className="experience-folder__summary">{item.summary}</p>
-              </div>
-            </div>
-            <div className="experience-folder__front">
-              <div>
-                <strong>{item.company}</strong>
-                <span className="experience-folder__role">{item.role}</span>
-              </div>
-              <span className="experience-folder__period">{item.period}</span>
-            </div>
-          </motion.article>
-        );
-      })}
-    </>
-  );
-});
-
-const ProjectCards = memo(function ProjectCards({ onOpenCaseStudy, onFocusPoint }: { onOpenCaseStudy: (id: string, origin?: { x: number; y: number }) => void; onFocusPoint: (worldX: number, worldY: number) => void }) {
-  const mobileStart = { x: 2300, y: 1000 };
-  return (
-    <>
-      {projects.map((project, index) => {
-        const desktopX = project.desktopPosition.x;
-        const desktopY = project.desktopPosition.y;
-
-        return (
-          <ProjectCard
-            key={project.title}
-            project={project}
-            index={index}
-            onOpen={onOpenCaseStudy}
-            onFocusPoint={onFocusPoint}
-          />
-        );
-      })}
-    </>
-  );
-});
-
-const ProjectCard = memo(function ProjectCard({
-  project,
-  index = 0,
-  onOpen,
-  onFocusPoint,
-}: {
-  project: Project;
-  index?: number;
-  onOpen: (id: string, origin?: { x: number; y: number }) => void;
-  onFocusPoint: (worldX: number, worldY: number) => void;
-}) {
-  const cardStyle = {
-    left: project.desktopPosition.x,
-    top: project.desktopPosition.y,
-  };
-
-  const rotate = project.desktopPosition.rotation;
-
-  const formattedSummary = project.summary.split(/(\d+%)/).map((part, idx) =>
-    part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
-  );
-
-  const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
-    e?.stopPropagation();
-    if (project.title === "Output Builder") {
-      const el = e?.currentTarget as HTMLElement | undefined;
-      const rect = el?.getBoundingClientRect();
-      const origin = rect
-        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-        : undefined;
-      onOpen("output-builder", origin);
-    }
-  };
-
-  return (
-    <motion.article
-      initial={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
-      animate={{ rotate: rotate, left: cardStyle.left, top: cardStyle.top }}
-      whileHover={{ y: -8, rotate: 0 }}
-      whileTap={{ scale: 0.98 }}
-      className={`project-card ${project.type === "concept" ? "project-card--concept" : ""} ${project.year === "Coming Soon" ? "is-disabled" : ""} ${project.title === "Output Builder" ? "is-clickable" : ""}`.trim()}
-      style={cardStyle}
-      data-interactive="true"
-      onClick={handleClick}
-      onFocus={project.title === "Output Builder" ? () => onFocusPoint(project.desktopPosition.x, project.desktopPosition.y) : undefined}
-      tabIndex={project.title === "Output Builder" ? 0 : -1}
-      onKeyDown={(e) => {
-        if (project.title === "Output Builder" && (e.key === "Enter" || e.key === " ")) {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
-    >
-      <div className="project-card__visual">
-        <img
-          src={projectImages[project.image]}
-          alt={project.title}
-          className="project-card__image"
-          draggable="false"
-        />
-      </div>
-
-      <div className="project-card__content">
-        <p className="project-card__summary">
-          {formattedSummary}
-        </p>
-
-        <div className="project-card__footer-meta">
-          {project.title === "Output Builder" ? (
-            <span className="project-card__company">
-              {project.company} {project.year}
-              <span
-                className="project-card__metadata-arrow"
-                dangerouslySetInnerHTML={{ __html: topArrowSvg.replace('stroke="#000"', 'stroke="currentColor"') }}
-              />
-            </span>
-          ) : project.year === "Coming Soon" ? (
-            <span className="project-card__coming-soon">Coming Soon</span>
-          ) : (
-            <span className="project-card__company">
-              {project.company} {project.year}
-            </span>
-          )}
-        </div>
-      </div>
-    </motion.article>
-  );
-});
-
-const CLOCK_GRADUATIONS = Array.from({ length: 60 }, (_, index) => (
-  <div
-    key={index}
-    className={`clock-widget__graduation ${index % 5 === 0 ? "is-major" : ""}`}
-    style={{ transform: `rotate(${index * 6}deg)` }}
-  />
-));
-
-const getIstParts = () => {
-  const now = new Date();
-  const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  return {
-    seconds: ist.getSeconds() + ist.getMilliseconds() / 1000,
-    minutes: ist.getMinutes(),
-    hours: ist.getHours(),
-    display: now.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: "Asia/Kolkata",
-    }),
-  };
-};
-
-const ClockWidget = memo(function ClockWidget() {
-  const [displayTime, setDisplayTime] = useState(() => getIstParts().display);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  // Snapshot the current time offsets ONCE on mount — hands are then driven
-  // purely by CSS animation. No per-second React render, no state thrash.
-  const offsetsRef = useRef<{ sec: number; min: number; hour: number } | null>(null);
-  if (offsetsRef.current === null) {
-    const { seconds, minutes, hours } = getIstParts();
-    offsetsRef.current = {
-      sec: seconds,
-      min: minutes * 60 + seconds,
-      hour: ((hours % 12) * 3600 + minutes * 60 + seconds),
-    };
-  }
-
-  // Pause hand animations when the clock is scrolled/panned off-screen so the
-  // compositor doesn't tick a GPU layer for an invisible widget.
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        el.dataset.visible = entries[0]?.isIntersecting ? "true" : "false";
-      },
-      { threshold: 0 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  // Update the readable text once per minute — cheap, no layout thrash.
-  useEffect(() => {
-    let intervalId: number | null = null;
-    const tick = () => setDisplayTime(getIstParts().display);
-    const now = new Date();
-    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-    
-    const timeoutId = window.setTimeout(() => {
-      tick();
-      intervalId = window.setInterval(tick, 60_000);
-    }, msUntilNextMinute);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      if (intervalId) window.clearInterval(intervalId);
-    };
-  }, []);
-
-  const { sec, min, hour } = offsetsRef.current;
-
+const VanakkamSticker = memo(function VanakkamSticker({ isStarted }: { isStarted: boolean }) {
   return (
     <motion.div
-      ref={rootRef}
-      className="clock-widget"
+      className="vanakkam-sticker"
       data-interactive="true"
-      data-visible="true"
+      whileHover={{ scale: 1.02, rotate: 0, zIndex: 20 }}
       whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, scale: 0.9, rotate: 12 }}
+      animate={isStarted ? { opacity: 1, scale: 1, rotate: 12 } : { opacity: 0, scale: 0.9, rotate: 12 }}
+      transition={{
+        opacity: { duration: 0.3, delay: 0.1 },
+        scale: { type: "spring", stiffness: 300, damping: 25, delay: 0.1 },
+        rotate: { type: "spring", stiffness: 400, damping: 35 }
+      }}
     >
-      <div className="clock-widget__inner">
-        <div className="clock-widget__graduations">{CLOCK_GRADUATIONS}</div>
-
-        <div
-          className="clock-widget__hand hour"
-          style={{ animationDelay: `${-hour}s` }}
-        />
-        <div
-          className="clock-widget__hand minute"
-          style={{ animationDelay: `${-min}s` }}
-        />
-        <div
-          className="clock-widget__hand second"
-          style={{ animationDelay: `${-sec}s` }}
-        />
-
-        <div className="clock-widget__metadata">
-          <span>Chennai, India</span>
-          <strong>{displayTime}</strong>
-        </div>
-      </div>
+      <img src={vanakkamBadge} alt="Vanakkam" className="vanakkam-sticker__image" width={180} height={180} draggable="false" />
     </motion.div>
   );
 });
 
-const BadgesCluster = memo(function BadgesCluster() {
+const BadgesCluster = memo(function BadgesCluster({
+  isMobile = false,
+  isStarted = false,
+}: {
+  isMobile?: boolean;
+  isStarted?: boolean;
+}) {
+  const animProps = (isMobile || !isStarted) ? {
+    initial: { opacity: isMobile ? 1 : 0, scale: isMobile ? 1 : 0.9 },
+    animate: isStarted ? { opacity: 1, scale: 1 } : { opacity: isMobile ? 1 : 0, scale: isMobile ? 1 : 0.9 },
+    transition: { duration: isMobile ? 0 : 0.3 }
+  } : {
+    initial: { opacity: 0, scale: 0.9 },
+    animate: { opacity: 1, scale: 1 }
+  };
+
   return (
     <div className="badges-cluster">
-      <a href="https://www.upwork.com/freelancers/~0124077c8ba1055975" target="_blank" rel="noreferrer" className="badge-link">
-        <img src={upworkBadge} alt="Upwork Top Rated" className="badge-image badge-image--upwork" draggable="false" />
+      <motion.a
+        href="https://www.upwork.com/freelancers/~0124077c8ba1055975"
+        target="_blank" rel="noreferrer" className="badge-link"
+        {...animProps}
+        transition={isMobile ? { duration: 0 } : {
+          opacity: { duration: 0.3, delay: 0.05 },
+          scale: { type: "spring", stiffness: 300, damping: 25, delay: 0.05 }
+        }}
+      >
+        <img src={upworkBadge} alt="Upwork Top Rated" className="badge-image badge-image--upwork" width={200} height={56} draggable="false" />
         <span className="badge-tooltip">View Profile</span>
-      </a>
-      <a href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB" target="_blank" rel="noreferrer" className="badge-link">
-        <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" draggable="false" />
+      </motion.a>
+      <motion.a
+        href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB"
+        target="_blank" rel="noreferrer" className="badge-link"
+        {...animProps}
+        transition={isMobile ? { duration: 0 } : {
+          opacity: { duration: 0.3, delay: 0.1 },
+          scale: { type: "spring", stiffness: 300, damping: 25, delay: 0.1 }
+        }}
+      >
+        <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" width={200} height={200} draggable="false" />
         <span className="badge-tooltip">See Certificate</span>
-      </a>
+      </motion.a>
     </div>
   );
 });
 
-const WorkCluster = memo(function WorkCluster() {
-  const rotations = [-2, 3, 1, -4];
-  const mobileRefPoint = { x: 800, y: 850 };
-
-  return (
-    <section className="work-cluster" data-interactive="true">
-      {workPrinciples.map((item, index) => {
-        const desktopRotate = rotations[index % 4];
-        const desktopPos = {
-          left: 910 + (index % 2) * 290,
-          top: 1430 + Math.floor(index / 2) * 320,
-        };
-
-        const rotate = desktopRotate;
-        const style = desktopPos;
-
-        return (
-          <motion.article
-            key={item.index}
-            initial={{ rotate: rotate, left: style.left, top: style.top }}
-            animate={{ rotate: rotate, left: style.left, top: style.top }}
-            transition={{ type: "spring", stiffness: 800, damping: 45 }}
-            whileHover={{ y: -8, rotate: 0, scale: 1.04 }}
-            whileTap={{ scale: 0.98 }}
-            className={`principle-card principle-card--${item.accent}`}
-            style={style}
-          >
-            <div className="principle-card__header">
-              <span>{item.index}</span>
-            </div>
-            <div className="principle-card__body">
-              <h2 className="principle-card__title">{item.title}</h2>
-              <p>{item.copy}</p>
-            </div>
-          </motion.article>
-        );
-      })}
-    </section>
-  );
-});
 
 const SocialStrip = memo(function SocialStrip({ className = "" }: { className?: string }) {
   return (
@@ -1775,281 +1378,130 @@ function CopyContactButton({ text, icon, copyValue }: { text: string; icon: stri
   );
 }
 
-const FloatingStatus = memo(function FloatingStatus() {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const pupilLeftRef = useRef<SVGPathElement>(null);
-  const pupilRightRef = useRef<SVGPathElement>(null);
+const FloatingStatus = memo(function FloatingStatus({ isStarted }: { isStarted: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const svg = svgRef.current;
+    const container = containerRef.current;
+    if (!container) return;
+    const svg = container.querySelector("svg") as SVGSVGElement | null;
     if (!svg) return;
 
-    type EyeGeom = {
-      eye: SVGGraphicsElement;
-      pupil: SVGPathElement;
-      offsetX: number;
-      offsetY: number;
-      maxDistX: number;
-      maxDistY: number;
-    };
+    // Direct path finding by fill color
+    const allPaths = Array.from(svg.querySelectorAll("path"));
+    const eyePaths = allPaths.filter(p => {
+      const f = p.getAttribute("fill")?.toLowerCase();
+      const isWhite = f === "#fff" || f === "#ffffff";
+      if (!isWhite) return false;
+      // Ignore large paths like the clip path or stroke background
+      const bbox = p.getBBox();
+      return bbox.width < 30; 
+    }) as SVGGraphicsElement[];
+    
+    const pupilPaths = allPaths.filter(p => {
+      const f = p.getAttribute("fill")?.toLowerCase();
+      return f === "#000101";
+    }) as SVGPathElement[];
 
-    const eyes: EyeGeom[] = [];
-    const leftEye = svg.querySelector("#eye-left") as SVGGraphicsElement | null;
-    const rightEye = svg.querySelector("#eye-right") as SVGGraphicsElement | null;
-    if (leftEye && pupilLeftRef.current) {
-      eyes.push({ eye: leftEye, pupil: pupilLeftRef.current, offsetX: 0, offsetY: 0, maxDistX: 0, maxDistY: 0 });
-    }
-    if (rightEye && pupilRightRef.current) {
-      eyes.push({ eye: rightEye, pupil: pupilRightRef.current, offsetX: 0, offsetY: 0, maxDistX: 0, maxDistY: 0 });
-    }
-    if (eyes.length === 0) return;
+    if (eyePaths.length < 2 || pupilPaths.length < 2) return;
 
-    let ctmA = 1;
-    let ctmD = 1;
+    // Sort by horizontal position
+    eyePaths.sort((a, b) => a.getBBox().x - b.getBBox().x);
+    pupilPaths.sort((a, b) => a.getBBox().x - b.getBBox().x);
 
-    // Cache intrinsic eye/pupil dimensions; these scale uniformly with CTM so
-    // they stay valid under canvas pan/zoom. Viewport center is re-read per frame.
-    const recomputeGeometry = () => {
+    const eyes = [
+      { eye: eyePaths[0], pupil: pupilPaths[0], ox: 0, oy: 0, mx: 0, my: 0, lcx: 0, lcy: 0 },
+      { eye: eyePaths[1], pupil: pupilPaths[1], ox: 0, oy: 0, mx: 0, my: 0, lcx: 0, lcy: 0 }
+    ];
+
+    const recompute = () => {
       for (const e of eyes) {
         e.pupil.removeAttribute("transform");
-        // Using getBBox() gives us coordinates in the SVG's local space (0-128),
-        // which are zoom-invariant.
-        const eyeBox = e.eye.getBBox();
-        const pupilBox = e.pupil.getBBox();
-
-        const eyeCenterX = eyeBox.x + eyeBox.width / 2;
-        const eyeCenterY = eyeBox.y + eyeBox.height / 2;
-        const pupilCenterX = pupilBox.x + pupilBox.width / 2;
-        const pupilCenterY = pupilBox.y + pupilBox.height / 2;
-
-        e.offsetX = eyeCenterX - pupilCenterX;
-        e.offsetY = eyeCenterY - pupilCenterY;
-        e.maxDistX = (eyeBox.width - pupilBox.width) / 2;
-        e.maxDistY = (eyeBox.height - pupilBox.height) / 2;
+        e.pupil.style.transform = "";
+        const eb = e.eye.getBBox();
+        const pb = e.pupil.getBBox();
+        
+        e.lcx = eb.x + eb.width / 2;
+        e.lcy = eb.y + eb.height / 2;
+        const pcx = pb.x + pb.width / 2;
+        const pcy = pb.y + pb.height / 2;
+        
+        e.ox = e.lcx - pcx;
+        e.oy = e.lcy - pcy;
+        e.mx = (eb.width - pb.width) * 0.55;
+        e.my = (eb.height - pb.height) * 0.55;
       }
     };
 
-    recomputeGeometry();
+    recompute();
+    const t = setTimeout(recompute, 300);
 
-    let pointerX = 0;
-    let pointerY = 0;
-    let rafId: number | null = null;
-
+    let px = 0, py = 0, raf: number | null = null;
     const commit = () => {
-      rafId = null;
+      raf = null;
+      const ctm = svg.getScreenCTM();
+      if (!ctm) return;
+
       for (const e of eyes) {
-        // centerX/Y are still viewport-based so they track the eye's screen position correctly.
-        const eyeRect = e.eye.getBoundingClientRect();
-        const centerX = eyeRect.left + eyeRect.width / 2;
-        const centerY = eyeRect.top + eyeRect.height / 2;
+        const vcx = e.lcx * ctm.a + e.lcy * ctm.c + ctm.e;
+        const vcy = e.lcx * ctm.b + e.lcy * ctm.d + ctm.f;
 
-        const distX = pointerX - centerX;
-        const distY = pointerY - centerY;
-        const angle = Math.atan2(distY, distX);
+        const dx = px - vcx;
+        const dy = py - vcy;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        const a = Math.atan2(dy, dx);
+        
+        // Very aggressive strength at close range to ensure convergence
+        const s = Math.min(d / 30, 1);
+        const tx = Math.cos(a) * e.mx * s;
+        const ty = Math.sin(a) * e.my * s;
 
-        // Final position is calculated in SVG units and applied directly.
-        const moveX = Math.cos(angle) * e.maxDistX;
-        const moveY = Math.sin(angle) * e.maxDistY;
-
-        e.pupil.setAttribute(
-          "transform",
-          `translate(${e.offsetX + moveX}, ${e.offsetY + moveY})`,
-        );
+        e.pupil.setAttribute("transform", `translate(${e.ox + tx}, ${e.oy + ty})`);
       }
     };
 
-    const handleMouseMove = (ev: MouseEvent) => {
-      pointerX = ev.clientX;
-      pointerY = ev.clientY;
-      if (rafId === null) rafId = requestAnimationFrame(commit);
+    const onMove = (e: MouseEvent) => {
+      px = e.clientX; py = e.clientY;
+      if (raf === null) raf = requestAnimationFrame(commit);
     };
 
-    let resizeRaf: number | null = null;
-    const scheduleRecompute = () => {
-      if (resizeRaf !== null) return;
-      resizeRaf = requestAnimationFrame(() => {
-        resizeRaf = null;
-        recomputeGeometry();
-      });
-    };
-
-    // Only listen while the eyes are visible — avoids per-frame getBoundingClientRect
-    // reads when the user has panned/scrolled them off-screen.
-    let listening = false;
-    const attach = () => {
-      if (listening) return;
-      listening = true;
-      window.addEventListener("mousemove", handleMouseMove, { passive: true });
-      window.addEventListener("resize", scheduleRecompute);
-    };
-    const detach = () => {
-      if (!listening) return;
-      listening = false;
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("resize", scheduleRecompute);
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-    };
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) attach();
-        else detach();
-      },
-      { threshold: 0 },
-    );
-    io.observe(svg);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("resize", recompute);
 
     return () => {
-      io.disconnect();
-      detach();
-      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
+      clearTimeout(t);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("resize", recompute);
+      if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [isStarted]);
 
   return (
     <motion.div
+      ref={containerRef}
       className="floating-status"
+      initial={{ opacity: 0, scale: 0.9, rotate: -12 }}
+      animate={isStarted ? { opacity: 1, scale: 1, rotate: -12 } : { opacity: 0, scale: 0.9, rotate: -12 }}
+      transition={{
+        opacity: { duration: 0.3, delay: 0.15 },
+        scale: { type: "spring", stiffness: 300, damping: 25, delay: 0.15 },
+        rotate: { type: "spring", stiffness: 400, damping: 35 }
+      }}
+      whileHover={{ scale: 1.02, rotate: 0, zIndex: 20 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => {
+        containerRef.current?.focus();
+      }}
+      tabIndex={0}
+      data-interactive="true"
     >
-      <svg
-        ref={svgRef}
-        id="eyes"
-        width="128"
-        height="128"
-        viewBox="0 0 128 128"
-        role="img"
-        aria-label="googly eyes emoji that track the mouse cursor"
-        className="floating-status__eyes"
-      >
-        <defs>
-          <linearGradient id="eye-grad" x1="0" x2="0" y1="46.676" y2="82.083" gradientUnits="userSpaceOnUse">
-            <stop offset="0" style={{ stopColor: "#424242" }} />
-            <stop offset="1" style={{ stopColor: "#212121" }} />
-          </linearGradient>
-          <g id="eye-shape">
-            <path
-              style={{ fill: "#fafafa" }}
-              d="M34.16 106.51C18.73 106.51 6.19 87.44 6.19 64s12.55-42.51 27.97-42.51S62.13 40.56 62.13 64s-12.55 42.51-27.97 42.51"
-            />
-            <path
-              style={{ fill: "#b0bec5" }}
-              d="M34.16 23.49c6.63 0 12.98 4 17.87 11.27 5.22 7.75 8.1 18.14 8.1 29.24s-2.88 21.49-8.1 29.24c-4.89 7.27-11.24 11.27-17.87 11.27s-12.98-4-17.87-11.27C11.06 85.49 8.19 75.1 8.19 64s2.88-21.49 8.1-29.24c4.89-7.27 11.23-11.27 17.87-11.27m0-4C17.61 19.49 4.19 39.42 4.19 64s13.42 44.51 29.97 44.51S64.13 88.58 64.13 64 50.71 19.49 34.16 19.49"
-            />
-          </g>
-        </defs>
-        <use href="#eye-shape" id="eye-left" />
-        <path
-          ref={pupilLeftRef}
-          id="pupil-left"
-          style={{ fill: "url(#eye-grad)" }}
-          d="M25.63 59.84c-2.7-2.54-2.1-7.58 1.36-11.26.18-.19.36-.37.55-.54-1.54-.87-3.23-1.36-5.01-1.36-7.19 0-13.02 7.93-13.02 17.7s5.83 17.7 13.02 17.7 13.02-7.93 13.02-17.7c0-1.75-.19-3.45-.54-5.05-3.24 2.33-7.11 2.64-9.38.51"
-        />
-        <g transform="translate(59.68 0)">
-          <use href="#eye-shape" id="eye-right" />
-          <path
-            ref={pupilRightRef}
-            id="pupil-right"
-            style={{ fill: "url(#eye-grad)" }}
-            d="M25.63 59.84c-2.7-2.54-2.1-7.58 1.36-11.26.18-.19.36-.37.55-.54-1.54-.87-3.23-1.36-5.01-1.36-7.19 0-13.02 7.93-13.02 17.7s5.83 17.7 13.02 17.7 13.02-7.93 13.02-17.7c0-1.75-.19-3.45-.54-5.05-3.24 2.33-7.11 2.64-9.38.51"
-          />
-        </g>
-      </svg>
-      <p>Open for opportunities</p>
+      <div className="floating-status__inner">
+        <div className="floating-status__icon" dangerouslySetInnerHTML={{ __html: lookoutSvgRawProcessed }} />
+      </div>
     </motion.div>
   );
 });
 
-function Legend({ isOpen, modifierKey }: { isOpen: boolean; modifierKey: string }) {
-  return (
-    <div className="legend-wrapper">
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -8, rotate: 2 }}
-            animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -8, rotate: 2 }}
-            transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 30,
-              mass: 0.8
-            }}
-            className="legend-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="legend-card__title">Canvas Controls</h2>
 
-            <div className="legend-card__sections">
-              <div className="legend-card__section">
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">Click</kbd>
-                    <span className="legend-card__plus">+</span>
-                    <kbd className="legend-card__key">Drag</kbd>
-                  </span>
-                  <span className="legend-card__action">Pan Canvas</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">←</kbd>
-                    <span className="legend-card__plus">/</span>
-                    <kbd className="legend-card__key">→</kbd>
-                  </span>
-                  <span className="legend-card__action">Switch Section</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">1 - 5</kbd>
-                  </span>
-                  <span className="legend-card__action">Jump to Section</span>
-                </div>
-              </div>
-
-              <div className="legend-card__divider" />
-
-              <div className="legend-card__section">
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">{modifierKey}</kbd>
-                    <span className="legend-card__plus">+</span>
-                    <kbd className="legend-card__key">Scroll</kbd>
-                  </span>
-                  <span className="legend-card__action">Smooth Zoom</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">{modifierKey}</kbd>
-                    <span className="legend-card__plus">+</span>
-                    <kbd className="legend-card__key">0</kbd>
-                  </span>
-                  <span className="legend-card__action">Reset Zoom</span>
-                </div>
-              </div>
-
-              <div className="legend-card__divider" />
-
-              <div className="legend-card__section">
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">T</kbd>
-                  </span>
-                  <span className="legend-card__action">Switch Theme</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">Shift + /</kbd>
-                  </span>
-                  <span className="legend-card__action">Toggle Help</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 export default App;

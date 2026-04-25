@@ -115,9 +115,9 @@ export const projects: Project[] = [
   },
   {
     title: "Form Builder",
-    year: "Coming Soon",
+    year: "2025",
     company: "Empyra",
-    status: "In progress",
+    status: "Coming Soon",
     impact: "Reduced engineering dependency",
     summary:
       "Rebuilt a legacy form builder so admins could create complex forms independently without leaning on engineering for every change.",
@@ -128,9 +128,9 @@ export const projects: Project[] = [
   },
   {
     title: "Form Taking",
-    year: "Coming Soon",
+    year: "2025",
     company: "Empyra",
-    status: "In progress",
+    status: "Coming Soon",
     impact: "Improved completion quality",
     summary:
       "Designed a guided form interface that improved completion rates and data accuracy through simpler, unified workflows.",
@@ -141,9 +141,9 @@ export const projects: Project[] = [
   },
   {
     title: "Dashboard",
-    year: "Coming Soon",
+    year: "2024",
     company: "Empyra",
-    status: "In progress",
+    status: "Coming Soon",
     impact: "Actionable report decisions",
     summary:
       "Introduced a modular widget-based dashboard that turned complex report data into instant, actionable decisions.",

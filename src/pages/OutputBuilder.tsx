@@ -52,7 +52,7 @@ const fadeUp = {
  * the viewport. Dramatically reduces upfront bandwidth/CPU on mobile where
  * autoplaying every demo at once would fetch ~9MB of MP4.
  */
-function LazyVideo({ src, className }: { src: string; className?: string }) {
+function LazyVideo({ src, className, width, height }: { src: string; className?: string; width?: number; height?: number }) {
   const ref = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -85,6 +85,8 @@ function LazyVideo({ src, className }: { src: string; className?: string }) {
     <video
       ref={ref}
       className={className}
+      width={width}
+      height={height}
       muted
       loop
       playsInline
@@ -817,7 +819,7 @@ function OutputBuilder({ onBack, origin }: OutputBuilderProps) {
                   >
                     <div className="ob-media__frame">
                       {f.videoPath ? (
-                        <LazyVideo src={f.videoPath} className="ob-video" />
+                        <LazyVideo src={f.videoPath} className="ob-video" width={1280} height={800} />
                       ) : (
                         <div className="ob-media__placeholder">
                           <ThemedIcon raw={dataIcon} size={48} />
