@@ -1494,18 +1494,19 @@ const ClockWidget = memo(function ClockWidget() {
 
   // Update the readable text once per minute — cheap, no layout thrash.
   useEffect(() => {
+    let intervalId: number | null = null;
     const tick = () => setDisplayTime(getIstParts().display);
     const now = new Date();
     const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-    const timeout = setTimeout(() => {
+    
+    const timeoutId = window.setTimeout(() => {
       tick();
-      const interval = setInterval(tick, 60_000);
-      (timeout as unknown as { interval?: number }).interval = interval as unknown as number;
+      intervalId = window.setInterval(tick, 60_000);
     }, msUntilNextMinute);
+
     return () => {
-      clearTimeout(timeout);
-      const interval = (timeout as unknown as { interval?: number }).interval;
-      if (interval) clearInterval(interval);
+      window.clearTimeout(timeoutId);
+      if (intervalId) window.clearInterval(intervalId);
     };
   }, []);
 
