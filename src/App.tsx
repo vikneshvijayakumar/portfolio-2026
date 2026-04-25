@@ -1621,7 +1621,7 @@ const WorkCluster = memo(function WorkCluster() {
               <span>{item.index}</span>
             </div>
             <div className="principle-card__body">
-              <h3>{item.title}</h3>
+              <h2 className="principle-card__title">{item.title}</h2>
               <p>{item.copy}</p>
             </div>
           </motion.article>
@@ -2009,7 +2009,7 @@ function Legend({ isOpen, modifierKey }: { isOpen: boolean; modifierKey: string 
             className="legend-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="legend-card__title">Canvas Controls</h3>
+            <h2 className="legend-card__title">Canvas Controls</h2>
 
             <div className="legend-card__sections">
               <div className="legend-card__section">

@@ -630,6 +630,8 @@
 
 .ob-sticky__title {
   font-size: 20px !important;
+  font-weight: 400;
+  margin: 0;
 }
 
 @media (max-width: 1024px) {
@@ -1068,7 +1070,11 @@
 }
 
 /* Disable the footer's cursor-driven prism on touch / low-power / reduced-motion. */
-@media (hover: none), (pointer: coarse), (max-width: 900px), (prefers-reduced-motion: reduce) {
+@media (hover: none),
+(pointer: coarse),
+(max-width: 900px),
+(prefers-reduced-motion: reduce) {
+
   .ob-footer__bg-color,
   .ob-footer__bg-glow {
     display: none;

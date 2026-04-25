@@ -1801,9 +1801,9 @@ button {
   padding: 20px;
 }
 
-.principle-card__body h3 {
-  font-size: 1rem;
-  font-weight: 500;
+.principle-card__body h2 {
+  font-weight: 600;
+  font-size: 16px;
   line-height: 1.5;
   margin: 0;
 }

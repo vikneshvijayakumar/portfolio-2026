@@ -614,7 +614,7 @@ function OutputBuilder({ onBack, origin }: OutputBuilderProps) {
                       <ThemedIcon raw={LEGACY_STEPS[0].icon} size={28} />
                     </div>
                     <div className="ob-legacy-step__text">
-                      <h4 className="ob-legacy-step__title">{LEGACY_STEPS[0].title}</h4>
+                      <h3 className="ob-legacy-step__title">{LEGACY_STEPS[0].title}</h3>
                       <p className="ob-legacy-step__body">{LEGACY_STEPS[0].body}</p>
                     </div>
                   </div>
@@ -641,7 +641,7 @@ function OutputBuilder({ onBack, origin }: OutputBuilderProps) {
                             <ThemedIcon raw={s.icon} size={28} />
                           </div>
                           <div className="ob-legacy-step__text">
-                            <h4 className="ob-legacy-step__title">{s.title}</h4>
+                            <h3 className="ob-legacy-step__title">{s.title}</h3>
                             <p className="ob-legacy-step__body">{s.body}</p>
                           </div>
                         </div>
@@ -830,7 +830,7 @@ function OutputBuilder({ onBack, origin }: OutputBuilderProps) {
               </motion.div>
             ))}
 
-            <div className="ob-eyebrow ob-eyebrow--center">The New Workflow</div>
+            <h3 className="ob-eyebrow ob-eyebrow--center">The New Workflow</h3>
             <motion.div
               className="ob-workflow-grid"
               variants={staggerParent}
@@ -848,7 +848,7 @@ function OutputBuilder({ onBack, origin }: OutputBuilderProps) {
                   >
                     <ThemedIcon raw={w.icon} size={40} className="ob-workflow-card__icon" />
                     <div className="ob-workflow-card__content">
-                      <h4 className="ob-workflow-title">{w.title}</h4>
+                      <h3 className="ob-workflow-title">{w.title}</h3>
                       <p className="ob-body">{w.body}</p>
                     </div>
                   </motion.article>
