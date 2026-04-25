@@ -240,15 +240,15 @@ function App() {
     : false;
   const modifierKey = isMac ? '⌘' : 'Ctrl';
 
-  const socialPos = { 
-    x: 2190 + (isMobile ? 100 : 0), 
-    y: 1170, 
-    rotate: -1 
+  const socialPos = {
+    x: 2190 + (isMobile ? 100 : 0),
+    y: 1170,
+    rotate: -1
   };
-  const madeWithPos = { 
-    x: 3080, 
-    y: 600 + (isMobile ? 100 : 0), 
-    rotate: -9 
+  const madeWithPos = {
+    x: 3080,
+    y: 600 + (isMobile ? 100 : 0),
+    rotate: -9
   };
 
   // Initial load effect removed as we now start loaded immediately
@@ -510,7 +510,7 @@ function App() {
     }
 
     activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    
+
     // NOTE: We don't call event.preventDefault() here anymore.
     // This allows native click events to flow if the user just taps.
     // Pointer capture and touch-action: none on the board handle the rest.
@@ -544,7 +544,7 @@ function App() {
     activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     const ds = dragStateRef.current;
-    
+
     // If we have a single pointer but haven't started "dragging" yet,
     // check if the user has moved enough to commit to a pan.
     if (ds && ds.pointerId === event.pointerId && !ds.hasMoved) {
@@ -767,6 +767,12 @@ function App() {
         return;
       }
 
+      // Toggle Theme on 'T'
+      if ((event.key === "t" || event.key === "T") && !activeCaseStudy) {
+        setTheme(prev => prev === "ink" ? "paper" : "ink");
+        return;
+      }
+
       if (activeCaseStudy || isMobile) return;
 
       // Zoom Controls (Cmd/Ctrl + Key)
@@ -806,7 +812,7 @@ function App() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeZone, isMobile, activeCaseStudy, zoneSequence]);
+  }, [activeZone, isMobile, activeCaseStudy, zoneSequence, setTheme]);
 
   useEffect(
     () => () => {
@@ -819,7 +825,7 @@ function App() {
   );
 
   return (
-    <div 
+    <div
       className="app-container"
       onClick={() => {
         if (isLegendOpen) setIsLegendOpen(false);
@@ -859,6 +865,22 @@ function App() {
         <div className="toolbar__panel toolbar__panel--right">
           <div className="toolbar__actions">
             {!isMobile && !isTablet && <AvailabilityPill />}
+            <div className="legend-trigger-wrapper">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLegendOpen(!isLegendOpen);
+                }}
+                className={`legend-trigger ${isLegendOpen ? 'is-active' : ''}`}
+                aria-label="Show canvas controls"
+              >
+                ?
+              </button>
+              <Legend
+                isOpen={isLegendOpen}
+                modifierKey={modifierKey}
+              />
+            </div>
             <ThemeToggle theme={theme} setTheme={setTheme} />
             {!isMobile && !isTablet && (
               <a className="download-button toolbar__resume" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
@@ -893,16 +915,6 @@ function App() {
                   .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
               }}
             />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsLegendOpen(!isLegendOpen);
-              }}
-              className={`legend-trigger ${isLegendOpen ? 'is-active' : ''}`}
-              aria-label="Show canvas controls"
-            >
-              ?
-            </button>
           </div>
         </div>
       )}
@@ -994,10 +1006,6 @@ function App() {
         )}
       </AnimatePresence>
 
-      <Legend
-        isOpen={isLegendOpen}
-        modifierKey={modifierKey}
-      />
       <SpeedInsights />
     </div>
   );
@@ -1810,6 +1818,7 @@ const FloatingStatus = memo(function FloatingStatus() {
       eye: SVGGraphicsElement;
       pupil: SVGPathElement;
       offsetX: number;
+      offsetY: number;
       maxDistX: number;
       maxDistY: number;
     };
@@ -1818,10 +1827,10 @@ const FloatingStatus = memo(function FloatingStatus() {
     const leftEye = svg.querySelector("#eye-left") as SVGGraphicsElement | null;
     const rightEye = svg.querySelector("#eye-right") as SVGGraphicsElement | null;
     if (leftEye && pupilLeftRef.current) {
-      eyes.push({ eye: leftEye, pupil: pupilLeftRef.current, offsetX: 0, maxDistX: 0, maxDistY: 0 });
+      eyes.push({ eye: leftEye, pupil: pupilLeftRef.current, offsetX: 0, offsetY: 0, maxDistX: 0, maxDistY: 0 });
     }
     if (rightEye && pupilRightRef.current) {
-      eyes.push({ eye: rightEye, pupil: pupilRightRef.current, offsetX: 0, maxDistX: 0, maxDistY: 0 });
+      eyes.push({ eye: rightEye, pupil: pupilRightRef.current, offsetX: 0, offsetY: 0, maxDistX: 0, maxDistY: 0 });
     }
     if (eyes.length === 0) return;
 
@@ -1833,11 +1842,20 @@ const FloatingStatus = memo(function FloatingStatus() {
     const recomputeGeometry = () => {
       for (const e of eyes) {
         e.pupil.removeAttribute("transform");
-        const eyeRect = e.eye.getBoundingClientRect();
-        const pupilRect = e.pupil.getBoundingClientRect();
-        e.offsetX = (eyeRect.right - pupilRect.right - (pupilRect.left - eyeRect.left)) / 2;
-        e.maxDistX = pupilRect.width / 2;
-        e.maxDistY = pupilRect.height / 2;
+        // Using getBBox() gives us coordinates in the SVG's local space (0-128),
+        // which are zoom-invariant.
+        const eyeBox = e.eye.getBBox();
+        const pupilBox = e.pupil.getBBox();
+
+        const eyeCenterX = eyeBox.x + eyeBox.width / 2;
+        const eyeCenterY = eyeBox.y + eyeBox.height / 2;
+        const pupilCenterX = pupilBox.x + pupilBox.width / 2;
+        const pupilCenterY = pupilBox.y + pupilBox.height / 2;
+
+        e.offsetX = eyeCenterX - pupilCenterX;
+        e.offsetY = eyeCenterY - pupilCenterY;
+        e.maxDistX = (eyeBox.width - pupilBox.width) / 2;
+        e.maxDistY = (eyeBox.height - pupilBox.height) / 2;
       }
     };
 
@@ -1849,27 +1867,23 @@ const FloatingStatus = memo(function FloatingStatus() {
 
     const commit = () => {
       rafId = null;
-      // The canvas applies CSS transforms that don't fire scroll/resize, so we
-      // must re-read each eye's viewport position per frame. Pupil/eye intrinsic
-      // dimensions (offsetX, maxDistX/Y) stay cached since they scale uniformly.
-      const ctm = svg.getScreenCTM();
-      if (ctm) {
-        ctmA = ctm.a || 1;
-        ctmD = ctm.d || 1;
-      }
       for (const e of eyes) {
+        // centerX/Y are still viewport-based so they track the eye's screen position correctly.
         const eyeRect = e.eye.getBoundingClientRect();
         const centerX = eyeRect.left + eyeRect.width / 2;
         const centerY = eyeRect.top + eyeRect.height / 2;
+
         const distX = pointerX - centerX;
         const distY = pointerY - centerY;
         const angle = Math.atan2(distY, distX);
-        const newPupilX =
-          e.offsetX + Math.min(e.maxDistX, Math.max(-e.maxDistX, Math.cos(angle) * e.maxDistX));
-        const newPupilY = Math.min(e.maxDistY, Math.max(-e.maxDistY, Math.sin(angle) * e.maxDistY));
+
+        // Final position is calculated in SVG units and applied directly.
+        const moveX = Math.cos(angle) * e.maxDistX;
+        const moveY = Math.sin(angle) * e.maxDistY;
+
         e.pupil.setAttribute(
           "transform",
-          `translate(${newPupilX / ctmA}, ${newPupilY / ctmD})`,
+          `translate(${e.offsetX + moveX}, ${e.offsetY + moveY})`,
         );
       }
     };
@@ -1983,10 +1997,15 @@ function Legend({ isOpen, modifierKey }: { isOpen: boolean; modifierKey: string 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 10 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            initial={{ opacity: 0, scale: 0.95, y: -8, rotate: 2 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -8, rotate: 2 }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 30,
+              mass: 0.8
+            }}
             className="legend-card"
             onClick={(e) => e.stopPropagation()}
           >
@@ -2036,6 +2055,23 @@ function Legend({ isOpen, modifierKey }: { isOpen: boolean; modifierKey: string 
                     <kbd className="legend-card__key">0</kbd>
                   </span>
                   <span className="legend-card__action">Reset Zoom</span>
+                </div>
+              </div>
+
+              <div className="legend-card__divider" />
+
+              <div className="legend-card__section">
+                <div className="legend-card__row">
+                  <span className="legend-card__keys">
+                    <kbd className="legend-card__key">T</kbd>
+                  </span>
+                  <span className="legend-card__action">Switch Theme</span>
+                </div>
+                <div className="legend-card__row">
+                  <span className="legend-card__keys">
+                    <kbd className="legend-card__key">Shift + /</kbd>
+                  </span>
+                  <span className="legend-card__action">Toggle Help</span>
                 </div>
               </div>
             </div>

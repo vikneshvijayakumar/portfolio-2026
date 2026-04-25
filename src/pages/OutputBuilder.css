@@ -500,7 +500,7 @@
 .ob-legacy-step__body {
 
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--text-soft);
   margin: 0;
 }
@@ -577,7 +577,7 @@
   font-weight: 700;
   color: var(--primary-dark);
   opacity: 0.18;
-  line-height: 1;
+  line-height: 1.5;
   user-select: none;
   pointer-events: none;
 }
@@ -643,6 +643,10 @@
   .ob-sticky-wall {
     grid-template-columns: 1fr;
     padding: 16px;
+  }
+
+  .ob-sticky__title {
+    font-size: 18px !important;
   }
 }
 

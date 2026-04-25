@@ -729,6 +729,7 @@ button {
 .social-strip {
   backdrop-filter: blur(12px);
 }
+
 .download-button,
 .social-strip,
 .availability-pill,
@@ -744,6 +745,7 @@ button {
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 240ms ease;
   color: var(--text);
 }
+
 .availability-pill {
   display: inline-flex;
   align-items: center;
@@ -817,7 +819,7 @@ button {
 .theme-toggle-minimal svg {
   width: 24px !important;
   height: 24px !important;
-  color: var(--text);
+  color: var(--text-soft);
   display: block;
 }
 
@@ -1170,7 +1172,7 @@ button {
 
 .experience-folder__summary {
   font-size: 0.95rem;
-  line-height: 1.4;
+  line-height: 1.5;
   margin: 0;
 }
 
@@ -1438,13 +1440,29 @@ button {
 }
 
 @keyframes clock-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.clock-widget__hand.hour   { animation-name: clock-rotate; animation-duration: 43200s; }
-.clock-widget__hand.minute { animation-name: clock-rotate; animation-duration: 3600s; }
-.clock-widget__hand.second { animation-name: clock-rotate; animation-duration: 60s; }
+.clock-widget__hand.hour {
+  animation-name: clock-rotate;
+  animation-duration: 43200s;
+}
+
+.clock-widget__hand.minute {
+  animation-name: clock-rotate;
+  animation-duration: 3600s;
+}
+
+.clock-widget__hand.second {
+  animation-name: clock-rotate;
+  animation-duration: 60s;
+}
 
 .clock-widget__hand.hour {
   height: 35px;
@@ -1631,6 +1649,7 @@ button {
 
 /* Hover & Copied Interactions */
 @media (hover: hover) {
+
   .badge-link:hover .badge-tooltip,
   .social-strip__copy-btn:hover .tooltip,
   .social-strip a:hover .tooltip,
@@ -2370,7 +2389,7 @@ button {
 
 .warp-hud__icon {
   font-size: 18px;
-  line-height: 1;
+  line-height: 1.5;
   margin-bottom: 2px;
 }
 
@@ -2378,7 +2397,6 @@ button {
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
   color: var(--text-soft);
 }
 
@@ -2446,9 +2464,9 @@ button {
 
 /* Legend / Help Menu */
 .legend-wrapper {
-  position: fixed;
-  bottom: 84px;
-  right: 24px;
+  position: absolute;
+  top: calc(100% + 24px);
+  right: 0;
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -2463,14 +2481,15 @@ button {
 }
 
 .legend-card {
-  width: 280px;
+  width: max-content;
+  min-width: 240px;
   background: var(--surface-strong);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 20px;
   box-shadow: var(--shadow);
-  transform-origin: bottom right;
+  transform-origin: top right;
   pointer-events: auto;
 }
 
@@ -2540,9 +2559,21 @@ button {
   font-weight: 400;
 }
 
+.legend-trigger-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+  .legend-trigger-wrapper {
+    display: none;
+  }
+}
+
 .legend-trigger {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
   color: var(--text-soft);
 }
 
