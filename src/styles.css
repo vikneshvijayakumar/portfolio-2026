@@ -1655,7 +1655,7 @@ button {
   .social-strip a:hover .tooltip,
   .zoom-controls__button:hover .tooltip,
   .zoom-controls__readout:hover .tooltip,
-  .warp-hud__item:hover .tooltip,
+
   .header-zone-nav__item:hover .tooltip {
     opacity: 1;
     transform: translate(-50%, -10px);
@@ -1665,7 +1665,7 @@ button {
 
 .zoom-controls__button,
 .zoom-controls__readout,
-.warp-hud__item,
+
 .header-zone-nav__item {
   position: relative;
 }
@@ -2349,72 +2349,7 @@ button {
   }
 }
 
-/* Warp HUD (Mobile Navigation) */
-.warp-hud {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(var(--white-rgb), 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 4px;
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(var(--black-rgb), 0.05);
-  box-shadow:
-    0 4px 20px rgba(var(--black-rgb), 0.08),
-    0 0 0 1px rgba(var(--black-rgb), 0.02);
-  pointer-events: auto;
-}
 
-[data-theme="ink"] .warp-hud {
-  background: color-mix(in srgb, var(--ide-bg) 82%, transparent);
-  border-color: rgba(var(--white-rgb), 0.1);
-  box-shadow: 0 4px 24px rgba(var(--black-rgb), 0.3);
-}
-
-.warp-hud__item {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border-radius: var(--radius-xl);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 1;
-  transition: opacity 0.2s;
-}
-
-.warp-hud__icon {
-  font-size: 18px;
-  line-height: 1.5;
-  margin-bottom: 2px;
-}
-
-.warp-hud__label {
-  font-size: 10px;
-  font-weight: 500;
-  text-transform: uppercase;
-  color: var(--text-soft);
-}
-
-.warp-hud__item.is-active .warp-hud__label {
-  color: var(--text);
-}
-
-.warp-hud__indicator {
-  position: absolute;
-  inset: 0;
-  background: rgba(var(--black-rgb), 0.04);
-  border-radius: var(--radius-xl);
-  z-index: -1;
-}
-
-[data-theme="ink"] .warp-hud__indicator {
-  background: rgba(var(--white-rgb), 0.08);
-}
 
 /* Ensure HUD stays above canvas on small screens */
 

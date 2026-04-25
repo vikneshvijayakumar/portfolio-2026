@@ -55,7 +55,7 @@ const zoneNavItems: { id: ZoneId; label: string; key: string }[] = [
   { id: "case-studies", label: "Case Studies", key: "2" },
   { id: "experience", label: "Experience", key: "3" },
   { id: "skills", label: "Skills", key: "4" },
-  { id: "how-i-work", label: "Process", key: "5" },
+  { id: "how-i-work", label: "Principles", key: "5" },
 ];
 
 /*
@@ -1011,38 +1011,7 @@ function App() {
   );
 }
 
-function WarpHUD({ activeZone, onSnap }: { activeZone: ZoneId; onSnap: (id: ZoneId) => void }) {
-  const navItems: { id: ZoneId; label: string; icon: string; key: string }[] = [
-    { id: "about", label: "Home", icon: "🏠", key: "1" },
-    { id: "case-studies", label: "Projects", icon: "📂", key: "2" },
-    { id: "skills", label: "Skills", icon: "🛠️", key: "3" },
-    { id: "experience", label: "History", icon: "💼", key: "4" },
-    { id: "how-i-work", label: "Process", icon: "🧠", key: "5" },
-  ];
 
-  return (
-    <nav className="warp-hud">
-      {navItems.map((item) => (
-        <button
-          key={item.id}
-          className={`warp-hud__item ${activeZone === item.id ? "is-active" : ""}`}
-          onClick={() => onSnap(item.id)}
-          type="button"
-        >
-          <span className="warp-hud__icon">{item.icon}</span>
-          <span className="warp-hud__label">{item.label}</span>
-          {activeZone === item.id && (
-            <motion.div
-              layoutId="warp-active"
-              className="warp-hud__indicator"
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          )}
-        </button>
-      ))}
-    </nav>
-  );
-}
 
 function ZoomControls({
   scale,
