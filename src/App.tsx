@@ -260,7 +260,7 @@ function App() {
     rotate: -1
   };
   const madeWithPos = {
-    x: 3080,
+    x: 3080 + (isMobile ? 100 : 0),
     y: 600 + (isMobile ? 100 : 0),
     rotate: -9
   };
@@ -974,7 +974,7 @@ function App() {
             </Suspense>
             <VanakkamSticker isStarted={startAnimations} />
             <BadgesCluster isMobile={isMobile} isStarted={startAnimations} />
-            {!isMobile && <FloatingStatus isStarted={startAnimations} />}
+            <FloatingStatus isStarted={startAnimations} />
 
             {isMobile && (
               <>
