@@ -260,8 +260,8 @@ function App() {
     rotate: -1
   };
   const madeWithPos = {
-    x: 3080 + (isMobile ? 100 : 0),
-    y: 600 + (isMobile ? 100 : 0),
+    x: isMobile ? 1550 : 3080,
+    y: isMobile ? 1300 : 600,
     rotate: -9
   };
 
@@ -1004,9 +1004,11 @@ function App() {
                   data-interactive="true"
                   dangerouslySetInnerHTML={{
                     __html: antigravityBadge
-                      .replace('<svg', '<svg viewBox="0 0 174 36"')
+                      .replace('<svg', '<svg viewBox="0 0 174 36" style="overflow:visible"')
                       .replace(/width="174"|height="36"/g, '')
                       .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+                      .replace('url(#a)', 'url(#antigravity-clip)')
+                      .replace('id="a"', 'id="antigravity-clip"')
                   }}
                 />
               </>
@@ -1395,9 +1397,9 @@ const FloatingStatus = memo(function FloatingStatus({ isStarted }: { isStarted: 
       if (!isWhite) return false;
       // Ignore large paths like the clip path or stroke background
       const bbox = p.getBBox();
-      return bbox.width < 30; 
+      return bbox.width < 30;
     }) as SVGGraphicsElement[];
-    
+
     const pupilPaths = allPaths.filter(p => {
       const f = p.getAttribute("fill")?.toLowerCase();
       return f === "#000101";
@@ -1420,12 +1422,12 @@ const FloatingStatus = memo(function FloatingStatus({ isStarted }: { isStarted: 
         e.pupil.style.transform = "";
         const eb = e.eye.getBBox();
         const pb = e.pupil.getBBox();
-        
+
         e.lcx = eb.x + eb.width / 2;
         e.lcy = eb.y + eb.height / 2;
         const pcx = pb.x + pb.width / 2;
         const pcy = pb.y + pb.height / 2;
-        
+
         e.ox = e.lcx - pcx;
         e.oy = e.lcy - pcy;
         e.mx = (eb.width - pb.width) * 0.55;
@@ -1450,7 +1452,7 @@ const FloatingStatus = memo(function FloatingStatus({ isStarted }: { isStarted: 
         const dy = py - vcy;
         const d = Math.sqrt(dx * dx + dy * dy);
         const a = Math.atan2(dy, dx);
-        
+
         // Very aggressive strength at close range to ensure convergence
         const s = Math.min(d / 30, 1);
         const tx = Math.cos(a) * e.mx * s;
