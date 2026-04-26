@@ -417,23 +417,30 @@ function OutputBuilder({ onBack, origin }: OutputBuilderProps) {
     )) return;
 
     let rafId = 0;
-    let pendingX = 0;
-    let pendingY = 0;
+    let clientX = 0;
+    let clientY = 0;
+
     const handleMove = (e: MouseEvent) => {
-      if (!footerRef.current) return;
-      const rect = footerRef.current.getBoundingClientRect();
-      if (e.clientY < rect.top || e.clientY > rect.bottom) return;
-      pendingX = e.clientX - rect.left;
-      pendingY = e.clientY - rect.top;
+      clientX = e.clientX;
+      clientY = e.clientY;
+      
       if (rafId) return;
       rafId = window.requestAnimationFrame(() => {
         rafId = 0;
         const el = footerRef.current;
         if (!el) return;
-        el.style.setProperty("--footer-mouse-x", `${pendingX}px`);
-        el.style.setProperty("--footer-mouse-y", `${pendingY}px`);
-        el.style.setProperty("--footer-mouse-x-px", `${pendingX}px`);
-        el.style.setProperty("--footer-mouse-y-px", `${pendingY}px`);
+        
+        const rect = el.getBoundingClientRect();
+        // Only update if mouse is within vertical bounds of footer
+        if (clientY < rect.top || clientY > rect.bottom) return;
+        
+        const relX = clientX - rect.left;
+        const relY = clientY - rect.top;
+        
+        el.style.setProperty("--footer-mouse-x", `${relX}px`);
+        el.style.setProperty("--footer-mouse-y", `${relY}px`);
+        el.style.setProperty("--footer-mouse-x-px", `${relX}px`);
+        el.style.setProperty("--footer-mouse-y-px", `${relY}px`);
       });
     };
     window.addEventListener("mousemove", handleMove, { passive: true });

@@ -730,11 +730,8 @@ function App() {
   };
 
   const adjustZoom = (direction: 1 | -1, originX?: number, originY?: number) => {
-    const boardRect = stageRef.current?.getBoundingClientRect();
-    const focusX =
-      originX ?? (boardRect ? boardRect.left + boardRect.width / 2 : window.innerWidth / 2);
-    const focusY =
-      originY ?? (boardRect ? boardRect.top + boardRect.height / 2 : window.innerHeight / 2);
+    const focusX = originX ?? window.innerWidth / 2;
+    const focusY = originY ?? window.innerHeight / 2;
 
     const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
     const factor = direction === 1 ? 1.2 : 1 / 1.2;
