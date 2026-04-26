@@ -12,10 +12,11 @@ import { MOBILE_BREAKPOINT, STAGE, EASE } from "./utils/constants";
 import SkillsCard from "./components/SkillsCard";
 import Legend from "./components/Legend";
 
+import ExperienceStack from "./components/ExperienceStack";
+import WorkCluster from "./components/WorkCluster";
+import ProjectCards from "./components/ProjectCards";
+
 const OutputBuilder = lazy(() => import("./pages/OutputBuilder"));
-const ExperienceStack = lazy(() => import("./components/ExperienceStack"));
-const WorkCluster = lazy(() => import("./components/WorkCluster"));
-const ProjectCards = lazy(() => import("./components/ProjectCards"));
 
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
