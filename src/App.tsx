@@ -1423,26 +1423,28 @@ const FloatingStatus = memo(function FloatingStatus({ isStarted }: { isStarted: 
     ];
 
     const recompute = () => {
-      for (const e of eyes) {
-        e.pupil.removeAttribute("transform");
-        e.pupil.style.transform = "";
-        const eb = e.eye.getBBox();
-        const pb = e.pupil.getBBox();
+      requestAnimationFrame(() => {
+        for (const e of eyes) {
+          e.pupil.removeAttribute("transform");
+          e.pupil.style.transform = "";
+          const eb = e.eye.getBBox();
+          const pb = e.pupil.getBBox();
 
-        e.lcx = eb.x + eb.width / 2;
-        e.lcy = eb.y + eb.height / 2;
-        const pcx = pb.x + pb.width / 2;
-        const pcy = pb.y + pb.height / 2;
+          e.lcx = eb.x + eb.width / 2;
+          e.lcy = eb.y + eb.height / 2;
+          const pcx = pb.x + pb.width / 2;
+          const pcy = pb.y + pb.height / 2;
 
-        e.ox = e.lcx - pcx;
-        e.oy = e.lcy - pcy;
-        e.mx = (eb.width - pb.width) * 0.55;
-        e.my = (eb.height - pb.height) * 0.55;
-      }
+          e.ox = e.lcx - pcx;
+          e.oy = e.lcy - pcy;
+          e.mx = (eb.width - pb.width) * 0.55;
+          e.my = (eb.height - pb.height) * 0.55;
+        }
+      });
     };
 
-    recompute();
-    const t = setTimeout(recompute, 300);
+    // Delay initial recompute to avoid competing with main render
+    const t = setTimeout(recompute, 150);
 
     let px = 0, py = 0, raf: number | null = null;
     const commit = () => {
