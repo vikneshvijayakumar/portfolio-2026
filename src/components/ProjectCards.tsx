@@ -100,6 +100,8 @@ const ProjectCard = memo(function ProjectCard({
           width={512}
           height={288}
           draggable="false"
+          loading="lazy"
+          decoding="async"
         />
       </div>
 

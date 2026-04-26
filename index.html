@@ -5,15 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6FG671TC9"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-Q6FG671TC9');
-  </script>
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
   <title>Viknesh Vijayakumar | Senior Product Designer</title>
   <meta name="description" content="Building zero-to-one product systems that redefine how organizations work." />
   <meta name="theme-color" content="#f5f0e8" media="(prefers-color-scheme: light)" />
@@ -58,6 +50,29 @@
 
 <body>
   <div id="root"></div>
+  <script>
+    // Defer Google Analytics until the page is idle to keep main thread free for interaction.
+    (function () {
+      var loaded = false;
+      function loadGA() {
+        if (loaded) return; loaded = true;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-Q6FG671TC9';
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ window.dataLayer.push(arguments); }
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', 'G-Q6FG671TC9');
+      }
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGA, { timeout: 4000 });
+      } else {
+        setTimeout(loadGA, 3000);
+      }
+    })();
+  </script>
 </body>
 
 </html>

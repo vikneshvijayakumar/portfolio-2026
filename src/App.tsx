@@ -988,7 +988,7 @@ function App() {
                     zIndex: 5,
                   }}
                 >
-                  <img src={pinIcon} className="social-card-pin" alt="" width={56} height={56} draggable="false" />
+                  <img src={pinIcon} className="social-card-pin" alt="" width={56} height={56} draggable="false" loading="lazy" decoding="async" />
                   <SocialStrip className="is-mobile" />
                 </motion.div>
 
@@ -1112,7 +1112,7 @@ const AboutCard = memo(function AboutCard({
       }}
     >
       <div className="avatar-disc">
-        <img src={profileImg} alt="Viknesh Vijayakumar" width={120} height={120} draggable="false" />
+        <img src={profileImg} alt="Viknesh Vijayakumar" width={120} height={120} draggable="false" decoding="async" fetchPriority="high" />
       </div>
       <div className="about-card__header">
         <h1>Viknesh Vijayakumar</h1>
@@ -1154,7 +1154,7 @@ const VanakkamSticker = memo(function VanakkamSticker({ isStarted }: { isStarted
         rotate: { type: "spring", stiffness: 400, damping: 35 }
       }}
     >
-      <img src={vanakkamBadge} alt="Vanakkam" className="vanakkam-sticker__image" width={180} height={180} draggable="false" />
+      <img src={vanakkamBadge} alt="Vanakkam" className="vanakkam-sticker__image" width={180} height={180} draggable="false" loading="lazy" decoding="async" />
     </motion.div>
   );
 });
@@ -1186,7 +1186,7 @@ const BadgesCluster = memo(function BadgesCluster({
           scale: { type: "spring", stiffness: 300, damping: 25, delay: 0.05 }
         }}
       >
-        <img src={upworkBadge} alt="Upwork Top Rated" className="badge-image badge-image--upwork" width={200} height={56} draggable="false" />
+        <img src={upworkBadge} alt="Upwork Top Rated" className="badge-image badge-image--upwork" width={200} height={56} draggable="false" loading="lazy" decoding="async" />
         <span className="badge-tooltip">View Profile</span>
       </motion.a>
       <motion.a
@@ -1198,7 +1198,7 @@ const BadgesCluster = memo(function BadgesCluster({
           scale: { type: "spring", stiffness: 300, damping: 25, delay: 0.1 }
         }}
       >
-        <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" width={200} height={200} draggable="false" />
+        <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" width={200} height={200} draggable="false" loading="lazy" decoding="async" />
         <span className="badge-tooltip">See Certificate</span>
       </motion.a>
     </div>
@@ -1210,11 +1210,11 @@ const SocialStrip = memo(function SocialStrip({ className = "" }: { className?: 
   return (
     <footer className={`social-strip ${className}`} data-interactive="true">
       <a href={toolbarLinks.dribbble} target="_blank" rel="noreferrer">
-        <img src={dribbbleIcon} alt="" width={22} height={22} draggable="false" />
+        <img src={dribbbleIcon} alt="" width={22} height={22} draggable="false" decoding="async" />
         <span>vikneshvijayakumar</span>
       </a>
       <a href={toolbarLinks.linkedin} target="_blank" rel="noreferrer">
-        <img src={linkedinIcon} alt="" width={22} height={22} draggable="false" />
+        <img src={linkedinIcon} alt="" width={22} height={22} draggable="false" decoding="async" />
         <span>vikneshvijayakumar</span>
       </a>
       <CopyContactButton
@@ -1368,7 +1368,7 @@ function CopyContactButton({ text, icon, copyValue }: { text: string; icon: stri
 
   return (
     <button className="social-strip__copy-btn" onClick={handleCopy} type="button">
-      <img src={icon} alt="" width={22} height={22} draggable="false" />
+      <img src={icon} alt="" width={22} height={22} draggable="false" decoding="async" />
       <span>{text}</span>
       <div className={`tooltip ${copied ? "is-copied" : ""}`}>
         <div className="tooltip__content">
