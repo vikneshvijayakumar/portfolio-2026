@@ -11,7 +11,7 @@ const projectImages: Record<string, string> = {
   "dashboard.webp": dashboardImg,
   "form-builder.webp": formBuilderImg,
   "form-taking.webp": formTakingImg,
-  "output-builder.webp": "/assets/output-builder.webp",
+  "output-builder.webp": outputBuilderImg,
 };
 
 const ProjectCard = memo(function ProjectCard({
@@ -100,8 +100,6 @@ const ProjectCard = memo(function ProjectCard({
           width={512}
           height={288}
           draggable="false"
-          loading={project.title === "Output Builder" ? "eager" : "lazy"}
-          {...({ fetchpriority: project.title === "Output Builder" ? "high" : "auto" } as any)}
         />
       </div>
 

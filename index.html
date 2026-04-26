@@ -4,8 +4,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://www.googletagmanager.com" />
-  <link rel="preload" href="/assets/fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6FG671TC9"></script>
@@ -38,8 +36,6 @@
   <link rel="canonical" href="https://viknesh.me/" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-  <link rel="preload" as="image" href="/assets/profile.webp" fetchpriority="high" />
-  <link rel="preload" as="image" href="/assets/output-builder.webp" fetchpriority="high" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <script type="application/ld+json">
   {
@@ -57,39 +53,6 @@
   }
   </script>
 
-  <style>
-    :root {
-      --canvas: #f4f0e8;
-      --glow-a: rgba(149, 213, 110, 0.15);
-      --glow-b: rgba(149, 213, 110, 0.1);
-      --glow-c: rgba(149, 213, 110, 0.12);
-      --glow-d: rgba(149, 213, 110, 0.08);
-    }
-    :root[data-theme="ink"] {
-      --canvas: #1b1715;
-      --glow-a: rgba(149, 213, 110, 0.08);
-      --glow-b: rgba(149, 213, 110, 0.1);
-      --glow-c: rgba(149, 213, 110, 0.11);
-      --glow-d: rgba(149, 213, 110, 0.06);
-    }
-    html, body { margin: 0; padding: 0; min-height: 100%; }
-    body {
-      background: var(--canvas);
-      background-image: 
-        radial-gradient(circle at 20% 10%, var(--glow-a), transparent 30%),
-        radial-gradient(circle at 80% 12%, var(--glow-b), transparent 24%),
-        radial-gradient(circle at 65% 72%, var(--glow-c), transparent 22%),
-        radial-gradient(circle at 8% 78%, var(--glow-d), transparent 20%);
-      background-attachment: fixed;
-    }
-  </style>
-  <script>
-    (function() {
-      const saved = window.localStorage.getItem("viknesh-theme");
-      const theme = saved === "ink" || saved === "paper" ? saved : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "ink" : "paper");
-      document.documentElement.dataset.theme = theme;
-    })();
-  </script>
   <script type="module" src="/src/main.tsx"></script>
 </head>
 

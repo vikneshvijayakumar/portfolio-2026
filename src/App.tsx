@@ -12,18 +12,17 @@ import { MOBILE_BREAKPOINT, STAGE, EASE } from "./utils/constants";
 import SkillsCard from "./components/SkillsCard";
 import Legend from "./components/Legend";
 
-import ExperienceStack from "./components/ExperienceStack";
-import WorkCluster from "./components/WorkCluster";
-import ProjectCards from "./components/ProjectCards";
-
 const OutputBuilder = lazy(() => import("./pages/OutputBuilder"));
+const ExperienceStack = lazy(() => import("./components/ExperienceStack"));
+const WorkCluster = lazy(() => import("./components/WorkCluster"));
+const ProjectCards = lazy(() => import("./components/ProjectCards"));
 
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
 import linkedinIcon from "./assets/linkedin.svg";
 import logoSvg from "./assets/logo.svg?raw";
 import moonSvg from "./assets/moon.svg?raw";
-const profileImg = "/assets/profile.webp";
+import profileImg from "./assets/profile.webp";
 import sunSvg from "./assets/sun.svg?raw";
 import googleUxBadge from "./assets/google-ux.webp";
 import upworkBadge from "./assets/Upwork-TopRated-Badge.svg";
@@ -731,8 +730,11 @@ function App() {
   };
 
   const adjustZoom = (direction: 1 | -1, originX?: number, originY?: number) => {
-    const focusX = originX ?? window.innerWidth / 2;
-    const focusY = originY ?? window.innerHeight / 2;
+    const boardRect = stageRef.current?.getBoundingClientRect();
+    const focusX =
+      originX ?? (boardRect ? boardRect.left + boardRect.width / 2 : window.innerWidth / 2);
+    const focusY =
+      originY ?? (boardRect ? boardRect.top + boardRect.height / 2 : window.innerHeight / 2);
 
     const currentCamera = { x: camX.get(), y: camY.get(), scale: camScale.get() };
     const factor = direction === 1 ? 1.2 : 1 / 1.2;
@@ -1110,15 +1112,7 @@ const AboutCard = memo(function AboutCard({
       }}
     >
       <div className="avatar-disc">
-        <img 
-          src={profileImg} 
-          alt="Viknesh Vijayakumar" 
-          width={120} 
-          height={120} 
-          draggable="false" 
-          loading="eager"
-          {...({ fetchpriority: "high" } as any)}
-        />
+        <img src={profileImg} alt="Viknesh Vijayakumar" width={120} height={120} draggable="false" />
       </div>
       <div className="about-card__header">
         <h1>Viknesh Vijayakumar</h1>
@@ -1423,28 +1417,26 @@ const FloatingStatus = memo(function FloatingStatus({ isStarted }: { isStarted: 
     ];
 
     const recompute = () => {
-      requestAnimationFrame(() => {
-        for (const e of eyes) {
-          e.pupil.removeAttribute("transform");
-          e.pupil.style.transform = "";
-          const eb = e.eye.getBBox();
-          const pb = e.pupil.getBBox();
+      for (const e of eyes) {
+        e.pupil.removeAttribute("transform");
+        e.pupil.style.transform = "";
+        const eb = e.eye.getBBox();
+        const pb = e.pupil.getBBox();
 
-          e.lcx = eb.x + eb.width / 2;
-          e.lcy = eb.y + eb.height / 2;
-          const pcx = pb.x + pb.width / 2;
-          const pcy = pb.y + pb.height / 2;
+        e.lcx = eb.x + eb.width / 2;
+        e.lcy = eb.y + eb.height / 2;
+        const pcx = pb.x + pb.width / 2;
+        const pcy = pb.y + pb.height / 2;
 
-          e.ox = e.lcx - pcx;
-          e.oy = e.lcy - pcy;
-          e.mx = (eb.width - pb.width) * 0.55;
-          e.my = (eb.height - pb.height) * 0.55;
-        }
-      });
+        e.ox = e.lcx - pcx;
+        e.oy = e.lcy - pcy;
+        e.mx = (eb.width - pb.width) * 0.55;
+        e.my = (eb.height - pb.height) * 0.55;
+      }
     };
 
-    // Delay initial recompute to avoid competing with main render
-    const t = setTimeout(recompute, 150);
+    recompute();
+    const t = setTimeout(recompute, 300);
 
     let px = 0, py = 0, raf: number | null = null;
     const commit = () => {
