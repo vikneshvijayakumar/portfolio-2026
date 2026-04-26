@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, memo, lazy, Suspense } from "react";
 import { motion, useSpring, useTransform, AnimatePresence, useMotionValue, useMotionValueEvent, animate } from "motion/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 import {
   toolbarLinks,
   zones,
@@ -1026,6 +1027,7 @@ function App() {
       </AnimatePresence>
 
       <SpeedInsights />
+      <Analytics />
     </div>
   );
 }
