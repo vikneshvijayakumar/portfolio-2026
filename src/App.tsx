@@ -22,7 +22,7 @@ import emailIcon from "./assets/email.svg";
 import linkedinIcon from "./assets/linkedin.svg";
 import logoSvg from "./assets/logo.svg?raw";
 import moonSvg from "./assets/moon.svg?raw";
-import profileImg from "./assets/profile.webp";
+const profileImg = "/assets/profile.webp";
 import sunSvg from "./assets/sun.svg?raw";
 import googleUxBadge from "./assets/google-ux.webp";
 import upworkBadge from "./assets/Upwork-TopRated-Badge.svg";
@@ -1109,7 +1109,15 @@ const AboutCard = memo(function AboutCard({
       }}
     >
       <div className="avatar-disc">
-        <img src={profileImg} alt="Viknesh Vijayakumar" width={120} height={120} draggable="false" />
+        <img 
+          src={profileImg} 
+          alt="Viknesh Vijayakumar" 
+          width={120} 
+          height={120} 
+          draggable="false" 
+          loading="eager"
+          {...({ fetchpriority: "high" } as any)}
+        />
       </div>
       <div className="about-card__header">
         <h1>Viknesh Vijayakumar</h1>
