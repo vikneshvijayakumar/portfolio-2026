@@ -1200,7 +1200,7 @@ const BadgesCluster = memo(function BadgesCluster({
           scale: { type: "spring", stiffness: 300, damping: 25, delay: 0.1 }
         }}
       >
-        <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" width={200} height={200} draggable="false" decoding="async" />
+        <img src={googleUxBadge} alt="Google UX Design Certificate" className="badge-image badge-image--google" width={200} height={200} draggable="false" decoding="async" fetchPriority="high" />
         <span className="badge-tooltip">See Certificate</span>
       </motion.a>
     </div>
