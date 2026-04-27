@@ -9,16 +9,21 @@ const WorkCluster = memo(function WorkCluster({
   isMobile?: boolean;
   isStarted?: boolean;
 }) {
-  const rotations = [-2, 3, 1, -4];
+  // Hand-tuned scattered layout — two rows (3 + 2), feels pinned to a workspace.
+  const layout = [
+    { left: 820,  top: 1420, rotate: -3 },
+    { left: 1110, top: 1455, rotate:  2 },
+    { left: 1400, top: 1430, rotate: -2 },
+    { left: 965,  top: 1755, rotate:  4 },
+    { left: 1255, top: 1735, rotate: -1 },
+  ];
 
   return (
     <section className="work-cluster" data-interactive="true">
       {workPrinciples.map((item, index) => {
-        const desktopRotate = rotations[index % 4];
-        const desktopPos = {
-          left: 910 + (index % 2) * 290,
-          top: 1430 + Math.floor(index / 2) * 320,
-        };
+        const slot = layout[index % layout.length];
+        const desktopRotate = slot.rotate;
+        const desktopPos = { left: slot.left, top: slot.top };
 
         const style = desktopPos;
 

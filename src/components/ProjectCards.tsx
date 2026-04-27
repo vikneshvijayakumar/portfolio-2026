@@ -29,20 +29,28 @@ const ProjectCard = memo(function ProjectCard({
   isMobile?: boolean;
   isStarted?: boolean;
 }) {
+  const isClickable = project.title === "Output Builder";
   const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
     e?.stopPropagation();
+    if (!isClickable) return;
+    const el = e?.currentTarget as HTMLElement | undefined;
+    const rect = el?.getBoundingClientRect();
+    const origin = rect
+      ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+      : undefined;
     if (project.title === "Output Builder") {
-      const el = e?.currentTarget as HTMLElement | undefined;
-      const rect = el?.getBoundingClientRect();
-      const origin = rect
-        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-        : undefined;
       onOpen("output-builder", origin);
     }
   };
 
+  // Prefetch the case study chunk on hover/focus so click is instant.
+  const prefetchCaseStudy = () => {
+    if (!isClickable) return;
+    import("../pages/Obv3");
+  };
+
   const formattedSummary = project.summary.split(/(\d+%)/).map((part, idx) =>
-    part.match(/\d+%/) ? <strong key={idx}>{part}</strong> : part
+    part.match(/\d+%/) ? <span key={idx} className="is-highlight">{part}</span> : part
   );
 
   return (
@@ -76,14 +84,18 @@ const ProjectCard = memo(function ProjectCard({
       }}
       whileHover={{ scale: 1.02, rotate: 0, zIndex: 20 }}
       whileTap={{ scale: 0.98 }}
-      className={`project-card ${project.title === "Output Builder" ? "is-clickable" : "is-disabled"}`}
+      className={`project-card ${isClickable ? "is-clickable" : "is-disabled"}`}
       style={{
         left: project.desktopPosition.x,
         top: project.desktopPosition.y,
       }}
       data-interactive="true"
       tabIndex={0}
-      onFocus={() => onFocusPoint(project.desktopPosition.x, project.desktopPosition.y)}
+      onFocus={() => {
+        onFocusPoint(project.desktopPosition.x, project.desktopPosition.y);
+        prefetchCaseStudy();
+      }}
+      onPointerEnter={prefetchCaseStudy}
       onClick={handleClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -111,14 +123,14 @@ const ProjectCard = memo(function ProjectCard({
         </p>
 
         <div className="project-card__footer-meta">
-          {project.title === "Output Builder" ? (
+          {isClickable ? (
             <div className="project-card__company is-link">
-              <strong>Empyra</strong> · {project.year}
+              <span className="semibold">{project.company}</span> · {project.year}
               <span className="project-card__metadata-arrow" dangerouslySetInnerHTML={{ __html: topArrowSvg }} />
             </div>
           ) : (
             <div className="project-card__company">
-              <strong>{project.company}</strong> · {project.year} · {project.status}
+              <span className="semibold">{project.company}</span> · {project.year} · {project.status}
               {project.status === "Coming Soon" && (
                 <span className="project-card__coming-soon"></span>
               )}

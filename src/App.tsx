@@ -13,7 +13,7 @@ import { MOBILE_BREAKPOINT, STAGE, EASE } from "./utils/constants";
 import SkillsCard from "./components/SkillsCard";
 import Legend from "./components/Legend";
 
-const OutputBuilder = lazy(() => import("./pages/OutputBuilder"));
+const Obv3 = lazy(() => import("./pages/Obv3"));
 const ExperienceStack = lazy(() => import("./components/ExperienceStack"));
 const WorkCluster = lazy(() => import("./components/WorkCluster"));
 const ProjectCards = lazy(() => import("./components/ProjectCards"));
@@ -846,7 +846,7 @@ function App() {
         if (isLegendOpen) setIsLegendOpen(false);
       }}
     >
-      {activeCaseStudy === "output-builder" && (
+      {activeCaseStudy && (
         <style>{`
           html, body { 
             overflow: hidden !important; 
@@ -1021,7 +1021,7 @@ function App() {
       <AnimatePresence>
         {activeCaseStudy === "output-builder" && (
           <Suspense fallback={null}>
-            <OutputBuilder onBack={closeCaseStudy} origin={caseStudyOrigin} />
+            <Obv3 onBack={closeCaseStudy} origin={caseStudyOrigin} />
           </Suspense>
         )}
       </AnimatePresence>

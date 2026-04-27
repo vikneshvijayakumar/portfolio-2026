@@ -1,20 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans+Extra+Condensed:wght@400;600;700&display=swap');
+
 @font-face {
-  font-family: 'FigtreeWeb';
-  src: url('./assets/fonts/Figtree-Variable.woff2') format('woff2-variations');
-  font-weight: 300 900;
+  font-family: 'IBM Plex Sans Variable';
+  src: url('https://cdn.jsdelivr.net/npm/@ibm/plex-sans-variable@0.2.0/fonts/complete/woff2/IBM%20Plex%20Sans%20Var-Roman.woff2') format('woff2-variations');
+  font-weight: 100 700;
   font-style: normal;
   font-display: swap;
 }
 
-@font-feature-values FigtreeWeb {
+@font-feature-values "IBM Plex Sans Variable" {
   @stylistic {
     ss01: 1;
     ss02: 1;
-  }
-
-  @character-variant {
-    cv01: 1;
-    cv02: 1;
   }
 }
 
@@ -28,6 +25,8 @@
 }
 
 :root {
+  --font-title: 'Sofia Sans Extra Condensed', sans-serif;
+  --font-body: 'IBM Plex Sans Variable', sans-serif;
   color-scheme: light;
   --space-1: 4px;
   --space-2: 8px;
@@ -101,45 +100,45 @@
 
 :root[data-theme="ink"] {
   color-scheme: dark;
-  --canvas: #1b1715;
-  --canvas-grid: rgba(242, 231, 219, 0.13);
-  --surface: rgba(36, 31, 28, 0.9);
-  --surface-strong: rgba(44, 39, 36, 0.98);
-  --surface-muted: rgba(36, 31, 28, 0.76);
+  --canvas: #0d0c0b;
+  --canvas-grid: rgba(242, 231, 219, 0.1);
+  --surface: rgba(18, 16, 14, 0.92);
+  --surface-strong: rgba(24, 21, 19, 0.98);
+  --surface-muted: rgba(14, 12, 11, 0.7);
   --primary: #95d56e;
   --primary-dark: #70ac4b;
   --primary-soft: rgba(149, 213, 110, 0.15);
   --blue: #7ba7ff;
   --coral: #ff9c74;
-  --glow-a: rgba(149, 213, 110, 0.08);
-  --glow-b: rgba(149, 213, 110, 0.1);
-  --glow-c: rgba(149, 213, 110, 0.11);
-  --glow-d: rgba(149, 213, 110, 0.06);
+  --glow-a: rgba(149, 213, 110, 0.06);
+  --glow-b: rgba(149, 213, 110, 0.08);
+  --glow-c: rgba(149, 213, 110, 0.09);
+  --glow-d: rgba(149, 213, 110, 0.04);
   --text: #f5eee5;
   --text-rgb: 245, 238, 229;
-  --text-soft: rgba(245, 238, 229, 0.68);
-  --border: rgba(245, 238, 229, 0.11);
+  --text-soft: rgba(245, 238, 229, 0.65);
+  --border: rgba(245, 238, 229, 0.05);
   --shadow-rgb: 0, 0, 0;
-  --paper-ink: #222222;
-  --shadow-color: rgba(0, 0, 0, 0.08);
-  --shadow: 2px 4px 8px rgba(0, 0, 0, 0.4);
-  --logo-filter: invert(1) brightness(2);
+  --paper-ink: #090909;
+  --shadow-color: rgba(0, 0, 0, 0.12);
+  --shadow: 2px 4px 12px rgba(0, 0, 0, 0.6);
+  --logo-filter: invert(1) brightness(1.8);
 
   /* IDE Theme - Dark */
-  --ide-bg: #1e1e1e;
-  --ide-sidebar: #252526;
-  --ide-tab-active: #1e1e1e;
-  --ide-tab-inactive: #2d2d2d;
-  --ide-tab-border: #2b2b2b;
+  --ide-bg: #181513;
+  --ide-sidebar: #0f0d0c;
+  --ide-tab-active: #181513;
+  --ide-tab-inactive: #0f0d0c;
+  --ide-tab-border: #0a0908;
   --ide-text: #d4d4d4;
-  --ide-gutter: #1e1e1e;
+  --ide-gutter: #0f0d0c;
   --md-h1: #569cd6;
   --md-h2: #9cdcfe;
   --md-keyword: #c586c0;
   --md-string: #ce9178;
   --md-comment: #6a9955;
   --md-bullet: #d4d4d4;
-  --tooltip-bg: #383838;
+  --tooltip-bg: #1a1a1a;
   --tooltip-text: #ffffff;
   --tooltip-text-rgb: 255, 255, 255;
 }
@@ -148,8 +147,8 @@
   box-sizing: border-box;
   line-height: 1.5;
   letter-spacing: 0;
-  font-feature-settings: "ss01" 1, "ss02" 1, "cv01" 1, "cv02" 1;
-  font-variant-alternates: stylistic(ss01), stylistic(ss02), character-variant(cv01), character-variant(cv02);
+  font-feature-settings: "ss01" 1, "ss02" 1, "zero" 1;
+  font-variant-alternates: stylistic(ss01), stylistic(ss02);
   text-rendering: optimizeLegibility;
   font-style: normal;
 }
@@ -176,7 +175,7 @@ body,
 
 body {
   margin: 0;
-  font-family: FigtreeWeb, sans-serif;
+  font-family: var(--font-body);
   background:
     radial-gradient(circle at 20% 10%, var(--glow-a), transparent 30%),
     radial-gradient(circle at 80% 12%, var(--glow-b), transparent 24%),
@@ -189,14 +188,71 @@ body {
   transition: background 300ms ease, background-color 300ms ease, color 300ms ease;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(40px, 5vw + 16px, 56px);
+}
+
+h2 {
+  font-size: clamp(32px, 4vw + 16px, 48px);
+}
+
+h3 {
+  font-size: clamp(28px, 3vw + 12px, 40px);
+}
+
+h4 {
+  font-size: clamp(24px, 2vw + 14px, 32px);
+}
+
+h5 {
+  font-size: clamp(20px, 1.5vw + 14px, 24px);
+}
+
+h6 {
+  font-size: clamp(18px, 1vw + 14px, 20px);
+}
+
+.semibold {
+  font-weight: 600;
+}
+
+.bold {
+  font-weight: 700;
+}
+
+.font-title {
+  font-family: var(--font-title);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+
+
 .os-windows body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 button,
-a {
-  font: inherit;
+a,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+  font-size: inherit;
   color: inherit;
 }
 
@@ -1021,22 +1077,20 @@ button {
 }
 
 .about-card__header h1 {
-  margin: 0;
-  font-size: clamp(1.5rem, 2.25vw, 2.25rem);
-  line-height: 1.5;
+  font-family: var(--font-body);
   font-weight: 500;
+  font-size: clamp(24px, 2vw + 14px, 32px);
 }
 
 .about-card__header p {
-  margin: 12px 0 0;
+  margin-top: 12px;
   color: var(--text-soft);
   font-size: 1rem;
 }
 
 .about-card__body {
-  margin: 24px auto 0;
+  margin-top: 24px;
   font-size: 1.06rem;
-  line-height: 1.5;
   text-align: center;
   color: var(--text-soft);
 }
@@ -1169,7 +1223,6 @@ button {
 
 .experience-folder__summary {
   font-size: 0.95rem;
-  line-height: 1.5;
   margin: 0;
 }
 
@@ -1198,7 +1251,7 @@ button {
   color: white;
 }
 
-.experience-folder__front strong {
+.experience-folder__company {
   font-size: 1.4rem;
   font-weight: 500;
   margin-bottom: 0px;
@@ -1206,6 +1259,7 @@ button {
 }
 
 .experience-folder__role {
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 500;
   opacity: 0.9;
@@ -1291,15 +1345,15 @@ button {
 }
 
 .project-card__summary {
+  font-family: var(--font-body);
   margin: 0;
   font-size: 1.4rem;
   color: var(--text);
-  line-height: 1.5;
   font-weight: 400;
 }
 
-.project-card__summary strong {
-  font-weight: 700;
+.project-card__summary span.is-highlight {
+  font-weight: 500;
 }
 
 
@@ -1348,7 +1402,6 @@ button {
 .clock-widget span,
 .social-strip span {
   color: var(--text-soft);
-  line-height: 1.5;
 }
 
 .project-card--concept {
@@ -1482,7 +1535,6 @@ button {
 
 .tooltip__label {
   height: 36px;
-  line-height: 1.5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1659,15 +1711,13 @@ button {
 }
 
 .principle-card__body h2 {
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 0;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .principle-card__body p {
   font-size: 0.88rem;
-  line-height: 1.5;
   opacity: 0.8;
   margin: 0;
 }
@@ -1742,6 +1792,20 @@ button {
   color: var(--text);
 }
 
+.principle-card--yellow {
+  background: none !important;
+}
+
+.principle-card--yellow .principle-card__header {
+  background: color-mix(in srgb, var(--surface) 75%, var(--yellow));
+  color: var(--text);
+}
+
+.principle-card--yellow .principle-card__body {
+  background: color-mix(in srgb, var(--surface) 55%, var(--yellow));
+  color: var(--text);
+}
+
 .social-strip {
   position: relative;
   left: auto;
@@ -1783,7 +1847,6 @@ button {
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 500;
-  line-height: 1.5;
   transition: color 200ms ease, transform 200ms ease;
   z-index: 1;
 }
@@ -2036,7 +2099,7 @@ button {
 
 .markdown-card.is-mobile .markdown-card__tab {
   padding: 0 8px;
-  font-size: 10px;
+  font-size: 12px;
   gap: 4px;
 }
 
@@ -2088,7 +2151,7 @@ button {
   background: var(--ide-tab-inactive);
   border-right: 1px solid var(--ide-tab-border);
   height: 100%;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-soft);
   cursor: pointer;
   transition: background 200ms ease, color 200ms ease;
@@ -2128,7 +2191,6 @@ button {
 
 .markdown-card__gutter div {
   height: 24px;
-  line-height: 1.5;
 }
 
 .markdown-card__content {
@@ -2141,7 +2203,6 @@ button {
 .markdown-card__line {
   display: block;
   min-height: 24px;
-  line-height: 1.5;
 }
 
 /* Syntax Highlighting */
@@ -2159,10 +2220,6 @@ button {
 
 .md-bold {
   font-weight: 700;
-}
-
-.md-italic {
-  font-style: normal;
 }
 
 .inline-asset-svg {
@@ -2342,14 +2399,14 @@ button {
   border: 1px solid rgba(var(--text-rgb), 0.1);
   border-radius: 8px;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 .legend-card__plus {
-  font-size: 10px;
+  font-size: 12px;
   opacity: 0.4;
 }
 

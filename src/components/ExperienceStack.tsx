@@ -93,7 +93,7 @@ const ExperienceStack = memo(function ExperienceStack({
             </div>
             <div className="experience-folder__front">
               <div>
-                <strong>{item.company}</strong>
+                <span className="experience-folder__company">{item.company}</span>
                 <span className="experience-folder__role">{item.role}</span>
               </div>
               <span className="experience-folder__period">{item.period}</span>

@@ -89,9 +89,9 @@ export const zones: Zone[] = [
   },
   {
     id: "how-i-work",
-    label: "How I Work",
-    desktopCenter: { x: 1220, y: 1700 },
-    mobileCenter: { x: 1100, y: 1500 },
+    label: "Principles",
+    desktopCenter: { x: 1240, y: 1650 },
+    mobileCenter: { x: 1000, y: 1500 },
     mobileEyebrow: "Process",
     mobileTitle: "A systems-minded design approach grounded in real constraints.",
     mobileBody:
@@ -158,23 +158,23 @@ export const projects: Project[] = [
 export const workPrinciples: WorkPrinciple[] = [
   {
     index: "01",
-    title: "Start with the bottleneck",
+    title: "Focus on the workflow",
     copy:
-      "I audit current workflows first. Time lost, coordination gaps, and fragile handoffs reveal more than jumping straight into polished screens.",
+      "A pretty interface cannot fix a bad process. I look at the whole user journey to remove friction before I start designing. The goal is to build around how people actually work.",
     accent: "lime",
   },
   {
     index: "02",
-    title: "Design with engineering, not around it",
+    title: "Design with engineering",
     copy:
-      "Constraints are part of the design material. I stay close to implementation realities so solutions land cleanly and scale after handoff.",
+      "My designs are not just eye candy. They must be technically feasible for both developers and the back end. Since I know HTML and CSS, I visualize how screens will actually be built. This makes collaboration much easier.",
     accent: "blue",
   },
   {
     index: "03",
-    title: "Build for real-world use",
+    title: "Keep everything consistent",
     copy:
-      "Enterprise interfaces need to survive exceptions, ambiguity, and repeated daily use. I design for those conditions from the start.",
+      "Consistency is key. I keep my designs consistent with each other. I avoid doing one thing here and making a conflicting design somewhere else. I also follow a 4px grid very strictly.",
     accent: "coral",
   },
   {
@@ -183,6 +183,13 @@ export const workPrinciples: WorkPrinciple[] = [
     copy:
       "Accessible products are more resilient products. The same rigor that supports edge cases usually improves the primary path too.",
     accent: "violet",
+  },
+  {
+    index: "05",
+    title: "Accessibility is a baseline",
+    copy:
+      "Accessibility is never an afterthought. I build it into the design from the very beginning. When you solve problems for edge cases, you improve the experience for everyone.",
+    accent: "yellow",
   },
 ];
 
