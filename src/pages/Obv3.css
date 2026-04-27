@@ -452,6 +452,7 @@
   font-size: 120px;
   line-height: initial;
   color: var(--obv3-accent);
+  font-weight: 600;
 }
 
 .obv3-callout__metric .obv3-pct {
