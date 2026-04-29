@@ -331,15 +331,21 @@ function App() {
 
   useEffect(() => {
     if (isEntering) {
-      // Start the zoom-in immediately to simulate a purposeful scroll entry
-      const timer = window.setTimeout(() => {
-        moveToZone("about", getDefaultZoom(window.innerWidth));
-        // Duration reflects a purposeful, smooth zoom
-        window.setTimeout(() => {
-          setIsEntering(false);
-        }, 1800);
-      }, 50);
-      return () => window.clearTimeout(timer);
+      if (isMobile) {
+        // Skip the zoom animation on mobile to fix LCP. Instantly show the content.
+        moveToZone("about", getDefaultZoom(window.innerWidth), true);
+        setIsEntering(false);
+      } else {
+        // Start the zoom-in immediately to simulate a purposeful scroll entry on desktop
+        const timer = window.setTimeout(() => {
+          moveToZone("about", getDefaultZoom(window.innerWidth));
+          // Duration reflects a purposeful, smooth zoom
+          window.setTimeout(() => {
+            setIsEntering(false);
+          }, 1800);
+        }, 50);
+        return () => window.clearTimeout(timer);
+      }
     }
   }, [isLoaded, isEntering, isMobile]);
 
@@ -488,7 +494,7 @@ function App() {
     };
   }, []);
 
-  const moveToZone = (zoneId: ZoneId, customScale?: number) => {
+  const moveToZone = (zoneId: ZoneId, customScale?: number, instant = false) => {
     setIsNavigating(true);
     setActiveZone(zoneId);
 
@@ -497,12 +503,17 @@ function App() {
     const targetZoom = customScale ?? (isMobile ? (zone.targetScale?.mobile ?? getDefaultZoom(window.innerWidth)) - (isSmallPhone ? 0.15 : 0) : zone.targetScale?.desktop) ?? getDefaultZoom(window.innerWidth);
     const target = centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom);
 
-    animate(camX, target.x, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
-    animate(camY, target.y, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
-    animate(camScale, target.scale, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
-
-    // Reset navigating flag after animation roughly finishes
-    setTimeout(() => setIsNavigating(false), 1000);
+    if (instant) {
+      camX.set(target.x);
+      camY.set(target.y);
+      camScale.set(target.scale);
+      setIsNavigating(false);
+    } else {
+      animate(camX, target.x, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
+      animate(camY, target.y, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
+      animate(camScale, target.scale, { type: "spring", stiffness: 60, damping: 18, mass: 1 });
+      setTimeout(() => setIsNavigating(false), 1000);
+    }
   };
 
   const moveMobileBy = (direction: -1 | 1) => {
