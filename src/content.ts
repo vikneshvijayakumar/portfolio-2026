@@ -28,7 +28,7 @@ export type Project = {
   type?: "case-study" | "concept";
 };
 
-export type WorkPrinciple = {
+type WorkPrinciple = {
   index: string;
   title: string;
   copy: string;
@@ -59,12 +59,13 @@ export const zones: Zone[] = [
   {
     id: "case-studies",
     label: "Case Studies",
-    desktopCenter: { x: 3200, y: 900 },
+    desktopCenter: { x: 3200, y: 1000 },
+    mobileCenter: { x: 3200, y: 900 },
     mobileEyebrow: "Selected Work",
     mobileTitle: "Projects designed for complex, high-stakes workflows.",
     mobileBody:
       "A recruiter-friendly scan of the systems work: workflow redesign, modular outputs, guided form completion, and reporting surfaces that help teams act faster.",
-    targetScale: { desktop: 0.85, mobile: 0.68 }
+    targetScale: { desktop: 1.0, mobile: 0.68 }
   },
   {
     id: "experience",
@@ -75,7 +76,7 @@ export const zones: Zone[] = [
     mobileTitle: "Over a decade across enterprise and startups",
     mobileBody:
       "A look into where I've worked and what I've done across healthtech, edtech, and B2B SaaS.",
-    targetScale: { desktop: 0.90, mobile: 0.9 }
+    targetScale: { desktop: 1.0, mobile: 0.9 }
   },
   {
     id: "skills",
@@ -193,7 +194,7 @@ export const workPrinciples: WorkPrinciple[] = [
   },
 ];
 
-export type Experience = {
+type Experience = {
   role: string;
   company: string;
   period: string;

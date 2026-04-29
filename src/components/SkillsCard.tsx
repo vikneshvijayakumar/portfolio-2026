@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect, memo } from "react";
 import { motion } from "motion/react";
 
+const MdH2 = ({ children }: { children: React.ReactNode }) => (
+  <div className="markdown-card__line"><span className="md-h2">{children}</span></div>
+);
+
+const MdItem = ({ label, desc }: { label: string; desc: string }) => (
+  <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">{label}</span>: {desc}</div>
+);
+
 const SkillsCard = memo(function SkillsCard({ 
   isMobile,
   isStarted = false 
@@ -41,10 +49,10 @@ const SkillsCard = memo(function SkillsCard({
       version: "1.0.0",
       content: (
         <>
-          <div className="markdown-card__line"><span className="md-h2">DOMAIN_SPECIALIZATION</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Enterprise</span>: Optimized for SaaS complexity and high-density data visualization.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">AI_Integration</span>: Specialized in HITL (Human-in-the-Loop) design patterns.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Verticals</span>: Healthcare UX, EdTech, and high-stakes Investor Demos.</div>
+          <MdH2>DOMAIN_SPECIALIZATION</MdH2>
+          <MdItem label="Enterprise" desc="Optimized for SaaS complexity and high-density data visualization." />
+          <MdItem label="AI_Integration" desc="Specialized in HITL (Human-in-the-Loop) design patterns." />
+          <MdItem label="Verticals" desc="Healthcare UX, EdTech, and high-stakes Investor Demos." />
         </>
       )
     },
@@ -54,9 +62,9 @@ const SkillsCard = memo(function SkillsCard({
       version: "1.0.0",
       content: (
         <>
-          <div className="markdown-card__line"><span className="md-h2">DESIGN_LEADERSHIP_PROTOCOL</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Collaboration</span>: Prioritize cross-functional alignment and stakeholder buy-in.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Team Management</span>: Execute mentoring and design direction for teams (up to 7+).</div>
+          <MdH2>DESIGN_LEADERSHIP_PROTOCOL</MdH2>
+          <MdItem label="Collaboration" desc="Prioritize cross-functional alignment and stakeholder buy-in." />
+          <MdItem label="Team Management" desc="Execute mentoring and design direction for teams (up to 7+)." />
           <div className="markdown-card__line"><span className="md-bold">Process</span>: Operate within Agile methodologies and maintain high-fidelity client communication.</div>
         </>
       )
@@ -67,10 +75,10 @@ const SkillsCard = memo(function SkillsCard({
       version: "1.0.0",
       content: (
         <>
-          <div className="markdown-card__line"><span className="md-h2">ACCESSIBILITY_VALIDATION</span></div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Compliance</span>: All outputs must strictly adhere to WCAG 2.2 standards.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">Evaluation</span>: Perform heuristic analysis on all UI components.</div>
-          <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">UX_Copy</span>: Optimize for clarity via UX Writing and intuitive interaction design.</div>
+          <MdH2>ACCESSIBILITY_VALIDATION</MdH2>
+          <MdItem label="Compliance" desc="All outputs must strictly adhere to WCAG 2.2 standards." />
+          <MdItem label="Evaluation" desc="Perform heuristic analysis on all UI components." />
+          <MdItem label="UX_Copy" desc="Optimize for clarity via UX Writing and intuitive interaction design." />
         </>
       )
     }

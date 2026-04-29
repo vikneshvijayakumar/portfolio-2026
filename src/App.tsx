@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, memo, lazy, Suspense } from "react";
 import { motion, useSpring, useTransform, AnimatePresence, useMotionValue, useMotionValueEvent, animate } from "motion/react";
-import { SpeedInsights } from "@vercel/speed-insights/react";
-import { Analytics } from "@vercel/analytics/react";
+
+
 import {
   toolbarLinks,
   zones,
@@ -10,8 +10,8 @@ import {
 } from "./content";
 import { MOBILE_BREAKPOINT, STAGE, EASE } from "./utils/constants";
 
-import SkillsCard from "./components/SkillsCard";
-import Legend from "./components/Legend";
+const SkillsCard = lazy(() => import("./components/SkillsCard"));
+const Legend = lazy(() => import("./components/Legend"));
 
 const Obv3 = lazy(() => import("./pages/Obv3"));
 const ExperienceStack = lazy(() => import("./components/ExperienceStack"));
@@ -249,6 +249,13 @@ function App() {
     experience: null,
     skills: null,
   });
+
+  const applyCamera = (target: Camera, stiffness = 120, damping = 20) => {
+    const config = { type: "spring", stiffness, damping } as const;
+    animate(camX, target.x, config);
+    animate(camY, target.y, config);
+    animate(camScale, target.scale, config);
+  };
 
   const isMac = typeof window !== 'undefined'
     ? navigator.userAgent.toUpperCase().indexOf('MAC') >= 0
@@ -662,9 +669,7 @@ function App() {
             window.innerWidth,
             window.innerHeight,
           );
-          animate(camX, zoomed.x, { type: "spring", stiffness: 120, damping: 20 });
-          animate(camY, zoomed.y, { type: "spring", stiffness: 120, damping: 20 });
-          animate(camScale, zoomed.scale, { type: "spring", stiffness: 120, damping: 20 });
+          applyCamera(zoomed);
         } else {
           lastTapRef.current = { t: now, x: event.clientX, y: event.clientY };
         }
@@ -748,17 +753,13 @@ function App() {
       window.innerWidth,
       window.innerHeight,
     );
-    animate(camX, zoomed.x, { type: "spring", stiffness: 120, damping: 20 });
-    animate(camY, zoomed.y, { type: "spring", stiffness: 120, damping: 20 });
-    animate(camScale, zoomed.scale, { type: "spring", stiffness: 120, damping: 20 });
+    applyCamera(zoomed);
   };
 
   const resetZoom = () => {
     const zone = zones.find((entry) => entry.id === activeZone)!;
     const target = centerCamera(zone, window.innerWidth, window.innerHeight, getDefaultZoom(window.innerWidth));
-    animate(camX, target.x, { type: "spring", stiffness: 120, damping: 20 });
-    animate(camY, target.y, { type: "spring", stiffness: 120, damping: 20 });
-    animate(camScale, target.scale, { type: "spring", stiffness: 120, damping: 20 });
+    applyCamera(target);
   };
 
   useEffect(() => {
@@ -891,10 +892,12 @@ function App() {
               >
                 ?
               </button>
-              <Legend
-                isOpen={isLegendOpen}
-                modifierKey={modifierKey}
-              />
+              <Suspense fallback={null}>
+                <Legend
+                  isOpen={isLegendOpen}
+                  modifierKey={modifierKey}
+                />
+              </Suspense>
             </div>
             <ThemeToggle theme={theme} setTheme={setTheme} />
             {!isMobile && !isTablet && (
@@ -966,8 +969,8 @@ function App() {
             }}
           >
             <AboutCard isStarted={startAnimations} isMobile={isMobile} />
-            <SkillsCard isMobile={isMobile} isStarted={startAnimations} />
             <Suspense fallback={null}>
+              <SkillsCard isMobile={isMobile} isStarted={startAnimations} />
               <LazySentinel onReady={() => setIsLazyReady(true)} />
               <ExperienceStack isMobile={isMobile} onFocusPoint={panToPoint} isStarted={startAnimations} />
               <ProjectCards onOpenCaseStudy={openCaseStudy} onFocusPoint={panToPoint} isMobile={isMobile} isStarted={startAnimations} />
@@ -1025,9 +1028,6 @@ function App() {
           </Suspense>
         )}
       </AnimatePresence>
-
-      <SpeedInsights />
-      <Analytics />
     </div>
   );
 }

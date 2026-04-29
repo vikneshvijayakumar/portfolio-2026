@@ -209,6 +209,57 @@ function RevealSection({
   );
 }
 
+function SectionBlock({
+  id,
+  className,
+  number,
+  title,
+  eyebrow,
+  heading,
+  onVisible,
+  children,
+}: {
+  id: string;
+  className: string;
+  number: string;
+  title: string;
+  eyebrow: string;
+  heading?: React.ReactNode;
+  onVisible?: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <RevealSection id={id} className={`obv3-section ${className}`} onVisible={onVisible}>
+      <div className="obv3-section__inner">
+        <div className="obv3-section__number">
+          {number}<span>{title}</span>
+        </div>
+        <div>
+          <div className="obv3-eyebrow">{eyebrow}</div>
+          {heading && <h2 className="obv3-heading">{heading}</h2>}
+          {children}
+        </div>
+      </div>
+    </RevealSection>
+  );
+}
+
+function ImpactStat({ label, desc, children }: { label: string; desc: string; children: React.ReactNode }) {
+  return (
+    <motion.div
+      className="obv3-impact-stat"
+      variants={{
+        hidden: { opacity: 0, y: 16 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+      }}
+    >
+      <div className="obv3-stat-label">{label}</div>
+      <div className="obv3-stat-num">{children}</div>
+      <div className="obv3-stat-desc">{desc}</div>
+    </motion.div>
+  );
+}
+
 export default function Obv3({ onBack, origin }: Props) {
   const transformOrigin = origin ? `${origin.x}px ${origin.y}px` : "50% 50%";
   const [activeId, setActiveId] = useState<string>("obv3-hero");
@@ -369,18 +420,21 @@ export default function Obv3({ onBack, origin }: Props) {
         </motion.section>
 
         {/* 01 OVERVIEW */}
-        <RevealSection id="obv3-overview" className="obv3-section obv3-section--overview" onVisible={setActiveId}>
-          <div className="obv3-section__inner">
-            <div className="obv3-section__number">
-              01<span>Overview</span>
-            </div>
-            <div>
-              <div className="obv3-eyebrow">The Problem</div>
-              <h2 className="obv3-heading">
-                Replacing Manual PDFs
-                <br />
-                with a Scalable System
-              </h2>
+        <SectionBlock
+          id="obv3-overview"
+          className="obv3-section--overview"
+          onVisible={setActiveId}
+          number="01"
+          title="Overview"
+          eyebrow="The Problem"
+          heading={
+            <>
+              Replacing Manual PDFs
+              <br />
+              with a Scalable System
+            </>
+          }
+        >
               <p className="obv3-body">
                 Organizations collect data using big forms, sometimes with 50+ questions. The system uses that data to automatically generate multiple official documents (outputs). But first, someone has to build the output templates that tell the system where these form data go.
               </p>
@@ -405,24 +459,24 @@ export default function Obv3({ onBack, origin }: Props) {
                 </div>
               </motion.div>
 
-    
-            </div>
-          </div>
-        </RevealSection>
+        </SectionBlock>
 
         {/* 02 CONTRAST */}
-        <RevealSection id="obv3-contrast" className="obv3-section obv3-section--contrast" onVisible={setActiveId}>
-          <div className="obv3-section__inner">
-            <div className="obv3-section__number">
-              02<span>Contrast</span>
-            </div>
-            <div>
-              <div className="obv3-eyebrow">Before &amp; After</div>
-              <h2 className="obv3-heading">
-                A Manual System
-                <br />
-                That Didn't Scale
-              </h2>
+        <SectionBlock
+          id="obv3-contrast"
+          className="obv3-section--contrast"
+          onVisible={setActiveId}
+          number="02"
+          title="Contrast"
+          eyebrow="Before &amp; After"
+          heading={
+            <>
+              A Manual System
+              <br />
+              That Didn't Scale
+            </>
+          }
+        >
               <p className="obv3-body">
                 Static PDFs don't know where form answers belong. Developers had to manually bridge that gap by mapping unique response codes to pixel coordinates on a blank PDF. This is time consuming and leads to duplication and human errors.
               </p>
@@ -459,23 +513,24 @@ export default function Obv3({ onBack, origin }: Props) {
               <p className="obv3-body obv3-italic" style={{ marginBottom: 0 }}>
                 "The fix wasn't just a better PDF tool, it was bringing the process in-house and removing manual mapping entirely."
               </p>
-            </div>
-          </div>
-        </RevealSection>
+        </SectionBlock>
 
         {/* 03 SOLUTION */}
-        <RevealSection id="obv3-solution" className="obv3-section obv3-section--solution" onVisible={setActiveId}>
-          <div className="obv3-section__inner">
-            <div className="obv3-section__number">
-              03<span>Solution</span>
-            </div>
-            <div>
-              <div className="obv3-eyebrow">Design Decisions</div>
-              <h2 className="obv3-heading">
-                From Manual Workflows
-                <br />
-                to a Visual System
-              </h2>
+        <SectionBlock
+          id="obv3-solution"
+          className="obv3-section--solution"
+          onVisible={setActiveId}
+          number="03"
+          title="Solution"
+          eyebrow="Design Decisions"
+          heading={
+            <>
+              From Manual Workflows
+              <br />
+              to a Visual System
+            </>
+          }
+        >
               <p className="obv3-body">
                 I designed a completely self-serve tool that brought the entire process in-house. The system hides the complexity in the background, letting users focus on the output they want to create, not the mechanics behind it.
               </p>
@@ -527,23 +582,24 @@ export default function Obv3({ onBack, origin }: Props) {
                   </motion.article>
                 ))}
               </div>
-            </div>
-          </div>
-        </RevealSection>
+        </SectionBlock>
 
         {/* 04 IMPACT */}
-        <RevealSection id="obv3-impact" className="obv3-section obv3-section--impact" onVisible={setActiveId}>
-          <div className="obv3-section__inner">
-            <div className="obv3-section__number">
-              04<span>Impact</span>
-            </div>
-            <div>
-              <div className="obv3-eyebrow">Outcomes</div>
-              <h2 className="obv3-heading">
-                Removing the Bottleneck,
-                <br />
-                Cutting the Costs
-              </h2>
+        <SectionBlock
+          id="obv3-impact"
+          className="obv3-section--impact"
+          onVisible={setActiveId}
+          number="04"
+          title="Impact"
+          eyebrow="Outcomes"
+          heading={
+            <>
+              Removing the Bottleneck,
+              <br />
+              Cutting the Costs
+            </>
+          }
+        >
               <p className="obv3-body">
                 A heavy engineering task became a fast, self-serve tool. This massively sped up customer onboarding and reduced server infrastructure costs.
               </p>
@@ -558,43 +614,15 @@ export default function Obv3({ onBack, origin }: Props) {
                   show: { transition: { staggerChildren: 0.1 } },
                 }}
               >
-                <motion.div
-                  className="obv3-impact-stat"
-                  variants={{
-                    hidden: { opacity: 0, y: 16 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
-                  }}
-                >
-                  <div className="obv3-stat-label">Creation Time</div>
-                  <div className="obv3-stat-num">
-                    <span className="obv3-stat-unit">↓</span>90<span className="obv3-stat-unit">%</span>
-                  </div>
-                  <div className="obv3-stat-desc">Days of dev time down to hours of self-service</div>
-                </motion.div>
-                <motion.div
-                  className="obv3-impact-stat"
-                  variants={{
-                    hidden: { opacity: 0, y: 16 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
-                  }}
-                >
-                  <div className="obv3-stat-label">Dev Dependency</div>
-                  <div className="obv3-stat-num">Zero</div>
-                  <div className="obv3-stat-desc">Clients manage outputs without engineers or external tools</div>
-                </motion.div>
-                <motion.div
-                  className="obv3-impact-stat"
-                  variants={{
-                    hidden: { opacity: 0, y: 16 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
-                  }}
-                >
-                  <div className="obv3-stat-label">Infrastructure</div>
-                  <div className="obv3-stat-num">
-                    <span className="obv3-stat-unit">↓</span>100<span className="obv3-stat-unit">%</span>
-                  </div>
-                  <div className="obv3-stat-desc">Eliminated static file storage by generating PDFs on-demand only</div>
-                </motion.div>
+                <ImpactStat label="Creation Time" desc="Days of dev time down to hours of self-service">
+                  <span className="obv3-stat-unit">↓</span>90<span className="obv3-stat-unit">%</span>
+                </ImpactStat>
+                <ImpactStat label="Dev Dependency" desc="Clients manage outputs without engineers or external tools">
+                  Zero
+                </ImpactStat>
+                <ImpactStat label="Infrastructure" desc="Eliminated static file storage by generating PDFs on-demand only">
+                  <span className="obv3-stat-unit">↓</span>100<span className="obv3-stat-unit">%</span>
+                </ImpactStat>
               </motion.div>
 
               <div className="obv3-divider" />
@@ -613,23 +641,24 @@ export default function Obv3({ onBack, origin }: Props) {
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </RevealSection>
+        </SectionBlock>
 
         {/* 05 EVOLUTION */}
-        <RevealSection id="obv3-evolution" className="obv3-section obv3-section--evolution" onVisible={setActiveId}>
-          <div className="obv3-section__inner">
-            <div className="obv3-section__number">
-              05<span>Evolution</span>
-            </div>
-            <div>
-              <div className="obv3-eyebrow">The North Star</div>
-              <h2 className="obv3-heading">
-                Exploring a
-                <br />
-                More Radical Idea
-              </h2>
+        <SectionBlock
+          id="obv3-evolution"
+          className="obv3-section--evolution"
+          onVisible={setActiveId}
+          number="05"
+          title="Evolution"
+          eyebrow="The North Star"
+          heading={
+            <>
+              Exploring a
+              <br />
+              More Radical Idea
+            </>
+          }
+        >
               <p className="obv3-body">
                 While the visual builder solved the immediate bottleneck, I also mapped out the next horizon — a more fundamental rethinking of the problem.
               </p>
@@ -652,18 +681,17 @@ export default function Obv3({ onBack, origin }: Props) {
                 <em className="obv3-emph-cream">building a form → generating a document</em>, the interface becomes{" "}
                 <em className="obv3-emph-accent">design the output → system fills it in.</em>
               </p>
-            </div>
-          </div>
-        </RevealSection>
+        </SectionBlock>
 
         {/* 06 REFLECTION */}
-        <RevealSection id="obv3-reflection" className="obv3-section obv3-section--reflection" onVisible={setActiveId}>
-          <div className="obv3-section__inner">
-            <div className="obv3-section__number">
-              06<span>Reflection</span>
-            </div>
-            <div>
-              <div className="obv3-eyebrow">Key Takeaway</div>
+        <SectionBlock
+          id="obv3-reflection"
+          className="obv3-section--reflection"
+          onVisible={setActiveId}
+          number="06"
+          title="Reflection"
+          eyebrow="Key Takeaway"
+        >
               <motion.div
                 className="obv3-reflection-rule"
                 initial={{ scaleX: 0, transformOrigin: "0% 50%" }}
@@ -686,9 +714,7 @@ export default function Obv3({ onBack, origin }: Props) {
                 <span className="obv3-reflection-tail">simplifying the underlying system is always better than just polishing the pixels.</span>{" "}
                 Design at the architecture level, not just the interface level.
               </p>
-            </div>
-          </div>
-        </RevealSection>
+        </SectionBlock>
 
         {/* FOOTER */}
         <motion.footer

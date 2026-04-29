@@ -1065,7 +1065,6 @@ button {
 
 [data-theme="ink"] .avatar-disc img {
   box-shadow: 0 8px 32px rgba(var(--black-rgb), 0.4);
-  z-index: 50;
 }
 
 [data-theme="ink"] .avatar-disc:hover img {

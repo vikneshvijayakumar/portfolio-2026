@@ -23,71 +23,59 @@ export default function Legend({ isOpen, modifierKey = MODIFIER_KEY }: { isOpen:
 
             <div className="legend-card__sections">
               <div className="legend-card__section">
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">Click</kbd>
-                    <span className="legend-card__plus">+</span>
-                    <kbd className="legend-card__key">Drag</kbd>
-                  </span>
-                  <span className="legend-card__action">Pan Canvas</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">←</kbd>
-                    <span className="legend-card__plus">/</span>
-                    <kbd className="legend-card__key">→</kbd>
-                  </span>
-                  <span className="legend-card__action">Switch Section</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">1 - 5</kbd>
-                  </span>
-                  <span className="legend-card__action">Jump to Section</span>
-                </div>
+                <LegendRow action="Pan Canvas">
+                  <kbd className="legend-card__key">Click</kbd>
+                  <span className="legend-card__plus">+</span>
+                  <kbd className="legend-card__key">Drag</kbd>
+                </LegendRow>
+                <LegendRow action="Switch Section">
+                  <kbd className="legend-card__key">←</kbd>
+                  <span className="legend-card__plus">/</span>
+                  <kbd className="legend-card__key">→</kbd>
+                </LegendRow>
+                <LegendRow action="Jump to Section">
+                  <kbd className="legend-card__key">1 - 5</kbd>
+                </LegendRow>
               </div>
 
               <div className="legend-card__divider" />
 
               <div className="legend-card__section">
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">{modifierKey}</kbd>
-                    <span className="legend-card__plus">+</span>
-                    <kbd className="legend-card__key">Scroll</kbd>
-                  </span>
-                  <span className="legend-card__action">Smooth Zoom</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">{modifierKey}</kbd>
-                    <span className="legend-card__plus">+</span>
-                    <kbd className="legend-card__key">0</kbd>
-                  </span>
-                  <span className="legend-card__action">Reset Zoom</span>
-                </div>
+                <LegendRow action="Smooth Zoom">
+                  <kbd className="legend-card__key">{modifierKey}</kbd>
+                  <span className="legend-card__plus">+</span>
+                  <kbd className="legend-card__key">Scroll</kbd>
+                </LegendRow>
+                <LegendRow action="Reset Zoom">
+                  <kbd className="legend-card__key">{modifierKey}</kbd>
+                  <span className="legend-card__plus">+</span>
+                  <kbd className="legend-card__key">0</kbd>
+                </LegendRow>
               </div>
 
               <div className="legend-card__divider" />
 
               <div className="legend-card__section">
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">T</kbd>
-                  </span>
-                  <span className="legend-card__action">Switch Theme</span>
-                </div>
-                <div className="legend-card__row">
-                  <span className="legend-card__keys">
-                    <kbd className="legend-card__key">Shift + /</kbd>
-                  </span>
-                  <span className="legend-card__action">Toggle Help</span>
-                </div>
+                <LegendRow action="Switch Theme">
+                  <kbd className="legend-card__key">T</kbd>
+                </LegendRow>
+                <LegendRow action="Toggle Help">
+                  <kbd className="legend-card__key">Shift + /</kbd>
+                </LegendRow>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function LegendRow({ children, action }: { children: React.ReactNode; action: string }) {
+  return (
+    <div className="legend-card__row">
+      <span className="legend-card__keys">{children}</span>
+      <span className="legend-card__action">{action}</span>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, memo } from "react";
 import { motion } from "motion/react";
 import { experience, type ZoneId } from "../content";
+import { getCardTransition } from "../utils/constants";
 
 const ExperienceStack = memo(function ExperienceStack({ 
   isMobile, 
@@ -60,13 +61,7 @@ const ExperienceStack = memo(function ExperienceStack({
             key={folderId}
             initial={{ opacity: 0, rotate: desktopRotate, left: style.left, top: style.top, scale: 0.9 }}
             animate={isStarted ? { opacity: 1, rotate: desktopRotate, left: style.left, top: style.top, scale: 1 } : { opacity: 0, rotate: desktopRotate, left: style.left, top: style.top, scale: 0.9 }}
-            transition={{ 
-              opacity: { duration: 0.3, delay: (isMobile ? 0.05 : 0.2) + index * (isMobile ? 0.02 : 0.05) },
-              scale: { type: "spring", stiffness: 300, damping: 25, delay: (isMobile ? 0.05 : 0.2) + index * (isMobile ? 0.02 : 0.05) },
-              left: { type: "spring", stiffness: 400, damping: 35 },
-              top: { type: "spring", stiffness: 400, damping: 35 },
-              rotate: { type: "spring", stiffness: 400, damping: 35 }
-            }}
+            transition={getCardTransition(isMobile, index)}
             whileTap={{ scale: 0.98 }}
             className={`experience-folder ${isOpen ? "is-open" : ""}`}
             style={style}

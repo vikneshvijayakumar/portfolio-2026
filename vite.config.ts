@@ -18,7 +18,6 @@ export default defineConfig({
             }
             if (id.includes("react-dom")) return "react-dom";
             if (id.includes("react") || id.includes("scheduler")) return "react";
-            if (id.includes("@vercel")) return "vercel";
           }
         },
       },

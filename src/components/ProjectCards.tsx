@@ -6,6 +6,7 @@ import formBuilderImg from "../assets/form-builder.webp";
 import formTakingImg from "../assets/form-taking.webp";
 import outputBuilderImg from "../assets/output-builder.webp";
 import topArrowSvg from "../assets/top-right-arrow.svg?raw";
+import { getCardTransition } from "../utils/constants";
 
 const projectImages: Record<string, string> = {
   "dashboard.webp": dashboardImg,
@@ -75,13 +76,7 @@ const ProjectCard = memo(function ProjectCard({
         left: project.desktopPosition.x,
         top: project.desktopPosition.y
       }}
-      transition={{
-        opacity: { duration: 0.3, delay: (isMobile ? 0.05 : 0.2) + index * (isMobile ? 0.02 : 0.05) },
-        scale: { type: "spring", stiffness: 300, damping: 25, delay: (isMobile ? 0.05 : 0.2) + index * (isMobile ? 0.02 : 0.05) },
-        left: { type: "spring", stiffness: 400, damping: 35 },
-        top: { type: "spring", stiffness: 400, damping: 35 },
-        rotate: { type: "spring", stiffness: 400, damping: 35 }
-      }}
+      transition={getCardTransition(isMobile, index)}
       whileHover={{ scale: 1.02, rotate: 0, zIndex: 20 }}
       whileTap={{ scale: 0.98 }}
       className={`project-card ${isClickable ? "is-clickable" : "is-disabled"}`}

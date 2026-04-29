@@ -21,3 +21,6 @@ vite.config.d.ts
 
 # Archived/dead code (kept locally, excluded from git)
 src/_archive/
+
+# Fallow tools cache
+.fallow/
