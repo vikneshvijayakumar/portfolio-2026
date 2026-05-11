@@ -269,8 +269,8 @@ function App() {
     rotate: -1
   };
   const madeWithPos = {
-    x: isMobile ? 2500 : 3080,
-    y: isMobile ? 1700 : 600,
+    x: isMobile ? 1900 : 2480,
+    y: isMobile ? 1300 : 200,
     rotate: -9
   };
 

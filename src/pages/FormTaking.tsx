@@ -4,7 +4,7 @@ import "./FormTaking.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-const PASSWORD_HASH = "df243cc153f04d98e5cfa56474b6fd8df49dfe7719bcf27e43ba143ca93bcb76";
+const PASSWORD_HASH = "2a7eef6a830db3a96c4710b22f833ca2b76e990bb3445977ac6ce848cd14fd05";
 const STORAGE_KEY = "viknesh-form-taking-unlocked";
 const FIGMA_SRC =
   "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdeck%2FAstzpq5hdC0rIVFP8qBOek%2FForm-Taking%3Fnode-id%3D1-42%26t%3DGPbiU7ok5J07P8BF-1";
