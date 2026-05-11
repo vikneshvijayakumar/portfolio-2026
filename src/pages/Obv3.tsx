@@ -293,34 +293,30 @@ export default function Obv3({ onBack, origin }: Props) {
       aria-modal="true"
       aria-label="Form Taking case study"
       style={{ transformOrigin, willChange: "transform, opacity" }}
-      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.05, filter: "blur(8px)" }}
-      animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
-      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.05, filter: "blur(8px)" }}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.05 }}
+      animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.05 }}
       transition={
         reduceMotion
           ? { duration: 0.2, ease: EASE }
           : {
               scale: { type: "spring", stiffness: 180, damping: 24, mass: 0.9 },
               opacity: { duration: 0.35, ease: EASE },
-              filter: { duration: 0.35, ease: EASE },
             }
       }
     >
-      <motion.button
-        className="obv3-back"
-        onClick={onBack}
-        aria-label="Back"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE, delay: 0.25 }}
-        whileHover={{ y: -1 }}
-        whileTap={{ scale: 0.96 }}
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-        <span>Back</span>
-      </motion.button>
+      <div className="obv3-topbar">
+        <button className="obv3-back" onClick={onBack} type="button" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <span>Back</span>
+        </button>
+        <div className="obv3-topbar__title">
+          <span className="obv3-topbar__eyebrow">Empyra · 2024</span>
+          <span className="obv3-topbar__name">Output Builder</span>
+        </div>
+      </div>
 
       <nav className="obv3-sidenav" aria-label="Sections">
         {NAV_SECTIONS.map((s) => (
@@ -349,15 +345,7 @@ export default function Obv3({ onBack, origin }: Props) {
           transition={{ duration: 0.6, ease: EASE }}
         >
           <div className="obv3-hero__inner">
-            <motion.div
-              className="obv3-hero__topbar"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
-            >
-              <span className="obv3-hero__tag">Empyra · 2024</span>
-              <span className="obv3-hero__index">CS — 001</span>
-            </motion.div>
+
 
             <div className="obv3-hero__main">
               <div className="obv3-hero__lede">

@@ -30,24 +30,32 @@ const ProjectCard = memo(function ProjectCard({
   isMobile?: boolean;
   isStarted?: boolean;
 }) {
-  const isClickable = project.title === "Output Builder";
+  const caseStudyId =
+    project.title === "Enterprise Output Architecture"
+      ? "output-builder"
+      : project.title === "Hybrid .NET/React Form Bridge"
+      ? "form-taking"
+      : null;
+  const isClickable = caseStudyId !== null;
   const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
     e?.stopPropagation();
-    if (!isClickable) return;
+    if (!isClickable || !caseStudyId) return;
     const el = e?.currentTarget as HTMLElement | undefined;
     const rect = el?.getBoundingClientRect();
     const origin = rect
       ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
       : undefined;
-    if (project.title === "Output Builder") {
-      onOpen("output-builder", origin);
-    }
+    onOpen(caseStudyId, origin);
   };
 
   // Prefetch the case study chunk on hover/focus so click is instant.
   const prefetchCaseStudy = () => {
     if (!isClickable) return;
-    import("../pages/Obv3");
+    if (caseStudyId === "output-builder") {
+      import("../pages/Obv3");
+    } else if (caseStudyId === "form-taking") {
+      import("../pages/FormTaking");
+    }
   };
 
   const formattedSummary = project.summary.split(/(\d+%)/).map((part, idx) =>
@@ -100,32 +108,50 @@ const ProjectCard = memo(function ProjectCard({
       }}
     >
       <div className="project-card__visual">
-        <img
-          src={projectImages[project.image]}
-          alt={project.title}
-          className="project-card__image"
-          width={512}
-          height={288}
-          draggable="false"
-          loading="lazy"
-          decoding="async"
-        />
+        <div className="project-card__image-wrapper">
+          <img
+            src={projectImages[project.image]}
+            alt={project.title}
+            className={`project-card__image ${project.note?.includes("Password") ? "is-locked" : ""}`}
+            width={512}
+            height={288}
+            draggable="false"
+            loading="lazy"
+            decoding="async"
+          />
+          {project.note?.includes("Password") && (
+            <div className="project-card__lock-overlay">
+              <div className="project-card__lock-icon" aria-hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="project-card__content">
-        <p className="project-card__summary">
-          {formattedSummary}
-        </p>
+        <div className="project-card__text-group">
+          <h3 className="project-card__title">{project.title}</h3>
+          <p className="project-card__summary">
+            {formattedSummary}
+          </p>
+        </div>
 
         <div className="project-card__footer-meta">
           {isClickable ? (
             <div className="project-card__company is-link">
               <span className="semibold">{project.company}</span> · {project.year}
+              {project.note?.includes("Password") ? ` · ${project.note}` : ""}
               <span className="project-card__metadata-arrow" dangerouslySetInnerHTML={{ __html: topArrowSvg }} />
             </div>
           ) : (
             <div className="project-card__company">
-              <span className="semibold">{project.company}</span> · {project.year} · {project.status}
+              <span className="semibold">{project.company}</span> · {project.year}
+              {project.note?.includes("Password") ? ` · ${project.note}` : ""}
+              {project.status ? ` · ${project.status}` : ""}
               {project.status === "Coming Soon" && (
                 <span className="project-card__coming-soon"></span>
               )}

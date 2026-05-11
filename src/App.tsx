@@ -14,6 +14,7 @@ const SkillsCard = lazy(() => import("./components/SkillsCard"));
 const Legend = lazy(() => import("./components/Legend"));
 
 const Obv3 = lazy(() => import("./pages/Obv3"));
+const FormTaking = lazy(() => import("./pages/FormTaking"));
 const ExperienceStack = lazy(() => import("./components/ExperienceStack"));
 const WorkCluster = lazy(() => import("./components/WorkCluster"));
 const ProjectCards = lazy(() => import("./components/ProjectCards"));
@@ -76,7 +77,7 @@ const LazySentinel = memo(function LazySentinel({ onReady }: { onReady: () => vo
  * so resize / rotate picks up the new value.
  */
 const getDefaultZoom = (viewportWidth: number): number =>
-  viewportWidth >= 1728 ? 1.0 : viewportWidth > 1400 ? 0.82 : 0.72;
+  viewportWidth >= 1728 ? 1.0 : viewportWidth > 1400 ? 0.75 : 0.65;
 
 type Camera = {
   x: number;
@@ -293,7 +294,7 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash === "output-builder") {
+      if (hash === "output-builder" || hash === "form-taking") {
         setActiveCaseStudy(hash);
       } else if (!hash) {
         setActiveCaseStudy(null);
@@ -1036,6 +1037,11 @@ function App() {
         {activeCaseStudy === "output-builder" && (
           <Suspense fallback={null}>
             <Obv3 onBack={closeCaseStudy} origin={caseStudyOrigin} />
+          </Suspense>
+        )}
+        {activeCaseStudy === "form-taking" && (
+          <Suspense fallback={null}>
+            <FormTaking onBack={closeCaseStudy} origin={caseStudyOrigin} />
           </Suspense>
         )}
       </AnimatePresence>
