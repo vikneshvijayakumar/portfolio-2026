@@ -901,7 +901,8 @@ button {
 .case-footer,
 .ps-overlay .case-footer,
 .obv3-overlay .case-footer,
-.ft-overlay .case-footer {
+.ft-overlay .case-footer,
+.as-overlay .case-footer {
   position: relative;
   padding: 120px 24px;
   border-top: 1px solid var(--border);
@@ -912,7 +913,8 @@ button {
 .case-footer__inner,
 .ps-overlay .case-footer__inner,
 .obv3-overlay .case-footer__inner,
-.ft-overlay .case-footer__inner {
+.ft-overlay .case-footer__inner,
+.as-overlay .case-footer__inner {
   max-width: 720px;
   margin: 0 auto;
   display: flex;
@@ -926,7 +928,8 @@ button {
 .case-footer__title,
 .ps-overlay .case-footer__title,
 .obv3-overlay .case-footer__title,
-.ft-overlay .case-footer__title {
+.ft-overlay .case-footer__title,
+.as-overlay .case-footer__title {
   font-family: var(--font-title);
   font-size: 56px;
   color: var(--text);
@@ -938,7 +941,8 @@ button {
 .case-footer__sub,
 .ps-overlay .case-footer__sub,
 .obv3-overlay .case-footer__sub,
-.ft-overlay .case-footer__sub {
+.ft-overlay .case-footer__sub,
+.as-overlay .case-footer__sub {
   font-size: 18px;
   color: var(--text-soft);
   margin: 0 0 16px;
@@ -949,6 +953,7 @@ button {
 .ps-overlay .case-footer .download-button,
 .obv3-overlay .case-footer .download-button,
 .ft-overlay .case-footer .download-button,
+.as-overlay .case-footer .download-button,
 .case-footer .download-button {
   padding: 0 32px !important;
   margin: 0;
@@ -972,14 +977,16 @@ button {
   .case-footer,
   .ps-overlay .case-footer,
   .obv3-overlay .case-footer,
-  .ft-overlay .case-footer {
+  .ft-overlay .case-footer,
+  .as-overlay .case-footer {
     padding: 40px 16px;
   }
 
   .case-footer__title,
   .ps-overlay .case-footer__title,
   .obv3-overlay .case-footer__title,
-  .ft-overlay .case-footer__title {
+  .ft-overlay .case-footer__title,
+  .as-overlay .case-footer__title {
     font-size: 32px;
   }
 }

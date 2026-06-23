@@ -116,9 +116,9 @@ export const projects: Project[] = [
     desktopPosition: { x: 2860, y: 830, rotation: 4.4 },
   },
   {
-    title: "PocketStylist AI Redesign",
+    title: "Getting an AI Fashion App Out of Its Own Way",
     year: "2025",
-    company: "PocketStylist",
+    company: "B2C",
     impact: "Faster first recommendation",
     summary:
       "Redesigned an AI fashion styling journey so users understand the value earlier, discover key wardrobe features faster, and trust how personalization shapes recommendations.",
@@ -129,9 +129,9 @@ export const projects: Project[] = [
     type: "case-study",
   },
   {
-    title: "Hybrid .NET/React Form Bridge",
+    title: "turning a fragmented form taking flow into one cohesive experience",
     year: "2025",
-    company: "Empyra",
+    company: "B2B",
     status: "Coming Soon",
     impact: "Zero lost users",
     summary:

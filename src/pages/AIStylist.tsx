@@ -5,7 +5,7 @@ import "./AIStylist.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const FIGMA_SRC =
-  "https://embed.figma.com/slides/iy15baRKp84wLmLnkXz6tP/PockeStylist?node-id=5-36&embed-host=share";
+  "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdeck%2Fiy15baRKp84wLmLnkXz6tP%2FPockeStylist%3Fnode-id%3D5-36%26t%3D3zDoeSAS7Ukuojnm-1";
 
 type Props = {
   onBack: () => void;
