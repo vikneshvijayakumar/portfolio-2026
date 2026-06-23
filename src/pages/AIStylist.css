@@ -12,7 +12,7 @@
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
-  overflow: hidden;
+  overflow-y: auto;
   isolation: isolate;
   display: flex;
   flex-direction: column;
@@ -92,12 +92,11 @@
 
 /* ── Body ── */
 .as-body {
-  flex: 1 1 auto;
+  flex: 1 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 32px;
-  overflow: auto;
 }
 
 /* ── Slides frame ── */
