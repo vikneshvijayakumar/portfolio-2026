@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import CaseStudyFooter from "../components/CaseStudyFooter";
 import "./FormTaking.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -83,9 +84,9 @@ export default function FormTaking({ onBack, origin }: Props) {
       aria-modal="true"
       aria-label="Form Taking case study"
       style={{ transformOrigin, willChange: "transform, opacity" }}
-      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.05 }}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
       animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
-      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.05 }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
       transition={
         reduceMotion
           ? { duration: 0.2, ease: EASE }
@@ -189,6 +190,11 @@ export default function FormTaking({ onBack, origin }: Props) {
           </motion.section>
         )}
       </div>
+
+      <CaseStudyFooter
+        title="Let's build something together"
+        sub="Have questions about this case study or looking to collaborate on form design systems and user experience architecture?"
+      />
     </motion.div>
   );
 }

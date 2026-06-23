@@ -40,15 +40,8 @@ const ExperienceStack = memo(function ExperienceStack({
         const desktopX = item.desktopPosition?.x ?? 0;
         const desktopY = item.desktopPosition?.y ?? 0;
 
-        let finalX = desktopX;
-        if (isMobile) {
-          if (item.company.includes("Upwork") || item.company === "Spiceblue") {
-            finalX = desktopX + 140;
-          }
-        }
-
         const style = {
-          left: finalX,
+          left: desktopX,
           top: desktopY,
           "--folder-color": item.logoColor ?? "#a886ff"
         } as React.CSSProperties;
@@ -67,7 +60,7 @@ const ExperienceStack = memo(function ExperienceStack({
             style={style}
             data-interactive="true"
             tabIndex={0}
-            onFocus={() => onFocusPoint(finalX, desktopY)}
+            onFocus={() => onFocusPoint(desktopX, desktopY)}
             onClick={() => toggleFolder(folderId)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {

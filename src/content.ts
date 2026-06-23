@@ -1,4 +1,4 @@
-export type ZoneId = "case-studies" | "about" | "how-i-work" | "experience" | "skills";
+export type ZoneId = "case-studies" | "about" | "dribbble" | "experience" | "skills";
 
 export type Zone = {
   id: ZoneId;
@@ -49,7 +49,7 @@ export const zones: Zone[] = [
     id: "about",
     label: "About Me",
     desktopCenter: { x: 2030, y: 950 },
-    mobileCenter: { x: 2030, y: 850 },
+    mobileCenter: { x: 2080, y: 850 },
     mobileEyebrow: "About",
     mobileTitle: "I turn complex workflows and ambiguous ideas into simple, shipped products.",
     mobileBody:
@@ -59,19 +59,30 @@ export const zones: Zone[] = [
   {
     id: "case-studies",
     label: "Case Studies",
-    desktopCenter: { x: 3200, y: 1000 },
-    mobileCenter: { x: 3200, y: 900 },
+    desktopCenter: { x: 3100, y: 900 },
+    mobileCenter: { x: 3100, y: 900 },
     mobileEyebrow: "Selected Work",
     mobileTitle: "Projects designed for complex, high-stakes workflows.",
     mobileBody:
       "A recruiter-friendly scan of the systems work: workflow redesign, modular outputs, guided form completion, and reporting surfaces that help teams act faster.",
-    targetScale: { desktop: 1.0, mobile: 0.68 }
+    targetScale: { desktop: 1.2, mobile: 0.68 }
+  },
+  {
+    id: "dribbble",
+    label: "Other Works",
+    desktopCenter: { x: 2135, y: 1730 },
+    mobileCenter: { x: 2000, y: 1730 },
+    mobileEyebrow: "Other Works",
+    mobileTitle: "A selection of other works like website, UI explorations and quick concepts",
+    mobileBody:
+      "A selection of other works like website, UI explorations and quick concepts posted on my Dribbble profile.",
+    targetScale: { desktop: 1.1, mobile: 0.8 }
   },
   {
     id: "experience",
     label: "Experience",
-    desktopCenter: { x: 1160, y: 900 },
-    mobileCenter: { x: 1100, y: 780 },
+    desktopCenter: { x: 1288, y: 896 },
+    mobileCenter: { x: 1232, y: 776 },
     mobileEyebrow: "History",
     mobileTitle: "Over a decade across enterprise and startups",
     mobileBody:
@@ -81,52 +92,41 @@ export const zones: Zone[] = [
   {
     id: "skills",
     label: "Skills",
-    desktopCenter: { x: 2135, y: 1730 },
-    mobileCenter: { x: 2105, y: 1530 },
+    desktopCenter: { x: 1240, y: 1650 },
+    mobileCenter: { x: 1000, y: 1500 },
     mobileEyebrow: "Capabilities",
     mobileTitle: "Specialized in enterprise complexity and design systems.",
     mobileBody: "A deep dive into the technical and leadership skills I bring to the table, from design systems to accessibility validation.",
     targetScale: { desktop: 1.2, mobile: 0.75 }
-  },
-  {
-    id: "how-i-work",
-    label: "Principles",
-    desktopCenter: { x: 1240, y: 1650 },
-    mobileCenter: { x: 1000, y: 1500 },
-    mobileEyebrow: "Process",
-    mobileTitle: "A systems-minded design approach grounded in real constraints.",
-    mobileBody:
-      "The work starts with bottlenecks, moves alongside engineering, and stays accountable to edge cases, accessibility, and how the product is actually used in the wild.",
-    targetScale: { desktop: 1.2, mobile: 1.2 }
   }
 ];
 
 export const projects: Project[] = [
   {
-    title: "Enterprise Output Architecture",
+    title: "Cutting template creation from days → hours",
     year: "2025",
-    company: "Empyra",
+    company: "B2B",
     status: "Coming Soon",
     impact: "90% faster creation time",
     summary:
-      "Replaced a manual, engineer-dependent PDF mapping process with a JSON-based visual builder. Cut template creation time from days to hours and accelerated client onboarding at scale.",
+      "Built a JSON-based visual builder to replace a manual PDF mapping process that required an engineer every time. Template work that used to take days can now be done in a few hours.",
     note: "Modular logic",
     tone: "Operational clarity / Data mapping",
     image: "output-builder.webp",
     desktopPosition: { x: 2860, y: 830, rotation: 4.4 },
   },
   {
-    title: "Self-Serve Form Builder",
+    title: "PocketStylist AI Redesign",
     year: "2025",
-    company: "Empyra",
-    status: "Coming Soon",
-    impact: "Zero dev dependency",
+    company: "PocketStylist",
+    impact: "Faster first recommendation",
     summary:
-      "Architected a drag-and-drop authoring canvas for complex administrative forms. Empowered non-technical users to build conditional logic and map profile fields without engineering support.",
-    note: "Canvas architecture",
-    tone: "Structural control / Authoring",
-    image: "form-builder.webp",
-    desktopPosition: { x: 3510, y: 940, rotation: -5.6 },
+      "Redesigned an AI fashion styling journey so users understand the value earlier, discover key wardrobe features faster, and trust how personalization shapes recommendations.",
+    note: "",
+    tone: "Personalization / Mobile UX",
+    image: "pocket-stylist.webp",
+    desktopPosition: { x: 3160, y: 520, rotation: -3.2 },
+    type: "case-study",
   },
   {
     title: "Hybrid .NET/React Form Bridge",
@@ -140,6 +140,19 @@ export const projects: Project[] = [
     tone: "Mobile-first / Persistent navigation",
     image: "form-taking.webp",
     desktopPosition: { x: 2800, y: 1430, rotation: -2.8 },
+  },
+  {
+    title: "Self-Serve Form Builder",
+    year: "2026",
+    company: "Empyra",
+    status: "Coming Soon",
+    impact: "Zero dev dependency",
+    summary:
+      "Architected a drag-and-drop authoring canvas for complex administrative forms. Empowered non-technical users to build conditional logic and map profile fields without engineering support.",
+    note: "Canvas architecture",
+    tone: "Structural control / Authoring",
+    image: "form-builder.webp",
+    desktopPosition: { x: 3510, y: 940, rotation: -5.6 },
   },
   {
     title: "Modular Analytics Dashboard",
@@ -210,8 +223,8 @@ export const experience: Experience[] = [
     company: "Empyra",
     period: "Aug 2023 – Jan 2026",
     summary:
-      "Led redesign of complex admin workflows across form setup, output setup, and form taking in a .NET-to-React migration.",
-    desktopPosition: { x: 1010, y: 630, rotation: -12.5 },
+      "Led redesign of complex admin workflows during .NET-to-React migration. Managed two Figma design systems and ensured WCAG accessibilty across the product.",
+    desktopPosition: { x: 1136, y: 632, rotation: -12.5 },
     logoColor: "#e74c3c"
   },
   {
@@ -220,7 +233,7 @@ export const experience: Experience[] = [
     period: "Apr 2023 – Jul 2023",
     summary:
       "Delivered MVPs for AI and B2B startups globally while balancing production speed with product quality.",
-    desktopPosition: { x: 510, y: 710, rotation: 9.6 },
+    desktopPosition: { x: 784, y: 712, rotation: 9.6 },
     logoColor: "#14a800"
   },
   {
@@ -229,7 +242,7 @@ export const experience: Experience[] = [
     period: "Mar 2015 – Jul 2023",
     summary:
       "Designed AI-powered healthcare products, led a seven-person design team, and built standards for shipping at scale.",
-    desktopPosition: { x: 1060, y: 1030, rotation: 14.2 },
+    desktopPosition: { x: 1192, y: 1032, rotation: 14.2 },
     logoColor: "#2980b9"
   },
   {
@@ -238,7 +251,7 @@ export const experience: Experience[] = [
     period: "2014 – 2015",
     summary:
       "Designed a leave management workflow for Kissflow, a low-code workflow platform, improving usability for day-to-day administrative tasks.",
-    desktopPosition: { x: 560, y: 1080, rotation: -7.4 },
+    desktopPosition: { x: 832, y: 1080, rotation: -7.4 },
     logoColor: "#53469B"
   },
 ];

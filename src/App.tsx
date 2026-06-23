@@ -10,14 +10,16 @@ import {
 } from "./content";
 import { MOBILE_BREAKPOINT, STAGE, EASE } from "./utils/constants";
 
-const SkillsCard = lazy(() => import("./components/SkillsCard"));
-const Legend = lazy(() => import("./components/Legend"));
+import SkillsCard from "./components/SkillsCard";
+import Legend from "./components/Legend";
+import ExperienceStack from "./components/ExperienceStack";
+import DribbbleCards from "./components/DribbbleCards";
+import ProjectCards from "./components/ProjectCards";
 
 const Obv3 = lazy(() => import("./pages/Obv3"));
 const FormTaking = lazy(() => import("./pages/FormTaking"));
-const ExperienceStack = lazy(() => import("./components/ExperienceStack"));
-const WorkCluster = lazy(() => import("./components/WorkCluster"));
-const ProjectCards = lazy(() => import("./components/ProjectCards"));
+const PocketStylist = lazy(() => import("./pages/PocketStylist"));
+const AIStylist = lazy(() => import("./pages/AIStylist"));
 
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
@@ -59,17 +61,11 @@ const MAX_ZOOM = 1.5;
 const zoneNavItems: { id: ZoneId; label: string; key: string }[] = [
   { id: "about", label: "About", key: "1" },
   { id: "case-studies", label: "Case Studies", key: "2" },
-  { id: "experience", label: "Experience", key: "3" },
-  { id: "skills", label: "Skills", key: "4" },
-  { id: "how-i-work", label: "Principles", key: "5" },
+  { id: "dribbble", label: "Other Works", key: "3" },
+  { id: "experience", label: "Experience", key: "4" },
+  { id: "skills", label: "Skills", key: "5" },
 ];
 
-const LazySentinel = memo(function LazySentinel({ onReady }: { onReady: () => void }) {
-  useEffect(() => {
-    onReady();
-  }, [onReady]);
-  return null;
-});
 
 /*
  * Default zoom scales with viewport size so the canvas feels right on
@@ -209,8 +205,7 @@ function App() {
 
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= MOBILE_BREAKPOINT : false);
   const [isTablet, setIsTablet] = useState(typeof window !== "undefined" ? (window.innerWidth > MOBILE_BREAKPOINT && window.innerWidth <= 1024) : false);
-  const [isLazyReady, setIsLazyReady] = useState(false);
-  const startAnimations = isMobile || isLazyReady;
+  const startAnimations = true;
   const [activeZone, setActiveZone] = useState<ZoneId>("about");
   const [isEntering, setIsEntering] = useState(true);
   const [isLoaded, setIsLoaded] = useState(true);
@@ -220,6 +215,12 @@ function App() {
   const camY = useMotionValue(0);
   const camScale = useMotionValue(0.40);
   const isKeyboardNav = useRef(false);
+
+  // Track the grid dimensions and offset dynamically so the cursor prism dots match the background grid zoom/pan
+  const gridX = useTransform(camX, (x) => `${43 + x}px`);
+  const gridY = useTransform(camY, (y) => `${-53 + y}px`);
+  const gridDotRadius = useTransform(camScale, (scale) => `${1.25 * scale}px`);
+  const gridSpacing = useTransform(camScale, (scale) => `${32 * scale}px`);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const wheelEndTimerRef = useRef<number | null>(null);
@@ -246,7 +247,7 @@ function App() {
   const mobileZoneRefs = useRef<Record<ZoneId, HTMLElement | null>>({
     "case-studies": null,
     about: null,
-    "how-i-work": null,
+    dribbble: null,
     experience: null,
     skills: null,
   });
@@ -264,13 +265,13 @@ function App() {
   const modifierKey = isMac ? '⌘' : 'Ctrl';
 
   const socialPos = {
-    x: 2190 + (isMobile ? 100 : 0),
-    y: 1170,
+    x: isMobile ? 1950 : 2192,
+    y: 1220,
     rotate: -1
   };
   const madeWithPos = {
-    x: isMobile ? 1900 : 2480,
-    y: isMobile ? 1300 : 200,
+    x: isMobile ? 1600 : 2480,
+    y: isMobile ? 1200 : 200,
     rotate: -9
   };
 
@@ -294,7 +295,7 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash === "output-builder" || hash === "form-taking") {
+      if (hash === "output-builder" || hash === "form-taking" || hash === "aistylist") {
         setActiveCaseStudy(hash);
       } else if (!hash) {
         setActiveCaseStudy(null);
@@ -533,8 +534,9 @@ function App() {
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
 
-    // 1. If the tap starts on a specific interactive control (link, button), let native events flow.
-    if (target.closest("a, button, label, input, textarea")) {
+    // 1. If the tap starts on a specific interactive control (input, textarea), let native events flow.
+    // We allow 'a' and 'button' tags so that dragging over links/buttons still pans the canvas, while clicks are preserved.
+    if (target.closest("input, textarea")) {
       return;
     }
 
@@ -869,169 +871,178 @@ function App() {
           }
         `}</style>
       )}
-      {/* Toolbar and footer rendered FIRST so they appear before canvas in tab order */}
-      <header className="toolbar" data-interactive="true">
-        <div className="toolbar__panel toolbar__panel--left">
-          <div className="toolbar__left">
-            <button
-              className="toolbar__branding"
-              onClick={() => moveToZone("about")}
-              type="button"
-            >
-              <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
-              <div className="toolbar__identity">
-                <span className="toolbar__name">Viknesh Vijayakumar</span>
-                <span className="toolbar__role">Senior Product Designer</span>
-              </div>
-            </button>
-            {!isMobile && (
-              <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile={false} />
-            )}
-          </div>
-        </div>
-
-        <div className="toolbar__panel toolbar__panel--right">
-          <div className="toolbar__actions">
-            {!isMobile && !isTablet && <AvailabilityPill />}
-            <div className="legend-trigger-wrapper">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsLegendOpen(!isLegendOpen);
-                }}
-                className={`legend-trigger ${isLegendOpen ? 'is-active' : ''}`}
-                aria-label="Show canvas controls"
-              >
-                ?
-              </button>
-              <Suspense fallback={null}>
-                <Legend
-                  isOpen={isLegendOpen}
-                  modifierKey={modifierKey}
-                />
-              </Suspense>
-            </div>
-            <ThemeToggle theme={theme} setTheme={setTheme} />
-            {!isMobile && !isTablet && (
-              <a className="download-button toolbar__resume" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
-                Download Resume
-              </a>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {!isMobile && (
-        <div className="bottom-dock">
-          <div className="bottom-dock__left">
-            <ZoomControls
-              scale={camScale}
-              onZoomIn={() => adjustZoom(1)}
-              onZoomOut={() => adjustZoom(-1)}
-              onReset={resetZoom}
-            />
-          </div>
-          <div className="bottom-dock__center">
-            <SocialStrip className="social-strip--footer" />
-          </div>
-          <div className="bottom-dock__right">
-            <div
-              className="made-with-card"
-              data-interactive="true"
-              dangerouslySetInnerHTML={{
-                __html: antigravityBadge
-                  .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
-                  .replace(/width="174"|height="36"/g, '')
-                  .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
-              }}
-            />
-          </div>
-        </div>
-      )}
-      {isMobile && <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile />}
-
-      <motion.div
-        className="app-shell"
-        animate={{
-          scale: activeCaseStudy ? 0.98 : 1,
-          opacity: activeCaseStudy ? 0.5 : 1
-        }}
-        transition={{ duration: 0.6, ease: EASE }}
-      >
-        <div className="dynamic-grid-bg">
-          <div className="dynamic-grid-bg__color-layer" />
-          <div className="dynamic-grid-bg__glow-layer" />
-        </div>
-        <main
-          ref={stageRef}
-          className="board"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-        >
+      <AnimatePresence>
+        {!activeCaseStudy && (
           <motion.div
-            className={`stage ${isEntering ? "is-entering" : ""}`}
-            style={{
-              height: STAGE.height,
-              width: STAGE.width,
-              x: camX,
-              y: camY,
-              scale: camScale,
-            }}
+            key="board-layout"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            style={{ width: "100%", height: "100%" }}
           >
-            <AboutCard isStarted={startAnimations} isMobile={isMobile} />
-            <Suspense fallback={null}>
-              <SkillsCard isMobile={isMobile} isStarted={startAnimations} />
-              <LazySentinel onReady={() => setIsLazyReady(true)} />
-              <ExperienceStack isMobile={isMobile} onFocusPoint={panToPoint} isStarted={startAnimations} />
-              <ProjectCards onOpenCaseStudy={openCaseStudy} onFocusPoint={panToPoint} isMobile={isMobile} isStarted={startAnimations} />
-              <WorkCluster isMobile={isMobile} isStarted={startAnimations} />
-            </Suspense>
-            <VanakkamSticker isStarted={startAnimations} />
-            <BadgesCluster isMobile={isMobile} isStarted={startAnimations} />
-            <FloatingStatus isStarted={startAnimations} />
+            {/* Toolbar and footer rendered FIRST so they appear before canvas in tab order */}
+            <header className="toolbar" data-interactive="true">
+              <div className="toolbar__panel toolbar__panel--left">
+                <div className="toolbar__left">
+                  <button
+                    className="toolbar__branding"
+                    onClick={() => moveToZone("about")}
+                    type="button"
+                  >
+                    <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
+                    <div className="toolbar__identity">
+                      <span className="toolbar__name">Viknesh Vijayakumar</span>
+                      <span className="toolbar__role">Senior Product Designer</span>
+                    </div>
+                  </button>
+                  {!isMobile && (
+                    <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile={false} />
+                  )}
+                </div>
+              </div>
 
-            {isMobile && (
-              <>
+              <div className="toolbar__panel toolbar__panel--right">
+                <div className="toolbar__actions">
+                  {!isMobile && !isTablet && <AvailabilityPill />}
+                  <div className="legend-trigger-wrapper">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLegendOpen(!isLegendOpen);
+                      }}
+                      className={`legend-trigger ${isLegendOpen ? 'is-active' : ''}`}
+                      aria-label="Show canvas controls"
+                    >
+                      ?
+                    </button>
+                    <Legend
+                      isOpen={isLegendOpen}
+                      modifierKey={modifierKey}
+                    />
+                  </div>
+                  <ThemeToggle theme={theme} setTheme={setTheme} />
+                  {!isMobile && !isTablet && (
+                    <a className="download-button toolbar__resume" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
+                      Download Resume
+                    </a>
+                  )}
+                </div>
+              </div>
+            </header>
+
+            {!isMobile && (
+              <div className="bottom-dock">
+                <div className="bottom-dock__left">
+                  <ZoomControls
+                    scale={camScale}
+                    onZoomIn={() => adjustZoom(1)}
+                    onZoomOut={() => adjustZoom(-1)}
+                    onReset={resetZoom}
+                  />
+                </div>
+                <div className="bottom-dock__center">
+                  <SocialStrip className="social-strip--footer" />
+                </div>
+                <div className="bottom-dock__right">
+                  <div
+                    className="made-with-card"
+                    data-interactive="true"
+                    dangerouslySetInnerHTML={{
+                      __html: antigravityBadge
+                        .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
+                        .replace(/width="174"|height="36"/g, '')
+                        .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            {isMobile && <ZoneNav onMove={moveToZone} activeZone={activeZone} isMobile />}
+
+            <div className="app-shell">
+              <div className="dynamic-grid-bg">
                 <motion.div
-                  className="social-card-canvas"
+                  className="dynamic-grid-bg__color-layer"
                   style={{
-                    position: "absolute",
-                    left: socialPos.x,
-                    top: socialPos.y,
-                    rotate: socialPos.rotate,
-                    zIndex: 5,
+                    "--grid-spacing": gridSpacing,
+                    "--grid-x": gridX,
+                    "--grid-y": gridY,
+                    "--grid-dot-radius": gridDotRadius,
+                  } as any}
+                />
+                <div className="dynamic-grid-bg__glow-layer" />
+              </div>
+              <main
+                ref={stageRef}
+                className="board"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+              >
+                <motion.div
+                  className={`stage ${isEntering ? "is-entering" : ""}`}
+                  style={{
+                    height: STAGE.height,
+                    width: STAGE.width,
+                    x: camX,
+                    y: camY,
+                    scale: camScale,
                   }}
                 >
-                  <img src={pinIcon} className="social-card-pin" alt="" width={56} height={56} draggable="false" loading="lazy" decoding="async" />
-                  <SocialStrip className="is-mobile" />
-                </motion.div>
+                  <AboutCard isStarted={startAnimations} isMobile={isMobile} />
+                  <SkillsCard isMobile={isMobile} isStarted={startAnimations} />
+                  <ExperienceStack isMobile={isMobile} onFocusPoint={panToPoint} isStarted={startAnimations} />
+                  <ProjectCards onOpenCaseStudy={openCaseStudy} onFocusPoint={panToPoint} isMobile={isMobile} isStarted={startAnimations} />
+                  <DribbbleCards isMobile={isMobile} isStarted={startAnimations} />
+                  <VanakkamSticker isStarted={startAnimations} />
+                  <BadgesCluster isMobile={isMobile} isStarted={startAnimations} />
+                  <FloatingStatus isStarted={startAnimations} />
 
-                <motion.div
-                  className="made-with-card made-with-card--canvas"
-                  style={{
-                    position: "absolute",
-                    left: madeWithPos.x,
-                    top: madeWithPos.y,
-                    rotate: madeWithPos.rotate,
-                    zIndex: 5,
-                  }}
-                  data-interactive="true"
-                  dangerouslySetInnerHTML={{
-                    __html: antigravityBadge
-                      .replace('<svg', '<svg viewBox="0 0 174 36" style="overflow:visible"')
-                      .replace(/width="174"|height="36"/g, '')
-                      .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
-                      .replace('url(#a)', 'url(#antigravity-clip)')
-                      .replace('id="a"', 'id="antigravity-clip"')
-                  }}
-                />
-              </>
-            )}
+                  {isMobile && (
+                    <>
+                      <motion.div
+                        className="social-card-canvas"
+                        style={{
+                          position: "absolute",
+                          left: socialPos.x,
+                          top: socialPos.y,
+                          rotate: socialPos.rotate,
+                          zIndex: 5,
+                        }}
+                      >
+                        <img src={pinIcon} className="social-card-pin" alt="" width={56} height={56} draggable="false" loading="lazy" decoding="async" />
+                        <SocialStrip className="is-mobile" />
+                      </motion.div>
+
+                      <motion.div
+                        className="made-with-card made-with-card--canvas"
+                        style={{
+                          position: "absolute",
+                          left: madeWithPos.x,
+                          top: madeWithPos.y,
+                          rotate: madeWithPos.rotate,
+                          zIndex: 5,
+                        }}
+                        data-interactive="true"
+                        dangerouslySetInnerHTML={{
+                          __html: antigravityBadge
+                            .replace('<svg', '<svg viewBox="0 0 174 36" style="overflow:visible"')
+                            .replace(/width="174"|height="36"/g, '')
+                            .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
+                            .replace('url(#a)', 'url(#antigravity-clip)')
+                            .replace('id="a"', 'id="antigravity-clip"')
+                        }}
+                      />
+                    </>
+                  )}
+                </motion.div>
+              </main>
+            </div>
           </motion.div>
-        </main>
-      </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {activeCaseStudy === "output-builder" && (
@@ -1042,6 +1053,11 @@ function App() {
         {activeCaseStudy === "form-taking" && (
           <Suspense fallback={null}>
             <FormTaking onBack={closeCaseStudy} origin={caseStudyOrigin} />
+          </Suspense>
+        )}
+        {activeCaseStudy === "aistylist" && (
+          <Suspense fallback={null}>
+            <AIStylist onBack={closeCaseStudy} origin={caseStudyOrigin} />
           </Suspense>
         )}
       </AnimatePresence>
@@ -1119,8 +1135,13 @@ const AboutCard = memo(function AboutCard({
 }) {
   return (
     <motion.section
-      className="about-card"
-      style={{ left: 1710, top: 630 }}
+      className={`about-card ${isMobile ? "is-mobile" : ""}`}
+      style={{
+        position: "absolute",
+        left: isMobile ? 1792 : 1710,
+        top: isMobile ? 528 : 630,
+        width: isMobile ? 480 : 520,
+      }}
       data-interactive="true"
       whileTap={{ scale: 0.98 }}
       initial={isMobile ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
@@ -1139,7 +1160,7 @@ const AboutCard = memo(function AboutCard({
       </div>
       <p className="about-card__body">
         Over 10 years of experience in enterprise SaaS in fields like healthcare, AI, and edtech.
-        I love taking complex systems with complicated workflows and technical limitations and turning
+        I specialize in taking complex systems with complicated workflows and technical limitations and turning
         them into user friendly interfaces that are easy to use and actually work.
       </p>
       <div className="about-card__footer">
@@ -1228,11 +1249,11 @@ const BadgesCluster = memo(function BadgesCluster({
 const SocialStrip = memo(function SocialStrip({ className = "" }: { className?: string }) {
   return (
     <footer className={`social-strip ${className}`} data-interactive="true">
-      <a href={toolbarLinks.dribbble} target="_blank" rel="noreferrer">
+      <a href={toolbarLinks.dribbble} target="_blank" rel="noreferrer" draggable="false" onDragStart={(e) => e.preventDefault()}>
         <img src={dribbbleIcon} alt="" width={22} height={22} draggable="false" decoding="async" />
         <span>vikneshvijayakumar</span>
       </a>
-      <a href={toolbarLinks.linkedin} target="_blank" rel="noreferrer">
+      <a href={toolbarLinks.linkedin} target="_blank" rel="noreferrer" draggable="false" onDragStart={(e) => e.preventDefault()}>
         <img src={linkedinIcon} alt="" width={22} height={22} draggable="false" decoding="async" />
         <span>vikneshvijayakumar</span>
       </a>

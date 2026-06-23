@@ -9,18 +9,18 @@ const MdItem = ({ label, desc }: { label: string; desc: string }) => (
   <div className="markdown-card__line"><span className="md-bullet">- </span><span className="md-bold">{label}</span>: {desc}</div>
 );
 
-const SkillsCard = memo(function SkillsCard({ 
+const SkillsCard = memo(function SkillsCard({
   isMobile,
-  isStarted = false 
-}: { 
+  isStarted = false
+}: {
   isMobile: boolean;
   isStarted?: boolean;
 }) {
   const [activeTab, setActiveTab] = useState(0);
 
   const style = {
-    left: 1760,
-    top: 1500,
+    left: isMobile ? 750 : 780,
+    top: isMobile ? 1500 : 1450,
   };
 
   const tabs = [

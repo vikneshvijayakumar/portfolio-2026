@@ -47,7 +47,7 @@
   padding: 0 16px;
   border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
   border-radius: 999px;
-  background: transparent;
+  background: var(--surface-strong);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
@@ -275,6 +275,10 @@
   line-height: 1.5;
   color: var(--text-soft, #888);
   text-align: center;
+}
+
+:root[data-theme="ink"] .ft-overlay .ft-back {
+  background: #1e1f32;
 }
 
 @media (max-width: 720px) {

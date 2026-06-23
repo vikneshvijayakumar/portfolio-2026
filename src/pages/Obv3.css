@@ -10,15 +10,15 @@
   --obv3-accent: var(--primary);
   --obv3-accent-dim: var(--primary-dark);
   --obv3-red: var(--coral);
-  --obv3-line: rgba(149, 213, 110, 0.2);
-  --obv3-ghost: rgba(149, 213, 110, 0.07);
-  --obv3-tint-05: rgba(149, 213, 110, 0.05);
-  --obv3-tint-06: rgba(149, 213, 110, 0.06);
-  --obv3-tint-07: rgba(149, 213, 110, 0.07);
-  --obv3-tint-08: rgba(149, 213, 110, 0.08);
-  --obv3-tint-10: rgba(149, 213, 110, 0.1);
-  --obv3-tint-25: rgba(149, 213, 110, 0.25);
-  --obv3-tint-50: rgba(149, 213, 110, 0.5);
+  --obv3-line: rgba(var(--primary-rgb), 0.2);
+  --obv3-ghost: rgba(var(--primary-rgb), 0.07);
+  --obv3-tint-05: rgba(var(--primary-rgb), 0.05);
+  --obv3-tint-06: rgba(var(--primary-rgb), 0.06);
+  --obv3-tint-07: rgba(var(--primary-rgb), 0.07);
+  --obv3-tint-08: rgba(var(--primary-rgb), 0.08);
+  --obv3-tint-10: rgba(var(--primary-rgb), 0.1);
+  --obv3-tint-25: rgba(var(--primary-rgb), 0.25);
+  --obv3-tint-50: rgba(var(--primary-rgb), 0.5);
   --obv3-font-mono: Menlo, Monaco, "Courier New", monospace;
 
   position: fixed;
@@ -43,8 +43,7 @@
 .obv3-overlay .obv3-feature__title,
 .obv3-overlay .obv3-stat-num,
 .obv3-overlay .obv3-quote-mark,
-.obv3-overlay .obv3-reflection-big,
-.obv3-overlay .obv3-footer__title {
+.obv3-overlay .obv3-reflection-big {
   text-transform: uppercase;
 }
 
@@ -85,7 +84,7 @@
   padding: 0 16px;
   border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
   border-radius: 999px;
-  background: transparent;
+  background: var(--surface-strong);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
@@ -199,7 +198,7 @@
 .obv3-hero__title {
   font-family: var(--font-title);
   font-size: clamp(56px, 9vw, 120px);
-  line-height: .8;
+  line-height: 1.1;
   color: var(--text);
   margin: 0 0 48px;
   font-weight: 600;
@@ -209,6 +208,9 @@
 .obv3-hero__title em {
   color: var(--obv3-accent);
   font-style: normal;
+  display: inline-block;
+  line-height: inherit;
+  vertical-align: baseline;
 }
 
 .obv3-hero__desc {
@@ -308,11 +310,13 @@
 }
 
 @keyframes obv3-scroll-line {
+
   0%,
   100% {
     opacity: 0.3;
     transform: scaleY(1);
   }
+
   50% {
     opacity: 1;
     transform: scaleY(1.2);
@@ -389,14 +393,25 @@
 
 .obv3-body {
   color: var(--text-soft);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.85;
-  max-width: 580px;
+  /* max-width: 580px; */
   margin-bottom: 40px;
 }
 
 .obv3-body:has(+ .obv3-body) {
   margin-bottom: 8px;
+}
+
+.obv3-subheading {
+  font-family: var(--font-title);
+  font-size: 24px;
+  color: var(--text);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 32px;
+  margin-bottom: 8px;
+  line-height: 1.5;
 }
 
 /* Section-specific bg ribbons (matching original) */
@@ -410,9 +425,70 @@
   border-top: 1px solid var(--obv3-line);
 }
 
-.obv3-section--solution {
-  background: var(--canvas);
+.obv3-solution-scroll-container {
+  position: relative;
   border-top: 1px solid var(--obv3-line);
+}
+
+.obv3-solution-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px;
+  box-sizing: border-box;
+}
+
+.obv3-solution-info {
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.obv3-solution-info .obv3-eyebrow {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.obv3-solution-info .obv3-heading {
+  margin-bottom: 24px;
+}
+
+.obv3-solution-info .obv3-body {
+  margin-bottom: 0;
+}
+
+.obv3-feature-box {
+  position: relative;
+}
+
+/* Step pills for feature switcher (aligned to 8px grid) */
+.obv3-step-pills {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 16px;
+  align-items: center;
+}
+
+.obv3-step-pill {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  border: none;
+  background: var(--obv3-line);
+  cursor: pointer;
+  padding: 0;
+  transition: background 300ms ease, width 300ms ease;
+  flex-shrink: 0;
+}
+
+.obv3-step-pill.is-active {
+  background: var(--obv3-accent);
+  width: 24px;
 }
 
 .obv3-section--impact {
@@ -471,7 +547,7 @@
 }
 
 .obv3-callout__line {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-soft);
   line-height: 1.5;
   margin: 0;
@@ -482,6 +558,17 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
+}
+
+/* ── Blockquote ── */
+.obv3-blockquote {
+  border-left: 3px solid var(--obv3-accent);
+  padding: 8px 24px;
+  margin: 24px 0;
+  color: var(--text-soft);
+  font-size: 18px;
+  line-height: 1.5;
+  font-style: italic;
 }
 
 /* ── Contrast / compare grid ── */
@@ -596,31 +683,27 @@
 
 .obv3-feature {
   position: relative;
-  padding: 32px 32px 32px 40px;
-  background: var(--obv3-bg2);
-  border-radius: var(--radius-sm);
-}
-
-
-.obv3-feature__index {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  font-family: var(--obv3-font-mono);
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: var(--obv3-accent);
-  text-transform: uppercase;
-  opacity: 0.7;
 }
 
 .obv3-feature__head {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 40px;
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--obv3-line);
+  margin-bottom: 16px;
+  min-height: 168px;
+  /* Prevents height shifts during slide transitions */
+}
+
+.obv3-feature__copy-wrap,
+.obv3-feature__helps-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.obv3-feature__copy-wrap>*,
+.obv3-feature__helps-wrap>* {
+  grid-row: 1;
+  grid-column: 1;
 }
 
 .obv3-feature__title {
@@ -652,12 +735,7 @@
   gap: 12px;
 }
 
-.obv3-feature__helps-label::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--obv3-line);
-}
+
 
 .obv3-feature__helps-list {
   list-style: none;
@@ -693,6 +771,17 @@
 .obv3-feature__helps-mark svg {
   width: 12px;
   height: 12px;
+}
+
+.obv3-feature__media-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-column: 1 / -1;
+}
+
+.obv3-feature__media-wrap>* {
+  grid-row: 1;
+  grid-column: 1;
 }
 
 .obv3-feature__media {
@@ -776,7 +865,7 @@
 .obv3-impact-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
+  /* gap: 16px; */
   margin-bottom: 48px;
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -934,46 +1023,6 @@
   font-weight: 600;
 }
 
-/* ── Footer ── */
-.obv3-footer {
-  position: relative;
-  padding: 120px 120px;
-  border-top: 1px solid var(--obv3-line);
-}
-
-.obv3-footer__inner {
-  position: relative;
-  max-width: 720px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 24px;
-}
-
-.obv3-footer__title {
-  font-family: var(--font-title);
-  font-size: 56px;
-  line-height: initial;
-  color: var(--text);
-  margin: 0;
-  font-weight: 600;
-}
-
-.obv3-footer__sub {
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--text-soft);
-  margin: 0;
-  max-width: 560px;
-}
-
-.obv3-overlay .download-button {
-  padding: 0 24px;
-}
-
 /* ── Divider ── */
 .obv3-divider {
   width: 100%;
@@ -1002,73 +1051,299 @@
   font-style: italic;
 }
 
+
 /* ──────────────────────────────────────────────────────────────────────────
-   Light-mode tuning
-   The lime primary at 4–10% opacity disappears on a cream canvas, and the
-   pastel coral lacks weight against the warm bg. In light mode we shift the
-   accent to primary-dark (forest green) for legibility, deepen the red to
-   match the original case-study palette, darken the alternating ribbon, and
-   swap all tint stops to the primary-dark RGB so subtle bgs remain visible.
+   Light-mode tuning — unified neutral canvas, deep indigo accent
+   Sections share one clean canvas — no alternating bands.
+   Indigo only appears in accent text, borders, and interactive elements.
    ────────────────────────────────────────────────────────────────────────── */
 :root:not([data-theme="ink"]) .obv3-overlay {
-  --obv3-bg2: #ece4d2;
-  --obv3-accent: var(--primary-dark);
-  --obv3-accent-dim: rgba(73, 121, 44, 0.55);
-  --obv3-red: #c94f3a;
-  --obv3-line: rgba(73, 121, 44, 0.22);
-  --obv3-ghost: rgba(73, 121, 44, 0.10);
-  --obv3-tint-05: rgba(73, 121, 44, 0.06);
-  --obv3-tint-06: rgba(73, 121, 44, 0.08);
-  --obv3-tint-07: rgba(73, 121, 44, 0.09);
-  --obv3-tint-08: rgba(73, 121, 44, 0.10);
-  --obv3-tint-10: rgba(73, 121, 44, 0.14);
-  --obv3-tint-25: rgba(73, 121, 44, 0.30);
-  --obv3-tint-50: rgba(73, 121, 44, 0.55);
+  --obv3-bg2: var(--surface-strong);
+  --obv3-accent: var(--primary);
+  /* #4f46e5 indigo */
+  --obv3-accent-dim: var(--primary-dark);
+  /* #3730a3 */
+  --obv3-red: #ef4444;
+  --obv3-line: rgba(79, 70, 229, 0.16);
+  --obv3-ghost: rgba(79, 70, 229, 0.07);
+  --obv3-tint-05: rgba(79, 70, 229, 0.04);
+  --obv3-tint-06: rgba(79, 70, 229, 0.05);
+  --obv3-tint-07: rgba(79, 70, 229, 0.07);
+  --obv3-tint-08: rgba(79, 70, 229, 0.08);
+  --obv3-tint-10: rgba(79, 70, 229, 0.10);
+  --obv3-tint-25: rgba(79, 70, 229, 0.22);
+  --obv3-tint-50: rgba(79, 70, 229, 0.44);
+  background: var(--canvas);
 }
 
-/* In light mode the alternating ribbon (bg2) is darker than bg, so the
-   compare-grid columns (which sit on bg) need to be slightly elevated
-   instead of recessed for the panel to read as content, not gutter. */
+/* All sections — single canvas background, no alternating bands */
+:root:not([data-theme="ink"]) .obv3-overlay .obv3-section--overview,
+:root:not([data-theme="ink"]) .obv3-overlay .obv3-section--contrast,
+:root:not([data-theme="ink"]) .obv3-overlay .obv3-section--solution,
+:root:not([data-theme="ink"]) .obv3-overlay .obv3-section--impact,
+:root:not([data-theme="ink"]) .obv3-overlay .obv3-section--evolution,
+:root:not([data-theme="ink"]) .obv3-overlay .obv3-section--reflection {
+  background: var(--canvas);
+}
+
+/* Topbar */
+:root[data-theme="ink"] .obv3-overlay .obv3-back {
+  background: #1e1f32;
+}
+
+:root:not([data-theme="ink"]) .obv3-overlay .obv3-topbar {
+  background: rgba(248, 248, 248, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom-color: rgba(17, 17, 24, 0.08);
+}
+
+/* Compare-grid columns */
 :root:not([data-theme="ink"]) .obv3-compare {
-  background: var(--obv3-bg2);
+  background: var(--surface-strong);
 }
 
 :root:not([data-theme="ink"]) .obv3-compare__col {
   background: var(--canvas);
 }
 
-/* Sticky section numbers — give them a touch more presence on cream
-   without losing the "ghost" feel. */
+/* Impact stat cells */
+:root:not([data-theme="ink"]) .obv3-impact-stat {
+  background: var(--surface-strong);
+  border: 1px solid rgba(17, 17, 24, 0.06);
+}
+
+/* Sticky section numbers */
 :root:not([data-theme="ink"]) .obv3-section__number {
   font-weight: 800;
 }
 
 /* Evolution box ghost quote */
 :root:not([data-theme="ink"]) .obv3-evolution-box::before {
-  color: rgba(73, 121, 44, 0.09);
+  color: rgba(79, 70, 229, 0.06);
 }
 
-/* Tech badges — on cream, the tinted bg with primary-dark border reads
-   cleanly without the dark-mode glow. Add a subtle warm fg for hierarchy. */
+/* Tech badges */
 :root:not([data-theme="ink"]) .obv3-tech-badge {
-  color: var(--text);
-  background: rgba(73, 121, 44, 0.06);
+  color: var(--primary);
+  background: rgba(79, 70, 229, 0.06);
+  border-color: rgba(79, 70, 229, 0.2);
 }
 
-/* Feature card panel — keep moody panel feel on cream */
-:root:not([data-theme="ink"]) .obv3-feature {
-  background: var(--obv3-bg2);
-}
+
 
 :root:not([data-theme="ink"]) .obv3-feature__duration {
-  background: rgba(31, 25, 21, 0.78);
-  color: #f4f0e8;
+  background: rgba(17, 17, 24, 0.76);
+  color: #f0f0ff;
 }
 
-/* Back button — surface contrast */
-:root:not([data-theme="ink"]) .obv3-back {
-  background: var(--surface-strong);
-  border-color: var(--obv3-line);
+/* Callout box */
+:root:not([data-theme="ink"]) .obv3-callout {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.06) 0%, transparent 60%);
+  border-color: rgba(79, 70, 229, 0.24);
+}
+
+/* Back button */
+/* ── Flow Design (legacy-web-newui) ── */
+.obv3-flow-container {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 32px;
+  margin-bottom: 32px;
+}
+
+.obv3-flow-card {
+  flex: 1;
+  background: var(--obv3-tint-05);
+  border: 1px solid var(--obv3-line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.obv3-flow-card:hover {
+  background: var(--obv3-ghost);
+  border-color: var(--obv3-accent);
+}
+
+.obv3-flow-icon-wrap {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--obv3-accent);
+}
+
+.obv3-flow-icon-wrap svg {
+  width: 32px;
+  height: 32px;
+}
+
+.obv3-flow-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.obv3-flow-title {
+  font-family: var(--font-title);
+  font-size: 20px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.obv3-flow-desc {
+  font-size: 14px;
+  color: var(--text-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.obv3-flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+  opacity: 0.6;
+}
+
+.obv3-flow-arrow svg {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 960px) {
+  .obv3-flow-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .obv3-flow-card {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .obv3-flow-icon-wrap {
+    flex-shrink: 0;
+  }
+
+  .obv3-flow-arrow {
+    transform: rotate(90deg);
+    padding: 8px 0;
+  }
+}
+
+/* ── Workflow steps (Discovery section) ── */
+.obv3-workflow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--obv3-line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.obv3-workflow-step {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--obv3-line);
+  background: var(--canvas);
+  transition: background 200ms ease;
+}
+
+.obv3-workflow-step:last-child {
+  border-bottom: none;
+}
+
+.obv3-workflow-step:hover {
+  background: var(--obv3-ghost);
+}
+
+.obv3-workflow-step__num {
+  font-family: var(--obv3-font-mono);
+  font-size: 12px;
+  color: var(--obv3-accent);
+  text-transform: uppercase;
+  padding: 16px;
+  border-right: 1px solid var(--obv3-line);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.obv3-workflow-step__text {
+  font-size: 14px;
+  color: var(--text-soft);
+  line-height: 1.5;
+  padding: 16px 24px;
+}
+
+/* ── Design principles cards (Reframe section) ── */
+.obv3-principles-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.obv3-principle-card {
+  background: transparent;
+  border: 1px solid var(--obv3-line);
+  border-radius: 8px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.obv3-principle-card:hover {
+  border-color: var(--obv3-accent);
+  transform: translateY(-2px);
+}
+
+.obv3-principle-card__icon {
+  width: 48px;
+  height: 48px;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  transition: color 200ms ease;
+}
+
+.obv3-principle-card:hover .obv3-principle-card__icon {
+  color: var(--obv3-accent);
+}
+
+.obv3-principle-card__label {
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  line-height: 1.5;
+  letter-spacing: 0px;
+}
+
+.obv3-principle-card__desc {
+  font-size: 16px;
+  color: var(--text-soft);
+  line-height: 1.5;
+  letter-spacing: 0px;
 }
 
 /* ── Responsive ── */
@@ -1079,7 +1354,7 @@
 
   .obv3-hero {
     min-height: auto;
-    padding: 64px 32px 64px;
+    padding: 40px 16px;
   }
 
   .obv3-hero__desc {
@@ -1088,7 +1363,7 @@
 
   .obv3-hero__main {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 32px;
   }
 
   .obv3-hero__meta {
@@ -1099,12 +1374,23 @@
   }
 
   .obv3-section {
-    padding: 80px 32px;
+    padding: 40px 16px;
   }
 
   .obv3-section__inner {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 24px;
+  }
+
+  .obv3-solution-scroll-container {
+    height: auto !important;
+  }
+
+  .obv3-solution-sticky {
+    position: relative;
+    top: auto;
+    height: auto;
+    padding: 40px 16px;
   }
 
   .obv3-section__number {
@@ -1126,13 +1412,12 @@
     grid-template-columns: 1fr;
   }
 
-  .obv3-feature {
-    padding: 24px;
-  }
+
 
   .obv3-feature__head {
     grid-template-columns: 1fr;
     gap: 24px;
+    min-height: auto;
   }
 
   .obv3-feature__title {
@@ -1143,11 +1428,12 @@
     grid-template-columns: 1fr;
   }
 
-  .obv3-footer {
-    padding: 80px 32px;
+  .obv3-principles-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .obv3-footer__title {
-    font-size: 32px;
+  .obv3-workflow-step {
+    grid-template-columns: 40px 1fr;
   }
 }
