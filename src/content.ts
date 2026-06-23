@@ -144,7 +144,7 @@ export const projects: Project[] = [
   {
     title: "Self-Serve Form Builder",
     year: "2026",
-    company: "Empyra",
+    company: "B2B",
     status: "Coming Soon",
     impact: "Zero dev dependency",
     summary:
@@ -156,8 +156,8 @@ export const projects: Project[] = [
   },
   {
     title: "Modular Analytics Dashboard",
-    year: "2025",
-    company: "Empyra",
+    year: "2024",
+    company: "B2B",
     status: "Coming Soon",
     impact: "Instant actionable data",
     summary:

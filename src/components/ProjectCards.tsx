@@ -63,7 +63,7 @@ const ProjectCard = memo(function ProjectCard({
     } else if (caseStudyId === "form-taking") {
       import("../pages/FormTaking");
     } else if (caseStudyId === "aistylist") {
-      import("../pages/AIStylist");
+      import("../pages/PocketStylist");
     }
   };
 

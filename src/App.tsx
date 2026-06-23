@@ -1057,7 +1057,7 @@ function App() {
         )}
         {activeCaseStudy === "aistylist" && (
           <Suspense fallback={null}>
-            <AIStylist onBack={closeCaseStudy} origin={caseStudyOrigin} />
+            <PocketStylist onBack={closeCaseStudy} origin={caseStudyOrigin} />
           </Suspense>
         )}
       </AnimatePresence>
