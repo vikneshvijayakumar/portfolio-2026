@@ -1203,7 +1203,6 @@ button {
 .about-card__body {
   margin-top: 24px;
   font-size: var(--font-size-body);
-  text-align: center;
   color: var(--text-soft);
 }
 

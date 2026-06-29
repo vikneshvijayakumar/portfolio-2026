@@ -932,7 +932,7 @@ function App() {
                     <span className="toolbar__mark toolbar__mark--large">{boardMark()}</span>
                     <div className="toolbar__identity">
                       <span className="toolbar__name">Viknesh Vijayakumar</span>
-                      <span className="toolbar__role">Senior Product Designer</span>
+                      <span className="toolbar__role">Lead Product Designer</span>
                     </div>
                   </button>
                   {!isMobile && (
@@ -1188,12 +1188,13 @@ const AboutCard = memo(function AboutCard({
       </div>
       <div className="about-card__header">
         <h1>Viknesh Vijayakumar</h1>
-        <p>Senior Product Designer</p>
+        <p>Lead Product Designer</p>
       </div>
       <p className="about-card__body">
-        Over 10 years of experience in enterprise SaaS in fields like healthcare, AI, and edtech.
-        I specialize in taking complex systems with complicated workflows and technical limitations and turning
-        them into user friendly interfaces that are easy to use and actually work.
+        Over a decade in designing software for hospitals, clinical AI and enterprise systems, where a confusing screen directly affects patient care. I have designed clinical platforms that turned realtime patient conversations into actual records, many years before ambient AI was a category.
+        <br></br>
+        <br></br>
+        One core principle I hold on to, AI can be everywhere, but the human should be in charge.
       </p>
       <div className="about-card__footer">
         <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
