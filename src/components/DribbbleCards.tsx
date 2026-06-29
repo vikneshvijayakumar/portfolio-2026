@@ -66,7 +66,7 @@ const DribbbleCards = memo(function DribbbleCards({
   return (
     <section
       className={`dribbble-cards ${isMobile ? "is-mobile" : ""}`}
-      style={{ position: "absolute", left: 1700, top: 1500, width: 1160, height: 1120 }}
+      style={{ position: "absolute", left: 1650, top: 1500, width: 1160, height: 1120 }}
       data-interactive="true"
     >
       <h2

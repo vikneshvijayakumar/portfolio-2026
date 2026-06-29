@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState, useCallback } from "react";
-import { motion, useInView, useReducedMotion, useScroll, AnimatePresence } from "motion/react";
+import { motion, useInView, useReducedMotion, AnimatePresence } from "motion/react";
 import { toolbarLinks } from "../content";
 import CaseStudyFooter from "../components/CaseStudyFooter";
 import "./PocketStylist.css";
@@ -165,7 +165,9 @@ function RevealSection({
   onVisible?: (id: string) => void;
 }) {
   const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: false, amount: "some" });
+  // Active section = whichever one overlaps a thin band near the top of the
+  // viewport, instead of "any pixel visible" (which made the nav jump early).
+  const inView = useInView(ref, { once: false, margin: "-35% 0px -55% 0px" });
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -263,192 +265,54 @@ function PhoneFrame({ stepId, label, variant }: { stepId: string; label: string;
 }
 
 /** Redesign steps — sticky scroll with standard section layout */
+/** Redesign steps — all steps stacked one below the other, regular scroll */
 function RedesignStepsSection({
-  containerRef,
   onVisible,
 }: {
-  containerRef: React.RefObject<HTMLDivElement | null>;
   onVisible: (id: string) => void;
 }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [activeStep, setActiveStep] = useState(0);
-  const reduceMotion = useReducedMotion();
-  const [isMobileView, setIsMobileView] = useState(() => typeof window !== "undefined" ? window.innerWidth <= 960 : false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth <= 960);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const blockItemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.35, ease: EASE }
-    }
-  };
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    container: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  useEffect(() => {
-    if (isMobileView) return;
-    const unsubscribe = scrollYProgress.on("change", (v) => {
-      const idx = Math.min(
-        REDESIGN_STEPS.length - 1,
-        Math.floor(v * REDESIGN_STEPS.length)
-      );
-      setActiveStep(Math.max(0, idx));
-      if (v > 0.05) onVisible("ps-redesign");
-    });
-    return unsubscribe;
-  }, [scrollYProgress, onVisible, isMobileView]);
-
-  const step = REDESIGN_STEPS[activeStep];
-
   return (
-    <div
-      ref={sectionRef}
-      id="ps-redesign"
-      className="ps-redesign-scroll-container"
-      style={{ height: isMobileView ? "auto" : `${REDESIGN_STEPS.length * 100}vh` }}
-    >
-      {isMobileView ? (
-        <RevealSection id="ps-redesign" className="ps-section ps-section--redesign-mobile" onVisible={onVisible}>
-          <div className="ps-section__inner">
-            <div className="ps-section__number">
-              04<span>Redesign</span>
-            </div>
-            <div className="ps-redesign-content-mobile" style={{ display: "flex", flexDirection: "column", gap: "48px", width: "100%" }}>
-              <div className="ps-eyebrow">Deep Dive</div>
-              {REDESIGN_STEPS.map((s, idx) => (
-                <div key={s.id} className="ps-redesign-mobile-step" style={{ display: "flex", flexDirection: "column", gap: "16px", borderBottom: "1px solid var(--ps-line)", paddingBottom: "40px" }}>
-                  <div style={{ fontFamily: "var(--ps-font-mono)", fontSize: "12px", color: "var(--ps-accent)", letterSpacing: "0.1em" }}>
-                    {s.stepNum} / {s.tag}
-                  </div>
-                  <h3 className="ps-heading" style={{ margin: 0, fontSize: "28px" }}>{s.title}</h3>
-                  <p className="ps-body" style={{ margin: 0 }}>{s.why}</p>
-
-                  <div className="ps-redesign-card__text-pair-mobile" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div className="ps-redesign-card__text">
-                      <div className="ps-redesign-card__block-label">
-                        <span className="ps-redesign-card__dot ps-redesign-card__dot--old" />
-                        The Problem
-                      </div>
-                      <p style={{ margin: 0, fontSize: "14px", color: "var(--text-soft)", lineHeight: "1.5" }}>{s.problem}</p>
-                    </div>
-                    <div className="ps-redesign-card__text">
-                      <div className="ps-redesign-card__block-label">
-                        <span className="ps-redesign-card__dot ps-redesign-card__dot--new" />
-                        What I Changed
-                      </div>
-                      <p style={{ margin: 0, fontSize: "14px", color: "var(--text-soft)", lineHeight: "1.5" }}>{s.solution}</p>
-                    </div>
-                  </div>
-
-                  <div className="ps-redesign-card__phones-mobile" style={{ display: "flex", flexDirection: "row", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginTop: "16px" }}>
-                    <PhoneFrame stepId={s.id} label={`${s.title} (Before)`} variant="old" />
-                    <PhoneFrame stepId={s.id} label={`${s.title} (After)`} variant="new" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </RevealSection>
-      ) : (
-        <div className="ps-redesign-sticky">
-          <div className="ps-section__inner">
-            <div className="ps-section__number">
-              04<span>Redesign</span>
-            </div>
-            <div className="ps-redesign-content">
-              <div className="ps-eyebrow">
-                Deep Dive
-                <div className="ps-step-pills">
-                  {REDESIGN_STEPS.map((s, i) => (
-                    <button
-                      key={s.id}
-                      className={`ps-step-pill${i === activeStep ? " is-active" : ""}`}
-                      aria-label={`Step ${s.stepNum}: ${s.title}`}
-                      onClick={() => {
-                        if (!reduceMotion && window.innerWidth > 960) {
-                          if (sectionRef.current && containerRef.current) {
-                            const offsetTop = sectionRef.current.offsetTop;
-                            const offsetHeight = sectionRef.current.offsetHeight;
-                            const targetTop = offsetTop + (i / REDESIGN_STEPS.length) * offsetHeight + 10;
-                            containerRef.current.scrollTo({ top: targetTop, behavior: "smooth" });
-                          }
-                        } else {
-                          setActiveStep(i);
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="ps-redesign__head-wrap">
-                <AnimatePresence mode="sync">
-                  <motion.div
-                    key={step.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.25, ease: EASE }}
-                  >
-                    <h2 className="ps-heading">{step.title}</h2>
-                    <p className="ps-body">{step.why}</p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              <div className="ps-redesign-card__pair">
-                <div className="ps-redesign-card-texts-wrap">
-                  <AnimatePresence mode="sync">
-                    <motion.div
-                      key={step.id}
-                      className="ps-redesign-card__text-pair"
-                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
-                      transition={{ duration: 0.35, ease: EASE }}
-                    >
-                      <div className="ps-redesign-card__text">
-                        <div className="ps-redesign-card__block-label">
-                          <span className="ps-redesign-card__dot ps-redesign-card__dot--old" />
-                          The Problem
-                        </div>
-                        <p>{step.problem}</p>
-                      </div>
-                      <div className="ps-redesign-card__text">
-                        <div className="ps-redesign-card__block-label">
-                          <span className="ps-redesign-card__dot ps-redesign-card__dot--new" />
-                          What I Changed
-                        </div>
-                        <p>{step.solution}</p>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-                <div className="ps-redesign-card__phone">
-                  <PhoneFrame stepId={step.id} label={`${step.title} (Before)`} variant="old" />
-                </div>
-                <div className="ps-redesign-card__phone">
-                  <PhoneFrame stepId={step.id} label={`${step.title} (After)`} variant="new" />
-                </div>
-              </div>
-            </div>
-          </div>
+    <RevealSection id="ps-redesign" className="ps-section ps-section--redesign-mobile" onVisible={onVisible}>
+      <div className="ps-section__inner">
+        <div className="ps-section__number">
+          04<span>Redesign</span>
         </div>
-      )}
-    </div>
+        <div className="ps-redesign-content-mobile" style={{ display: "flex", flexDirection: "column", gap: "48px", width: "100%" }}>
+          <div className="ps-eyebrow">Deep Dive</div>
+          {REDESIGN_STEPS.map((s) => (
+            <div key={s.id} className="ps-redesign-mobile-step" style={{ display: "flex", flexDirection: "column", gap: "16px", borderBottom: "1px solid var(--ps-line)", paddingBottom: "40px" }}>
+              <div style={{ fontFamily: "var(--ps-font-mono)", fontSize: "12px", color: "var(--ps-accent)", letterSpacing: "0.1em" }}>
+                {s.stepNum} / {s.tag}
+              </div>
+              <h3 className="ps-heading" style={{ margin: 0, fontSize: "28px" }}>{s.title}</h3>
+              <p className="ps-body" style={{ margin: 0 }}>{s.why}</p>
+
+              <div className="ps-redesign-card__text-pair-mobile" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div className="ps-redesign-card__text">
+                  <div className="ps-redesign-card__block-label">
+                    <span className="ps-redesign-card__dot ps-redesign-card__dot--old" />
+                    The Problem
+                  </div>
+                  <p style={{ margin: 0, fontSize: "14px", color: "var(--text-soft)", lineHeight: "1.5" }}>{s.problem}</p>
+                </div>
+                <div className="ps-redesign-card__text">
+                  <div className="ps-redesign-card__block-label">
+                    <span className="ps-redesign-card__dot ps-redesign-card__dot--new" />
+                    What I Changed
+                  </div>
+                  <p style={{ margin: 0, fontSize: "14px", color: "var(--text-soft)", lineHeight: "1.5" }}>{s.solution}</p>
+                </div>
+              </div>
+
+              <div className="ps-redesign-card__phones-mobile" style={{ display: "flex", flexDirection: "row", gap: "8px", justifyContent: "center", flexWrap: "wrap", marginTop: "16px" }}>
+                <PhoneFrame stepId={s.id} label={`${s.title} (Before)`} variant="old" />
+                <PhoneFrame stepId={s.id} label={`${s.title} (After)`} variant="new" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </RevealSection>
   );
 }
 
@@ -619,13 +483,15 @@ export default function PocketStylist({ onBack, origin }: Props) {
             </div>
             <div>
               <div className="ps-eyebrow">The Product</div>
-              <h2 className="ps-heading">What is PocketStylist?</h2>
-              <p className="ps-body">
-                PocketStylist is an AI-powered fashion styling app designed to reduce decision fatigue and build AI powered, personalized wardrobes curated based on users' physical attributes and style preferences.
-              </p>
-              <p className="ps-body">
-                The core differentiator was their recommendation engine, which integrated expert backed styling rules with AI generated images to show users how their curated outfits will look on them.
-              </p>
+              <div className="ps-heading-body-group">
+                <h2 className="ps-heading">What is PocketStylist?</h2>
+                <p className="ps-body">
+                  PocketStylist is an AI-powered fashion styling app designed to reduce decision fatigue and build AI powered, personalized wardrobes curated based on users' physical attributes and style preferences.
+                </p>
+                <p className="ps-body">
+                  The core differentiator was their recommendation engine, which integrated expert backed styling rules with AI generated images to show users how their curated outfits will look on them.
+                </p>
+              </div>
             </div>
           </div>
         </RevealSection>
@@ -638,22 +504,21 @@ export default function PocketStylist({ onBack, origin }: Props) {
             </div>
             <div>
               <div className="ps-eyebrow">Audit Findings</div>
-              <h2 className="ps-heading">High Friction, Low Transparency</h2>
-              <p className="ps-body">
-                During my UX audit, I identified that the users were required to complete several steps before even knowing what they would finally get. This created a high friction experience and impacted how the users experienced the app.
-              </p>
+              <div className="ps-heading-body-group">
+                <h2 className="ps-heading">High Friction, Low Transparency</h2>
+                <p className="ps-body">
+                  During my UX audit, I identified that the users were required to complete several steps before even knowing what they would finally get. This created a high friction experience and impacted how the users experienced the app.
+                </p>
+              </div>
               <div className="ps-audit-grid">
                 <div className="ps-audit-card">
-                  <h3 className="ps-audit-card__title">Delayed Time to Value</h3>
-                  <p className="ps-audit-card__body">Users were required to complete a style assessment and share personal details before knowing what they would finally get. This increased the risk of early abandonment.</p>
+                  <p className="ps-body"><strong>Delayed Time to Value:</strong> Users were required to complete a style assessment and share personal details before knowing what they would finally get. This increased the risk of early abandonment.</p>
                 </div>
                 <div className="ps-audit-card">
-                  <h3 className="ps-audit-card__title">Hard to Discover Features</h3>
-                  <p className="ps-audit-card__body">Important features like wardrobe management, the unique ability to choose between Indian and Western attairs were hidden in between screens.</p>
+                  <p className="ps-body"><strong>Hard to Discover Features:</strong> Important features like wardrobe management, the unique ability to choose between Indian and Western attairs were hidden in between screens.</p>
                 </div>
                 <div className="ps-audit-card">
-                  <h3 className="ps-audit-card__title">Low Transparency</h3>
-                  <p className="ps-audit-card__body">Users were not clearly informed how recommendations were generated or how their inputs changed the outfit selection. This made the whole process feel random and not personalized.</p>
+                  <p className="ps-body"><strong>Low Transparency:</strong> Users were not clearly informed how recommendations were generated or how their inputs changed the outfit selection. This made the whole process feel random and not personalized.</p>
                 </div>
               </div>
             </div>
@@ -668,16 +533,18 @@ export default function PocketStylist({ onBack, origin }: Props) {
             </div>
             <div>
               <div className="ps-eyebrow">The North Star</div>
-              <h2 className="ps-heading">Help users reach their first meaningful styling recommendation as quickly and confidently as possible.</h2>
-              <p className="ps-body">
-                I focused on redesigning the app focusing on reducing cognitive load, improving feature discoverability and making personalization more transparent throughout the app.
-              </p>
+              <div className="ps-heading-body-group">
+                <h2 className="ps-heading">Help users reach their first meaningful styling recommendation as quickly and confidently as possible.</h2>
+                <p className="ps-body">
+                  I focused on redesigning the app focusing on reducing cognitive load, improving feature discoverability and making personalization more transparent throughout the app.
+                </p>
+              </div>
             </div>
           </div>
         </RevealSection>
 
         {/* REDESIGN STEPS — sticky scroll */}
-        <RedesignStepsSection containerRef={scrollContainerRef} onVisible={handleRedesignVisible} />
+        <RedesignStepsSection onVisible={handleRedesignVisible} />
 
         {/* OUTCOMES */}
         <RevealSection id="ps-outcomes" className="ps-section ps-section--outcomes" onVisible={setActiveId}>
@@ -687,10 +554,12 @@ export default function PocketStylist({ onBack, origin }: Props) {
             </div>
             <div>
               <div className="ps-eyebrow">Results</div>
-              <h2 className="ps-heading">System Impact</h2>
-              <p className="ps-body">
-                The redesign shifted PocketStylist from a set of disjointed screens to a unified, cohesive styling experience.
-              </p>
+              <div className="ps-heading-body-group">
+                <h2 className="ps-heading">System Impact</h2>
+                <p className="ps-body">
+                  The redesign shifted PocketStylist from a set of disjointed screens to a unified, cohesive styling experience.
+                </p>
+              </div>
 
               <div className="ps-outcomes-grid">
                 <div className="ps-outcome-card">
@@ -725,17 +594,17 @@ export default function PocketStylist({ onBack, origin }: Props) {
               <div className="ps-reflection-rule" />
               <p className="ps-reflection-big">
                 Restructuring the journey
-                <br />
-                beats <em>polishing</em>
-                <br />
+                beats polishing
                 individual features.
               </p>
-              <p className="ps-body">
-                The redesign was not about introducing new functionality. Most of the platform's strongest capabilities already existed in the backend.
-              </p>
-              <p className="ps-body">
-                By restructuring the user journey, surfacing value earlier, and removing unnecessary navigation overhead, we unlocked the platform's true potential. Designing the system architecture is always more impactful than just styling the interface.
-              </p>
+              <div className="ps-body-group">
+                <p className="ps-body">
+                  The redesign was not about introducing new functionality. Most of the platform's strongest capabilities already existed in the backend.
+                </p>
+                <p className="ps-body">
+                  By restructuring the user journey, surfacing value earlier, and removing unnecessary navigation overhead, we unlocked the platform's true potential. Designing the system architecture is always more impactful than just styling the interface.
+                </p>
+              </div>
             </div>
           </div>
         </RevealSection>

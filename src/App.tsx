@@ -18,8 +18,8 @@ import ProjectCards from "./components/ProjectCards";
 
 const Obv3 = lazy(() => import("./pages/Obv3"));
 const FormTaking = lazy(() => import("./pages/FormTaking"));
-const PocketStylist = lazy(() => import("./pages/PocketStylist"));
 const AIStylist = lazy(() => import("./pages/AIStylist"));
+const ClinicalDocumentation = lazy(() => import("./pages/ClinicalDocumentation"));
 
 import dribbbleIcon from "./assets/dribbble.svg";
 import emailIcon from "./assets/email.svg";
@@ -31,7 +31,7 @@ import sunSvg from "./assets/sun.svg?raw";
 import googleUxBadge from "./assets/google-ux.webp";
 import upworkBadge from "./assets/Upwork-TopRated-Badge.svg";
 import whatsappIcon from "./assets/whatsapp.svg";
-import antigravityBadge from "./assets/madewithantigravity.svg?raw";
+import aiBadge from "./assets/madewithclaudecode.svg?raw";
 import topArrowSvg from "./assets/top-right-arrow.svg?raw";
 import pinIcon from "./assets/pin.svg";
 import lookoutSvgRaw from "./assets/lookout.svg?raw";
@@ -55,8 +55,10 @@ const lookoutSvgRawProcessed = lookoutSvgRaw
   });
 
 
-const MIN_ZOOM = 0.25;
-const MAX_ZOOM = 1.5;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2;
+
+const CASE_STUDY_IDS = ["output-builder", "form-taking", "aistylist", "clinical-documentation"];
 
 const zoneNavItems: { id: ZoneId; label: string; key: string }[] = [
   { id: "about", label: "About", key: "1" },
@@ -132,6 +134,26 @@ function InlineAssetSvg({ html, className }: { html: string; className?: string 
 
 function boardMark() {
   return <InlineAssetSvg html={logoSvg} />;
+}
+
+/*
+ * The raw badge SVG ships with a baked-in 160x30 viewBox and explicit
+ * width/height attributes. We swap in a clean opening tag (so CSS can size
+ * it via `.made-with-card svg`), recolor the text to `currentColor` so it
+ * adapts to the paper/ink theme, and namespace the clip-path ids per
+ * instance so the desktop and mobile copies never collide.
+ */
+function buildAiBadgeMarkup(idSuffix: string) {
+  return aiBadge
+    .replace(/<svg[^>]*>/, '<svg viewBox="0 0 160 30" xmlns="http://www.w3.org/2000/svg">')
+    .replaceAll('id="a"', `id="ai-badge-a-${idSuffix}"`)
+    .replaceAll('url(#a)', `url(#ai-badge-a-${idSuffix})`)
+    .replaceAll('id="b"', `id="ai-badge-b-${idSuffix}"`)
+    .replaceAll('url(#b)', `url(#ai-badge-b-${idSuffix})`)
+    .replaceAll('id="c"', `id="ai-badge-c-${idSuffix}"`)
+    .replaceAll('url(#c)', `url(#ai-badge-c-${idSuffix})`)
+    .replace(/fill="#1F1915"/g, 'fill="currentColor"')
+    .replace(/fill="#000"/g, 'fill="currentColor"');
 }
 
 function centerCamera(
@@ -283,30 +305,39 @@ function App() {
   const openCaseStudy = (id: string, origin?: { x: number; y: number }) => {
     if (origin) setCaseStudyOrigin(origin);
     setActiveCaseStudy(id);
-    window.location.hash = id;
+    window.history.pushState(null, "", "/" + id + window.location.search);
   };
 
   const closeCaseStudy = () => {
     setActiveCaseStudy(null);
-    window.history.pushState(null, "", window.location.pathname + window.location.search);
+    window.history.pushState(null, "", "/" + window.location.search);
   };
 
-  // Handle deep linking and browser navigation
+  // Handle deep linking and browser navigation — accepts the case study id
+  // either as a hash ("/#output-builder") or a plain path ("/output-builder"),
+  // since the host rewrites every path to index.html.
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash === "output-builder" || hash === "form-taking" || hash === "aistylist") {
-        setActiveCaseStudy(hash);
-      } else if (!hash) {
+    const handleLocationChange = () => {
+      const hashId = window.location.hash.slice(1);
+      const pathId = window.location.pathname.replace(/^\/+|\/+$/g, "");
+      const id = CASE_STUDY_IDS.includes(hashId) ? hashId : CASE_STUDY_IDS.includes(pathId) ? pathId : null;
+
+      if (id) {
+        setActiveCaseStudy(id);
+      } else if (!hashId) {
         setActiveCaseStudy(null);
       }
     };
 
-    // Check hash on initial load
-    handleHashChange();
+    // Check the URL on initial load
+    handleLocationChange();
 
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener("hashchange", handleLocationChange);
+    window.addEventListener("popstate", handleLocationChange);
+    return () => {
+      window.removeEventListener("hashchange", handleLocationChange);
+      window.removeEventListener("popstate", handleLocationChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -502,7 +533,10 @@ function App() {
 
     const zone = zones.find((entry) => entry.id === zoneId)!;
     const isSmallPhone = window.innerWidth <= 402;
-    const targetZoom = customScale ?? (isMobile ? (zone.targetScale?.mobile ?? getDefaultZoom(window.innerWidth)) - (isSmallPhone ? 0.15 : 0) : zone.targetScale?.desktop) ?? getDefaultZoom(window.innerWidth);
+    let targetZoom = customScale ?? (isMobile ? (zone.targetScale?.mobile ?? getDefaultZoom(window.innerWidth)) - (isSmallPhone ? 0.15 : 0) : zone.targetScale?.desktop) ?? getDefaultZoom(window.innerWidth);
+    if (isMobile && zoneId === "case-studies") {
+      targetZoom = window.innerWidth / 1152;
+    }
     const target = centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom);
 
     if (instant) {
@@ -772,7 +806,12 @@ function App() {
 
   const resetZoom = () => {
     const zone = zones.find((entry) => entry.id === activeZone)!;
-    const target = centerCamera(zone, window.innerWidth, window.innerHeight, getDefaultZoom(window.innerWidth));
+    const isSmallPhone = window.innerWidth <= 402;
+    let targetZoom = isMobile ? (zone.targetScale?.mobile ?? getDefaultZoom(window.innerWidth)) - (isSmallPhone ? 0.15 : 0) : zone.targetScale?.desktop ?? getDefaultZoom(window.innerWidth);
+    if (isMobile && activeZone === "case-studies") {
+      targetZoom = window.innerWidth / 1152;
+    }
+    const target = centerCamera(zone, window.innerWidth, window.innerHeight, targetZoom);
     applyCamera(target);
   };
 
@@ -948,12 +987,7 @@ function App() {
                   <div
                     className="made-with-card"
                     data-interactive="true"
-                    dangerouslySetInnerHTML={{
-                      __html: antigravityBadge
-                        .replace('<svg', '<svg viewBox="0 0 174 36" shape-rendering="geometricPrecision"')
-                        .replace(/width="174"|height="36"/g, '')
-                        .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
-                    }}
+                    dangerouslySetInnerHTML={{ __html: buildAiBadgeMarkup("desktop") }}
                   />
                 </div>
               </div>
@@ -1026,14 +1060,7 @@ function App() {
                           zIndex: 5,
                         }}
                         data-interactive="true"
-                        dangerouslySetInnerHTML={{
-                          __html: antigravityBadge
-                            .replace('<svg', '<svg viewBox="0 0 174 36" style="overflow:visible"')
-                            .replace(/width="174"|height="36"/g, '')
-                            .replace(/fill="#(1F1915|202124)"/g, 'fill="currentColor"')
-                            .replace('url(#a)', 'url(#antigravity-clip)')
-                            .replace('id="a"', 'id="antigravity-clip"')
-                        }}
+                        dangerouslySetInnerHTML={{ __html: buildAiBadgeMarkup("mobile") }}
                       />
                     </>
                   )}
@@ -1057,7 +1084,12 @@ function App() {
         )}
         {activeCaseStudy === "aistylist" && (
           <Suspense fallback={null}>
-            <PocketStylist onBack={closeCaseStudy} origin={caseStudyOrigin} />
+            <AIStylist onBack={closeCaseStudy} origin={caseStudyOrigin} />
+          </Suspense>
+        )}
+        {activeCaseStudy === "clinical-documentation" && (
+          <Suspense fallback={null}>
+            <ClinicalDocumentation onBack={closeCaseStudy} origin={caseStudyOrigin} />
           </Suspense>
         )}
       </AnimatePresence>
@@ -1470,8 +1502,8 @@ const FloatingStatus = memo(function FloatingStatus({ isStarted }: { isStarted: 
 
         e.ox = e.lcx - pcx;
         e.oy = e.lcy - pcy;
-        e.mx = (eb.width - pb.width) * 0.55;
-        e.my = (eb.height - pb.height) * 0.55;
+        e.mx = (eb.width - pb.width) * 0.85;
+        e.my = (eb.height - pb.height) * 0.85;
       }
     };
 

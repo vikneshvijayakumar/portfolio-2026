@@ -1,6 +1,6 @@
 export const MOBILE_BREAKPOINT = 720;
 export const STAGE = {
-  width: 4500,
+  width: 5000,
   height: 2500,
 };
 export const EASE = [0.22, 1, 0.36, 1] as const;

@@ -59,19 +59,19 @@ export const zones: Zone[] = [
   {
     id: "case-studies",
     label: "Case Studies",
-    desktopCenter: { x: 3100, y: 900 },
-    mobileCenter: { x: 3100, y: 900 },
+    desktopCenter: { x: 3550, y: 1150 },
+    mobileCenter: { x: 3294, y: 1576 },
     mobileEyebrow: "Selected Work",
     mobileTitle: "Projects designed for complex, high-stakes workflows.",
     mobileBody:
       "A recruiter-friendly scan of the systems work: workflow redesign, modular outputs, guided form completion, and reporting surfaces that help teams act faster.",
-    targetScale: { desktop: 1.2, mobile: 0.68 }
+    targetScale: { desktop: 1, mobile: 0.68 }
   },
   {
     id: "dribbble",
     label: "Other Works",
     desktopCenter: { x: 2135, y: 1730 },
-    mobileCenter: { x: 2000, y: 1730 },
+    mobileCenter: { x: 1900, y: 1730 },
     mobileEyebrow: "Other Works",
     mobileTitle: "A selection of other works like website, UI explorations and quick concepts",
     mobileBody:
@@ -103,9 +103,9 @@ export const zones: Zone[] = [
 
 export const projects: Project[] = [
   {
-    title: "Cutting template creation from days → hours",
+    title: "Cutting output template creation time from days → hours",
     year: "2025",
-    company: "B2B",
+    company: "Edtech",
     status: "Coming Soon",
     impact: "90% faster creation time",
     summary:
@@ -113,25 +113,38 @@ export const projects: Project[] = [
     note: "Modular logic",
     tone: "Operational clarity / Data mapping",
     image: "output-builder.webp",
-    desktopPosition: { x: 2860, y: 830, rotation: 4.4 },
+    desktopPosition: { x: 2810, y: 830, rotation: 3.4 },
   },
   {
-    title: "Getting an AI Fashion App Out of Its Own Way",
-    year: "2025",
-    company: "B2C",
-    impact: "Faster first recommendation",
+    title: "Designing AI native clinical documentation, before AI was a thing",
+    year: "2021",
+    company: "Healthcare AI",
+    impact: "30+ modules shipped",
     summary:
-      "Redesigned an AI fashion styling journey so users understand the value earlier, discover key wardrobe features faster, and trust how personalization shapes recommendations.",
+      "Built the design for a realtime clinical AI platform that listens to provider and patient conversations and generates reports automatically, from patient intake to a node based AI trainer.",
     note: "",
-    tone: "Personalization / Mobile UX",
-    image: "pocket-stylist.webp",
-    desktopPosition: { x: 3160, y: 520, rotation: -3.2 },
+    tone: "Realtime AI / Clinical workflows",
+    image: "clinical-documentation.webp",
+    desktopPosition: { x: 3330, y: 830, rotation: -2 },
     type: "case-study",
   },
   {
-    title: "turning a fragmented form taking flow into one cohesive experience",
+    title: "An intelligent transcription platform, where the clinical AI work began",
+    year: "2015 - 2018",
+    company: "Healthcare AI",
+    status: "Coming Soon",
+    impact: "30+ modules / 1000+ screens",
+    summary:
+      "The clinical transcription platform that came before, 30 plus modules and over a thousand screens, where the design patterns first took shape.",
+    note: "",
+    tone: "Clinical transcription / Speech AI",
+    image: "ai-transcription.webp",
+    desktopPosition: { x: 3310, y: 1430, rotation: 3.2 },
+  },
+  {
+    title: "Turning a fragmented form taking flow into one cohesive experience",
     year: "2025",
-    company: "B2B",
+    company: "Edtech",
     status: "Coming Soon",
     impact: "Zero lost users",
     summary:
@@ -139,34 +152,33 @@ export const projects: Project[] = [
     note: "🔒 Password Protected",
     tone: "Mobile-first / Persistent navigation",
     image: "form-taking.webp",
-    desktopPosition: { x: 2800, y: 1430, rotation: -2.8 },
+    desktopPosition: { x: 2800, y: 1430, rotation: -2 },
   },
   {
-    title: "Self-Serve Form Builder",
-    year: "2026",
-    company: "B2B",
-    status: "Coming Soon",
-    impact: "Zero dev dependency",
+    title: "Getting an AI fashion stylist app out of its own way",
+    year: "2025",
+    company: "Fashion AI",
+    impact: "Faster first recommendation",
     summary:
-      "Architected a drag-and-drop authoring canvas for complex administrative forms. Empowered non-technical users to build conditional logic and map profile fields without engineering support.",
-    note: "Canvas architecture",
-    tone: "Structural control / Authoring",
-    image: "form-builder.webp",
-    desktopPosition: { x: 3510, y: 940, rotation: -5.6 },
-  },
-  {
-    title: "Modular Analytics Dashboard",
-    year: "2024",
-    company: "B2B",
-    status: "Coming Soon",
-    impact: "Instant actionable data",
-    summary:
-      "Designed a fully customizable, drag-and-drop widget architecture. Transformed dense, static compliance reports into personalized, high-level interfaces that drive business decisions.",
-    note: "Widget architecture",
-    tone: "Data visualization / Modularity",
-    image: "dashboard.webp",
-    desktopPosition: { x: 3460, y: 1610, rotation: 3.4 },
+      "Redesigned an AI fashion styling journey so users understand the value earlier, discover key wardrobe features faster, and trust how personalization shapes recommendations.",
+    note: "",
+    tone: "Personalization / Mobile UX",
+    image: "pocket-stylist.webp",
+    desktopPosition: { x: 3850, y: 830, rotation: 2.2 },
     type: "case-study",
+  },
+  {
+    title: "Redefining patient onboarding, from frustration to satisfaction",
+    year: "2020",
+    company: "Healthcare AI",
+    status: "Coming Soon",
+    impact: "Paper-to-digital intake",
+    summary:
+      "A digital patient intake platform that replaced paper forms, from research and interviews to a shipped product.",
+    note: "",
+    tone: "User research / Form design",
+    image: "snapintake.webp",
+    desktopPosition: { x: 3850, y: 1430, rotation: -1.8 },
   },
 ];
 

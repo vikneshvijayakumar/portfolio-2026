@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion, useScroll, AnimatePresence } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import { toolbarLinks } from "../content";
 import CaseStudyFooter from "../components/CaseStudyFooter";
 import "./Obv3.css";
@@ -187,7 +187,9 @@ function RevealSection({
   onVisible?: (id: string) => void;
 }) {
   const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: false, amount: "some" });
+  // Active section = whichever one overlaps a thin band near the top of the
+  // viewport, instead of "any pixel visible" (which made the nav jump early).
+  const inView = useInView(ref, { once: false, margin: "-35% 0px -55% 0px" });
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -275,38 +277,6 @@ export default function Obv3({ onBack, origin }: Props) {
   const heroInView = useInView(heroRef, { amount: 0.5 });
   const reduceMotion = useReducedMotion();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const solutionSectionRef = useRef<HTMLDivElement>(null);
-  const [activeStep, setActiveStep] = useState(0);
-  const [isMobileView, setIsMobileView] = useState(() => typeof window !== "undefined" ? window.innerWidth <= 960 : false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth <= 960);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const { scrollYProgress } = useScroll({
-    target: solutionSectionRef,
-    container: scrollContainerRef,
-    offset: ["start start", "end end"],
-  });
-
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (v) => {
-      const idx = Math.min(
-        FEATURES.length - 1,
-        Math.floor(v * FEATURES.length)
-      );
-      setActiveStep(Math.max(0, idx));
-      if (v > 0.05) {
-        setActiveId("obv3-solution");
-      }
-    });
-    return unsubscribe;
-  }, [scrollYProgress]);
 
   useEffect(() => {
     if (heroInView) {
@@ -688,178 +658,59 @@ export default function Obv3({ onBack, origin }: Props) {
           </div>
         </SectionBlock>
 
-        {/* 05 SOLUTION */}
-        {isMobileView ? (
-          <RevealSection id="obv3-solution" className="obv3-section obv3-section--solution-mobile" onVisible={setActiveId}>
-            <div className="obv3-section__inner">
-              <div className="obv3-section__number">
-                05<span>Solution</span>
-              </div>
-              <div>
-                <div className="obv3-solution-info" style={{ marginBottom: "40px" }}>
-                  <div className="obv3-eyebrow">Design Decisions</div>
-                  <h2 className="obv3-heading">
-                    From Manual Workflows
-                    <br />
-                    to a Visual System
-                  </h2>
-                </div>
-                <div className="obv3-mobile-features-list" style={{ display: "flex", flexDirection: "column", gap: "48px" }}>
-                  {FEATURES.map((feature, idx) => (
-                    <div key={idx} className="obv3-mobile-feature-card" style={{ display: "flex", flexDirection: "column", gap: "16px", borderBottom: "1px solid var(--obv3-line)", paddingBottom: "40px" }}>
-                      <div className="obv3-mobile-feature-meta" style={{ fontFamily: "var(--obv3-font-mono)", fontSize: "12px", color: "var(--obv3-accent)", letterSpacing: "0.1em" }}>
-                        {String(idx + 1).padStart(2, '0')} / {feature.title}
-                      </div>
-                      <h3 className="obv3-feature__title" style={{ margin: 0 }}>{feature.title}</h3>
-                      <p className="obv3-feature__body" style={{ margin: 0, maxWidth: "none" }}>{feature.body}</p>
-                      
-                      <div className="obv3-feature__helps-wrap" style={{ display: "block" }}>
-                        <div className="obv3-feature__helps-label">How it helps</div>
-                        <ul className="obv3-feature__helps-list">
-                          {feature.helps.map((h) => (
-                            <li key={h}>
-                              <span className="obv3-feature__helps-mark" aria-hidden="true">
-                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="3 8.5 6.5 12 13 5" />
-                                </svg>
-                              </span>
-                              <span>{h}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="obv3-feature__media-wrap" style={{ display: "block" }}>
-                        <div className="obv3-feature__media" style={{ transform: "none" }}>
-                          <div className="obv3-feature__media-frame">
-                            <LazyVideo src={feature.videoPath} className="obv3-feature__video" />
-                            <div className="obv3-feature__duration">{feature.duration}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* 05 SOLUTION — all features stacked one below the other */}
+        <RevealSection id="obv3-solution" className="obv3-section obv3-section--solution" onVisible={setActiveId}>
+          <div className="obv3-section__inner">
+            <div className="obv3-section__number">
+              05<span>Solution</span>
             </div>
-          </RevealSection>
-        ) : (
-          <div
-            ref={solutionSectionRef}
-            id="obv3-solution"
-            className="obv3-solution-scroll-container"
-            style={{ height: reduceMotion ? "auto" : `${FEATURES.length * 100}vh` }}
-          >
-            <div className="obv3-solution-sticky">
-              <div className="obv3-section__inner">
-                <div className="obv3-section__number">
-                  05<span>Solution</span>
-                </div>
-                <div>
-                  <div className="obv3-solution-info">
-                    <div className="obv3-eyebrow">
-                      Design Decisions
-                      <div className="obv3-step-pills">
-                        {FEATURES.map((_, i) => (
-                          <button
-                            key={i}
-                            className={`obv3-step-pill${i === activeStep ? " is-active" : ""}`}
-                            aria-label={`Feature ${i + 1}`}
-                            onClick={() => {
-                              if (!reduceMotion && window.innerWidth > 960) {
-                                if (solutionSectionRef.current && scrollContainerRef.current) {
-                                  const offsetTop = solutionSectionRef.current.offsetTop;
-                                  const offsetHeight = solutionSectionRef.current.offsetHeight;
-                                  const targetTop = offsetTop + (i / FEATURES.length) * offsetHeight + 10;
-                                  scrollContainerRef.current.scrollTo({ top: targetTop, behavior: "smooth" });
-                                }
-                              } else {
-                                setActiveStep(i);
-                              }
-                            }}
-                          />
+            <div>
+              <div className="obv3-solution-info" style={{ marginBottom: "40px" }}>
+                <div className="obv3-eyebrow">Design Decisions</div>
+                <h2 className="obv3-heading">
+                  From Manual Workflows
+                  <br />
+                  to a Visual System
+                </h2>
+              </div>
+              <div className="obv3-features-list">
+                {FEATURES.map((feature, idx) => (
+                  <div key={idx} className="obv3-feature-card">
+                    <div className="obv3-feature__header">
+                      <h3 className="obv3-feature__title">{feature.title}</h3>
+                      <p className="obv3-feature__body">{feature.body}</p>
+                    </div>
+
+                    <div className="obv3-feature__helps-wrap">
+                      <div className="obv3-feature__helps-label">How it helps</div>
+                      <ul className="obv3-feature__helps-list">
+                        {feature.helps.map((h) => (
+                          <li key={h}>
+                            <span className="obv3-feature__helps-mark" aria-hidden="true">
+                              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 8.5 6.5 12 13 5" />
+                              </svg>
+                            </span>
+                            <span>{h}</span>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
-                    <h2 className="obv3-heading">
-                      From Manual Workflows
-                      <br />
-                      to a Visual System
-                    </h2>
-                  </div>
 
-                  <div className="obv3-feature-box">
-                    <div className="obv3-feature">
-                      <div className="obv3-feature__head">
-                        <div className="obv3-feature__copy-wrap">
-                          <AnimatePresence mode="sync">
-                            <motion.div
-                              key={activeStep}
-                              className="obv3-feature__copy"
-                              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
-                              transition={{ duration: 0.35, ease: EASE }}
-                            >
-                              <h3 className="obv3-feature__title">{FEATURES[activeStep].title}</h3>
-                              <p className="obv3-feature__body">{FEATURES[activeStep].body}</p>
-                            </motion.div>
-                          </AnimatePresence>
-                        </div>
-
-                        <div className="obv3-feature__helps-wrap">
-                          <AnimatePresence mode="sync">
-                            <motion.div
-                              key={activeStep}
-                              className="obv3-feature__helps"
-                              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
-                              transition={{ duration: 0.35, ease: EASE }}
-                            >
-                              <div className="obv3-feature__helps-label">How it helps</div>
-                              <ul className="obv3-feature__helps-list">
-                                {FEATURES[activeStep].helps.map((h) => (
-                                  <li key={h}>
-                                    <span className="obv3-feature__helps-mark" aria-hidden="true">
-                                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="3 8.5 6.5 12 13 5" />
-                                      </svg>
-                                    </span>
-                                    <span>{h}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </motion.div>
-                          </AnimatePresence>
-                        </div>
-
-                        <div className="obv3-feature__media-wrap">
-                          <AnimatePresence mode="sync">
-                            <motion.div
-                              key={activeStep}
-                              className="obv3-feature__media"
-                              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
-                              transition={{ duration: 0.3, ease: EASE }}
-                              whileHover={{ y: -2 }}
-                            >
-                              <div className="obv3-feature__media-frame">
-                                <LazyVideo src={FEATURES[activeStep].videoPath} className="obv3-feature__video" />
-                                <div className="obv3-feature__duration">{FEATURES[activeStep].duration}</div>
-                              </div>
-                            </motion.div>
-                          </AnimatePresence>
+                    <div className="obv3-feature__media-wrap">
+                      <div className="obv3-feature__media" style={{ transform: "none" }}>
+                        <div className="obv3-feature__media-frame">
+                          <LazyVideo src={feature.videoPath} className="obv3-feature__video" />
+                          <div className="obv3-feature__duration">{feature.duration}</div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
-        )}
+        </RevealSection>
 
         {/* 06 IMPACT */}
         <SectionBlock
@@ -953,9 +804,6 @@ export default function Obv3({ onBack, origin }: Props) {
             transition={{ duration: 0.6, ease: EASE }}
           >
             <p className="obv3-evolution-quote">"What if we design the output first and let the system determine what information is actually missing?"</p>
-            <p className="obv3-evolution-detail">
-              Design the desired output first and let the system determine what information is actually missing. Instead of building a form and generating a document after that, the output itself becomes the starting point.
-            </p>
           </motion.div>
 
           <p className="obv3-body obv3-evolution-tail" style={{ marginBottom: 0 }}>
@@ -972,16 +820,6 @@ export default function Obv3({ onBack, origin }: Props) {
           title="Reflection"
           eyebrow="Key Takeaway"
         >
-          <motion.div
-            className="obv3-reflection-rule"
-            initial={{ scaleX: 0, transformOrigin: "0% 50%" }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true, amount: 0.6 }}
-            transition={{ duration: 1, ease: EASE }}
-          />
-          <p className="obv3-reflection-big">
-            The interface was never the problem.
-          </p>
           <p className="obv3-body">
             The ask was to make PDF creation easier. The real opportunity was understanding why it was hard in the first place. Once I mapped the workflow and found the hidden dependencies, I could remove a major part of the workflow rather than just making it less annoying.
           </p>

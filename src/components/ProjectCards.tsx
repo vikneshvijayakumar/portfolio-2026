@@ -5,7 +5,10 @@ import dashboardImg from "../assets/dashboard.webp";
 import formBuilderImg from "../assets/form-builder.webp";
 import formTakingImg from "../assets/form-taking.webp";
 import outputBuilderImg from "../assets/output-builder.webp";
-import pocketStylistImg from "../assets/pocket-stylist.webp";
+import pocketStylistImg from "../assets/aistylist.webp";
+import clinicalDocumentationImg from "../assets/clinical-documentation.webp";
+import aiTranscriptionImg from "../assets/ai-transcription.webp";
+import snapIntakeImg from "../assets/snapintake.webp";
 import topArrowSvg from "../assets/top-right-arrow.svg?raw";
 import { getCardTransition } from "../utils/constants";
 
@@ -15,6 +18,9 @@ const projectImages: Record<string, string> = {
   "form-taking.webp": formTakingImg,
   "output-builder.webp": outputBuilderImg,
   "pocket-stylist.webp": pocketStylistImg,
+  "clinical-documentation.webp": clinicalDocumentationImg,
+  "ai-transcription.webp": aiTranscriptionImg,
+  "snapintake.webp": snapIntakeImg,
 };
 
 const ProjectCard = memo(function ProjectCard({
@@ -34,15 +40,17 @@ const ProjectCard = memo(function ProjectCard({
 }) {
   const caseStudyId =
     project.image === "output-builder.webp" ||
-    project.title === "Enterprise Output Architecture" ||
-    project.title === "Eliminating PDF Bottlenecks with a Visual Builder" ||
-    project.title === "Cutting template creation from days → hours"
+      project.title === "Enterprise Output Architecture" ||
+      project.title === "Eliminating PDF Bottlenecks with a Visual Builder" ||
+      project.title === "Cutting template creation from days → hours"
       ? "output-builder"
       : project.image === "form-taking.webp" || project.title === "Hybrid .NET/React Form Bridge"
         ? "form-taking"
         : project.image === "pocket-stylist.webp" || project.title === "PocketStylist AI Redesign"
           ? "aistylist"
-          : null;
+          : project.image === "clinical-documentation.webp"
+            ? "clinical-documentation"
+            : null;
   const isClickable = caseStudyId !== null;
 
   const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
@@ -63,7 +71,9 @@ const ProjectCard = memo(function ProjectCard({
     } else if (caseStudyId === "form-taking") {
       import("../pages/FormTaking");
     } else if (caseStudyId === "aistylist") {
-      import("../pages/PocketStylist");
+      import("../pages/AIStylist");
+    } else if (caseStudyId === "clinical-documentation") {
+      import("../pages/ClinicalDocumentation");
     }
   };
 
@@ -71,16 +81,53 @@ const ProjectCard = memo(function ProjectCard({
     part.match(/\d+%/) ? <span key={idx} className="is-highlight">{part}</span> : part
   );
 
+  const desktopMotionProps = {
+    initial: {
+      opacity: 0,
+      scale: 0.9,
+      rotate: project.desktopPosition.rotation,
+      left: project.desktopPosition.x,
+      top: project.desktopPosition.y,
+    },
+    animate: isStarted
+      ? {
+        opacity: 1,
+        scale: 1,
+        rotate: project.desktopPosition.rotation,
+        left: project.desktopPosition.x,
+        top: project.desktopPosition.y,
+      }
+      : {
+        opacity: 0,
+        scale: 0.9,
+        rotate: project.desktopPosition.rotation,
+        left: project.desktopPosition.x,
+        top: project.desktopPosition.y,
+      },
+    whileHover: { scale: 1.02, rotate: 0, zIndex: 20 },
+    whileTap: { scale: 0.98 },
+  };
+
+  const mobileMotionProps = {
+    initial: { opacity: 0, y: 16, rotate: project.desktopPosition.rotation },
+    animate: isStarted
+      ? { opacity: 1, y: 0, rotate: project.desktopPosition.rotation }
+      : { opacity: 0, y: 16, rotate: project.desktopPosition.rotation },
+    whileHover: { y: -4, rotate: 0 },
+  };
+
   return (
     <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      animate={isStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+      {...(isMobile ? mobileMotionProps : desktopMotionProps)}
       transition={getCardTransition(isMobile, index)}
-      whileHover={{ x: 4 }}
-      className={`project-card ${isClickable ? "is-clickable" : "is-disabled"}`}
+      className={`project-card ${isMobile ? "is-mobile" : ""} ${isClickable ? "is-clickable" : "is-disabled"}`}
+      style={!isMobile ? { left: project.desktopPosition.x, top: project.desktopPosition.y } : undefined}
       data-interactive="true"
       tabIndex={0}
-      onFocus={() => prefetchCaseStudy()}
+      onFocus={() => {
+        if (!isMobile) onFocusPoint(project.desktopPosition.x, project.desktopPosition.y);
+        prefetchCaseStudy();
+      }}
       onPointerEnter={prefetchCaseStudy}
       onClick={handleClick}
       onKeyDown={(e) => {
@@ -140,9 +187,6 @@ const ProjectCard = memo(function ProjectCard({
   );
 });
 
-const PROJECTS_LIST_X = 2850;
-const PROJECTS_LIST_Y = 850;
-
 const ProjectCards = memo(function ProjectCards({
   onOpenCaseStudy,
   onFocusPoint,
@@ -154,20 +198,63 @@ const ProjectCards = memo(function ProjectCards({
   isMobile?: boolean;
   isStarted?: boolean;
 }) {
+  // Mobile: a single straightened column inside a positioned wrapper, since
+  // scattered rotation isn't practical in the stepper layout.
+  if (isMobile) {
+    const mobileOrder = [
+      "output-builder.webp",
+      "clinical-documentation.webp",
+      "pocket-stylist.webp",
+      "form-taking.webp",
+      "ai-transcription.webp",
+      "snapintake.webp",
+    ];
+    const orderedProjects = mobileOrder
+      .map((img) => projects.find((p) => p.image === img))
+      .filter((p): p is Project => !!p);
+
+    return (
+      <motion.div
+        className="project-cards is-mobile"
+        style={{ position: "absolute", left: 2832, top: 832, width: 1024 }}
+        initial={{ opacity: 0 }}
+        animate={isStarted ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h2 className="project-cards__title">CASE STUDIES</h2>
+        {orderedProjects.map((project, index) => (
+          <ProjectCard
+            key={project.title}
+            project={project}
+            index={index}
+            onOpen={onOpenCaseStudy}
+            onFocusPoint={onFocusPoint}
+            isMobile
+            isStarted={isStarted}
+          />
+        ))}
+      </motion.div>
+    );
+  }
+
+  // Desktop: each card is pinned directly on the canvas at its own
+  // scattered, rotated position — like stickies pinned to a FigJam board.
   return (
-    <motion.div
-      className={`project-cards ${isMobile ? "is-mobile" : ""}`}
-      style={{
-        position: "absolute",
-        left: isMobile ? 2800 : PROJECTS_LIST_X,
-        top: isMobile ? 832 : PROJECTS_LIST_Y,
-        width: isMobile ? 560 : 600,
-      }}
-      initial={{ opacity: 0 }}
-      animate={isStarted ? { opacity: 1 } : { opacity: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <h2 className="project-cards__title">CASE STUDIES</h2>
+    <>
+      <motion.h2
+        className="project-cards__title"
+        style={{
+          position: "absolute",
+          left: 2810,
+          top: 770,
+          margin: 0,
+        }}
+        initial={{ opacity: 0 }}
+        animate={isStarted ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        CASE STUDIES
+      </motion.h2>
       {projects.map((project, index) => (
         <ProjectCard
           key={project.title}
@@ -175,11 +262,11 @@ const ProjectCards = memo(function ProjectCards({
           index={index}
           onOpen={onOpenCaseStudy}
           onFocusPoint={onFocusPoint}
-          isMobile={isMobile}
+          isMobile={false}
           isStarted={isStarted}
         />
       ))}
-    </motion.div>
+    </>
   );
 });
 
