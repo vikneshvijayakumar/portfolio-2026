@@ -337,71 +337,73 @@ function ModulesSection({ onVisible }: { onVisible: (id: string) => void }) {
         <div className="ps-section__number">
           04<span>Modules</span>
         </div>
-        <div className="cd-modules-list">
+        <div className="cd-modules">
           <div className="ps-eyebrow">The Build</div>
-          {MODULES.map((module) => (
-            <div key={module.id} className="cd-module">
-              <div className="cd-module__meta">{module.num} / {module.tag}</div>
-              <h3 className="ps-heading cd-module__title">{module.title}</h3>
-              <p className="ps-body">{module.subtitle}</p>
+          <div className="cd-modules-list">
+            {MODULES.map((module) => (
+              <div key={module.id} className="cd-module">
+                <div className="cd-module__meta">{module.num} / {module.tag}</div>
+                <h3 className="ps-heading cd-module__title">{module.title}</h3>
+                <p className="ps-body">{module.subtitle}</p>
 
-              {module.id === "patient-intake" ? (
-                <>
-                  <div className="cd-module__texts">
-                    <ModuleBlocks module={module} />
-                  </div>
-                  <div className="cd-media">
-                    <div ref={setInlineVideoSlot} className="cd-media-video-slot" />
-                    <MaximizeButton onClick={() => setVideoExpanded(true)} />
-                  </div>
-                </>
-              ) : module.id === "companion-app" ? (
-                <>
-                  <div className="cd-module__texts">
-                    <ModuleBlocks module={module} />
-                  </div>
-                  <div className="cd-media">
-                    <img
-                      className="cd-module__video"
-                      src={companionAppImage}
-                      alt={module.title}
-                    />
-                    <MaximizeButton
-                      onClick={() => setLightboxMedia({ type: "image", src: companionAppImage, alt: module.title })}
-                    />
-                  </div>
-                </>
-              ) : module.id === "ai-trainer" ? (
-                <>
-                  <div className="cd-module__texts">
-                    <ModuleBlocks module={module} />
-                  </div>
-                  <div className="cd-media">
-                    <img
-                      className="cd-module__video"
-                      src={trainerImage}
-                      alt={module.title}
-                    />
-                    <MaximizeButton
-                      onClick={() => setLightboxMedia({ type: "image", src: trainerImage, alt: module.title })}
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="cd-module__pair">
-                  <div className="cd-module__texts">
-                    <ModuleBlocks module={module} />
-                  </div>
-                  <div className="cd-module__mockup">
-                    <div className="cd-module__mockup-inner">
-                      <ModuleMockup label={module.title} />
-                      <ModuleAnnotations items={module.annotations} />
+                {module.id === "patient-intake" ? (
+                  <>
+                    <div className="cd-module__texts">
+                      <ModuleBlocks module={module} />
+                    </div>
+                    <div className="cd-media">
+                      <div ref={setInlineVideoSlot} className="cd-media-video-slot" />
+                      <MaximizeButton onClick={() => setVideoExpanded(true)} />
+                    </div>
+                  </>
+                ) : module.id === "companion-app" ? (
+                  <>
+                    <div className="cd-module__texts">
+                      <ModuleBlocks module={module} />
+                    </div>
+                    <div className="cd-media">
+                      <img
+                        className="cd-module__video"
+                        src={companionAppImage}
+                        alt={module.title}
+                      />
+                      <MaximizeButton
+                        onClick={() => setLightboxMedia({ type: "image", src: companionAppImage, alt: module.title })}
+                      />
+                    </div>
+                  </>
+                ) : module.id === "ai-trainer" ? (
+                  <>
+                    <div className="cd-module__texts">
+                      <ModuleBlocks module={module} />
+                    </div>
+                    <div className="cd-media">
+                      <img
+                        className="cd-module__video"
+                        src={trainerImage}
+                        alt={module.title}
+                      />
+                      <MaximizeButton
+                        onClick={() => setLightboxMedia({ type: "image", src: trainerImage, alt: module.title })}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="cd-module__pair">
+                    <div className="cd-module__texts">
+                      <ModuleBlocks module={module} />
+                    </div>
+                    <div className="cd-module__mockup">
+                      <div className="cd-module__mockup-inner">
+                        <ModuleMockup label={module.title} />
+                        <ModuleAnnotations items={module.annotations} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -711,7 +713,6 @@ export default function ClinicalDocumentation({ onBack, origin }: Props) {
             </div>
             <div>
               <div className="ps-eyebrow">Key Takeaway</div>
-              <div className="ps-reflection-rule" />
               <p className="ps-reflection-big">
                 AI can be on every screen,
                 but the human should be

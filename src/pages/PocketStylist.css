@@ -776,13 +776,6 @@
 }
 
 /* ── Reflection ── */
-.ps-reflection-rule {
-  height: 3px;
-  background: var(--ps-accent);
-  width: 96px;
-  margin-bottom: 40px;
-}
-
 .ps-reflection-big {
   font-family: var(--font-title);
   font-size: 56px;

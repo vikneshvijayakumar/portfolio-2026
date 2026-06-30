@@ -31,6 +31,16 @@
 }
 
 /* ── Modules stacked one below the other within a single section ── */
+.cd-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cd-modules .ps-eyebrow {
+  margin-bottom: 0;
+}
+
 .cd-modules-list {
   display: flex;
   flex-direction: column;
@@ -45,7 +55,7 @@
   border-top: 1px solid var(--ps-line);
 }
 
-.cd-modules-list>.cd-module:first-of-type {
+.cd-modules-list > .cd-module:first-of-type {
   padding-top: 0;
   border-top: none;
 }

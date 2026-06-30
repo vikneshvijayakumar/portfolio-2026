@@ -591,7 +591,6 @@ export default function PocketStylist({ onBack, origin }: Props) {
             </div>
             <div>
               <div className="ps-eyebrow">Key Takeaway</div>
-              <div className="ps-reflection-rule" />
               <p className="ps-reflection-big">
                 Restructuring the journey
                 beats polishing
