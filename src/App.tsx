@@ -1171,7 +1171,7 @@ const AboutCard = memo(function AboutCard({
       style={{
         position: "absolute",
         left: isMobile ? 1792 : 1710,
-        top: isMobile ? 528 : 630,
+        top: isMobile ? 480 : 580,
         width: isMobile ? 480 : 520,
       }}
       data-interactive="true"
