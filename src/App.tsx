@@ -1191,10 +1191,11 @@ const AboutCard = memo(function AboutCard({
         <p>Lead Product Designer</p>
       </div>
       <p className="about-card__body">
-        Over a decade in designing software for hospitals, clinical AI and enterprise systems, where a confusing screen directly affects patient care. I have designed clinical platforms that turned realtime patient conversations into actual records, many years before ambient AI was a category.
+        I'm a product designer with 12 years of experience designing complex enterprise software, from healthcare AI and edtech to a range of client work across domains. For most of my career I have been a sole designer, owning a product from problem framing to delivery.
         <br></br>
         <br></br>
-        One core principle I hold on to, AI can be everywhere, but the human should be in charge.
+        I use AI as a support, using tools like Claude Code and Figma AI to ideate and iterate faster, building realistic prototypes and the leanest solutions that deliver the most value.
+
       </p>
       <div className="about-card__footer">
         <a className="download-button" href={toolbarLinks.resume} target="_blank" rel="noreferrer">

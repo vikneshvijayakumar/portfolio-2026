@@ -569,7 +569,7 @@ export default function ClinicalDocumentation({ onBack, origin }: Props) {
                 </div>
                 <div className="ps-meta-item">
                   <span className="ps-meta-label">Platform</span>
-                  <span className="ps-meta-val">Web, iOS, Android</span>
+                  <span className="ps-meta-val">Web (Angular Material), iOS, Android</span>
                 </div>
                 <div className="ps-meta-item">
                   <span className="ps-meta-label">Scale</span>
