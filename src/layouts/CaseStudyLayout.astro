@@ -1,0 +1,17 @@
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+}
+
+const { title, description, ogImage } = Astro.props;
+---
+
+<Layout {title} {description} {ogImage} pageClass="case-study-page">
+  <main>
+    <slot />
+  </main>
+</Layout>

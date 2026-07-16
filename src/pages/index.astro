@@ -1,0 +1,1854 @@
+---
+// Landing page — imported from Claude Design (index.dc.html), Ledger layout, indigo accent.
+import Layout from "../layouts/Layout.astro";
+import GalleryCard from "../components/GalleryCard.astro";
+import AskAI from "../components/AskAI.astro";
+import "../styles/header.css";
+import "../styles/glow.css";
+import "../styles/made-with.css";
+import { buildAiBadgeMarkup } from "../lib/ai-badge";
+
+const aiBadgeMarkup = buildAiBadgeMarkup("home");
+const EMAIL = "hello@viknesh.me";
+const RESUME =
+  "https://drive.google.com/file/d/16Iyt5Sfy_c8Jv3_tKE_pivnKhpe1QpYo/view";
+
+const base = [
+  {
+    tag: "case-study / output-builder",
+    title: "No-code form output builder",
+    meta: "Empyra · 90% faster template creation · 2024",
+    img: "/assets/output-builder.webp",
+    alt: "Output Builder visual template editor",
+    tint: "rgba(209,227,255,.4)",
+    featured: true,
+    draft: false,
+    link: "/output-builder",
+  },
+  {
+    tag: "case-study / ambient-scribe",
+    title: "AI-native clinical documentation, before AI was a thing",
+    meta: "AmbientOne · 30+ modules shipped · 2018-2021",
+    img: "/assets/clinical-documentation.webp",
+    alt: "Clinical documentation platform",
+    tint: "rgba(225,240,255,.5)",
+    featured: false,
+    draft: false,
+    link: "/clinical-documentation",
+  },
+  {
+    tag: "case-study / ai-stylist",
+    title: "Getting an AI stylist app out of its own way",
+    meta: "Freelance · Faster first recommendation · 2025",
+    img: "/assets/aistylist.webp",
+    alt: "AI Stylist redesign",
+    tint: "rgba(220,240,230,.5)",
+    featured: false,
+    draft: false,
+    link: "/ai-stylist",
+  },
+  {
+    tag: "case-study / form-taking",
+    title: "Turning fragmented enrollment flow into a guided experience",
+    meta: "Empyra · Zero lost users · 2025",
+    img: "/assets/form-taking.webp",
+    alt: "Form Taking enrollment flow",
+    tint: "rgba(255,240,220,.5)",
+    featured: false,
+    draft: false,
+    link: "/form-taking",
+  },
+  {
+    tag: "draft / snapintake",
+    title: "Paper-to-digital patient intake",
+    meta: "AmbientOne · 2020",
+    img: "/assets/snapintake.webp",
+    alt: "Paper-to-digital patient intake",
+    tint: "rgba(238,240,245,.6)",
+    featured: false,
+    draft: true,
+  },
+  {
+    tag: "draft / clinical-transcription",
+    title: "AI Powered clinical transcription",
+    meta: "AmbientOne · 1000+ screens · 2015–2018",
+    img: "/assets/ai-transcription.webp",
+    alt: "Intelligent clinical transcription",
+    tint: "rgba(238,240,245,.6)",
+    featured: false,
+    draft: true,
+  },
+];
+
+const caseStudies = base.map((cs, i) => ({
+  ...cs,
+  num: "0" + (i + 1),
+  z: i + 1,
+  top: `calc(clamp(200px, 26vh, 300px) + ${i * 12}px)`,
+  border: cs.draft
+    ? "1.5px dashed var(--border-strong)"
+    : "1px solid var(--line)",
+  tagColor: cs.featured ? "var(--ac)" : "var(--muted)",
+  titleColor: cs.draft ? "var(--muted)" : "var(--text)",
+  hasLink: !!cs.link,
+}));
+
+// Off-the-record gallery — ported from Fignam-Codex DribbbleCards
+const galleryItems = [
+  {
+    src: "/assets/investor-pitchdeck.webp",
+    label: "Healthcare AI Pitch Deck",
+    link: "https://www.figma.com/deck/1GRsT7aJxwDo8Dsc7JgJfh",
+    rot: -1.2,
+    tapeRot: -4,
+  },
+  {
+    src: "/assets/orgusta-otherwork.webp",
+    label: "Orgusta Logo Design",
+    link: "https://www.figma.com/deck/Gav4HFOlEX7DXmJdeF8OhI",
+    rot: 1.4,
+    tapeRot: -3,
+  },
+  {
+    src: "/assets/other-work-2.webp",
+    label: "Tango App Exploration",
+    link: "https://dribbble.com/shots/21047586-Tango-App-Exploration",
+    rot: -0.9,
+    tapeRot: 4,
+  },
+  {
+    src: "/assets/other-work-3.webp",
+    label: "Reiki Website",
+    link: "https://dribbble.com/shots/21037521-Website-Reiki-Healing",
+    rot: 0.8,
+    tapeRot: 3,
+  },
+  {
+    src: "/assets/3dnissan.webp",
+    label: "Nissan GTR, yes, I modeled it",
+    rot: -0.6,
+    tapeRot: -5,
+  },
+  {
+    src: "/assets/other-work-1.webp",
+    label: "Healing Studio Landing",
+    link: "https://dribbble.com/shots/21096185-Healing-Studio-Website-Landing",
+    rot: 1,
+    tapeRot: 3,
+  },
+  {
+    src: "/assets/collabcoyn.webp",
+    label: "CollabCoyn Mining Dashboard",
+    link: "https://dribbble.com/shots/21044656-Crypto-App-Concept",
+    rot: -1.1,
+    tapeRot: -3,
+  },
+];
+
+const tickerWork = [
+  "B2B SaaS",
+  "Enterprise SaaS",
+  "Healthcare AI",
+  "EdTech",
+  "Design Systems",
+  "Clinical Workflows",
+  "AI-Native UX",
+  "HITL patterns",
+  "Conversational UI",
+  "Voice Interface Design",
+  "Agile Methodology",
+  "Team Management",
+];
+const tickerSkills = [
+  "Figma",
+  "Claude Code",
+  "Cursor",
+  "Material UI",
+  "shadcn",
+  "UntitledUI",
+  "Jitter",
+  "HTML/CSS",
+  "Advanced Prototyping",
+  "Wordpress",
+  "SME Interviews",
+  "WCAG 2.2",
+  "Competitive Analysys",
+  "Journey Mapping",
+  "Interaction Design",
+  "Information Architecture",
+  "User Research",
+];
+---
+
+<Layout
+  title="Viknesh Vijayakumar — Lead Product Designer"
+  description="I make complex B2B software feel refreshingly simple. 12 years in product design, 8 in healthcare AI."
+  ogImage="/assets/profile.webp"
+  pageClass="home-page"
+>
+  <script is:inline>
+    // Resolve the theme before first paint so dark mode never flashes white.
+    (() => {
+      const saved = localStorage.getItem("viknesh-theme");
+      document.documentElement.dataset.theme =
+        saved === "ink" || saved === "paper"
+          ? saved
+          : matchMedia("(prefers-color-scheme: dark)").matches
+            ? "ink"
+            : "paper";
+    })();
+  </script>
+
+  <style is:global>
+    @keyframes pulseDot {
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45);
+      }
+      50% {
+        box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+      }
+    }
+    @keyframes floatCursor {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+    @keyframes tickerX {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(-50%);
+      }
+    }
+    /* ── Hero entrance ── */
+    @keyframes fxUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    @keyframes wordUp {
+      from {
+        transform: translateY(115%);
+      }
+      to {
+        transform: none;
+      }
+    }
+    @keyframes cornerPop {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+    .fx {
+      opacity: 0;
+      animation: fxUp 0.9s var(--ease-out-quart) forwards;
+      animation-delay: var(--d, 0s);
+    }
+    /* Masked word reveal (hero h1 + section headings) */
+    .w-mask {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      padding-bottom: 0.12em;
+      margin-bottom: -0.12em;
+    }
+    .w-in {
+      display: inline-block;
+      transform: translateY(115%);
+    }
+    .hero-ready [data-rsp="hero-line"] .w-in {
+      animation: wordUp 0.9s var(--ease-out-quart) forwards;
+      animation-delay: calc(var(--i) * 70ms);
+    }
+    .hero-l2 {
+      display: inline-block;
+      opacity: 0;
+      animation: fxUp 0.9s var(--ease-out-quart) 0.45s forwards;
+    }
+    .hero-l2 .corner {
+      transform: scale(0);
+      animation: cornerPop 0.45s var(--ease-out-back) forwards;
+    }
+    .hero-l2 .corner:nth-of-type(1) {
+      animation-delay: 1s;
+    }
+    .hero-l2 .corner:nth-of-type(2) {
+      animation-delay: 1.12s;
+    }
+    .hero-l2 .corner:nth-of-type(3) {
+      animation-delay: 1.24s;
+    }
+    /* Heading word cascade on scroll */
+    [data-reveal="words"] .w-in {
+      transition: transform 0.85s var(--ease-out-quart);
+      transition-delay: calc(var(--i) * 80ms);
+    }
+    [data-reveal="words"].in .w-in {
+      transform: none;
+    }
+    /* ── Hero dot-grid spotlight ── */
+    #top::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background-image: radial-gradient(var(--ac) 1.5px, transparent 1.5px);
+      background-size: 26px 26px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      -webkit-mask-image: radial-gradient(
+        240px circle at var(--mx, 50%) var(--my, 50%),
+        #000 0%,
+        transparent 72%
+      );
+      mask-image: radial-gradient(
+        240px circle at var(--mx, 50%) var(--my, 50%),
+        #000 0%,
+        transparent 72%
+      );
+    }
+    #top:hover::after {
+      opacity: 0.55;
+    }
+    /* ── Tickers ── */
+    .ticker:hover .ticker-track {
+      animation-play-state: paused;
+    }
+    .ticker-track--reverse {
+      animation-direction: reverse;
+    }
+    /* The masthead logo ships as an <img>, so it inverts via filter rather
+       than the currentColor trace the canvas uses on its inline SVG. */
+    .toolbar__mark img {
+      filter: var(--logo-filter);
+    }
+    /* ── Scroll progress bar — pinned to the viewport, above the panels ── */
+    #progress {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--ac);
+      transform: scaleX(0);
+      transform-origin: left;
+      z-index: 101;
+    }
+    /* ── Theme toggle icons (scoped past header.css's `.theme-toggle-minimal svg`) ── */
+    .theme-toggle-minimal .icon-sun {
+      display: none;
+    }
+    :root[data-theme="ink"] .theme-toggle-minimal .icon-sun {
+      display: block;
+    }
+    :root[data-theme="ink"] .theme-toggle-minimal .icon-moon {
+      display: none;
+    }
+    /* ── Work cards: depth while stacking ── */
+    [data-card-index] {
+      transform-origin: top center;
+      will-change: transform, filter;
+    }
+    /* ── Contact email underline sweep ── */
+    .email-link {
+      background-image: linear-gradient(var(--accent-300), var(--accent-300));
+      background-repeat: no-repeat;
+      background-size: 0% 0.045em;
+      background-position: 0 96%;
+      transition: background-size 0.6s var(--ease-in-out-quart);
+    }
+    .email-link:hover {
+      background-size: 100% 0.045em;
+    }
+    .copied-indicator {
+      display: inline-block;
+      font-family: var(--font), sans-serif;
+      font-size: clamp(12px, 1.5vw, 15px);
+      font-weight: 600;
+      color: #10b981;
+      opacity: 0;
+      transform: scale(0.9) translate3d(0, 4px, 0);
+      transition:
+        opacity 0.35s var(--ease-out-back),
+        transform 0.35s var(--ease-out-back);
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      pointer-events: none;
+    }
+    .copied-indicator.is-visible {
+      opacity: 1;
+      transform: scale(1) translate3d(0, 0, 0);
+    }
+    .email-copy-icon {
+      width: 0.38em;
+      height: 0.38em;
+      min-width: 24px;
+      min-height: 24px;
+      opacity: 0.45;
+      transition: opacity 0.2s var(--ease-in-out-quart);
+      margin-left: 0.12em;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .email-link:hover .email-copy-icon {
+      opacity: 0.85;
+    }
+    /* ── Badge Tooltips ── */
+    .badge-link {
+      position: relative;
+    }
+    .badge-link .custom-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-4px);
+      background: var(--surface-strong);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--text);
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-family: var(--font), sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(15, 21, 36, 0.08);
+      transition:
+        opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+        transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 10;
+    }
+    .badge-link .custom-tooltip::before {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 5px;
+      border-style: solid;
+      border-color: var(--surface-strong) transparent transparent transparent;
+    }
+    .badge-link:hover .custom-tooltip,
+    .badge-link:focus-visible .custom-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fx,
+      .hero-l2,
+      .w-in,
+      .hero-l2 .corner {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .ticker-track,
+      [style*="floatCursor"],
+      [style*="pulseDot"] {
+        animation: none !important;
+      }
+      #top::after {
+        display: none;
+      }
+    }
+    /* ── Ask AI card — sits at the base of the hero, below the action row ── */
+    .ask-ai-slot {
+      margin-top: clamp(48px, 9vh, 110px);
+    }
+    [data-rsp="burger"] {
+      display: none !important;
+    }
+    /* The right panel runs out of room before the nav does — shed the
+       decorative pill and the resume CTA first (the mobile menu has both). */
+    @media (max-width: 1100px) {
+      [data-rsp="pill"],
+      [data-rsp="resume"] {
+        display: none !important;
+      }
+    }
+    @media (max-width: 900px) {
+      [data-rsp="nav"] {
+        display: none !important;
+      }
+      [data-rsp="burger"] {
+        display: flex !important;
+      }
+      [data-rsp="case"] {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+        gap: 32px !important;
+        padding: 32px 24px !important;
+        opacity: 1 !important;
+        transform: none !important;
+        margin-bottom: 24px;
+      }
+      #work-pinned {
+        position: relative !important;
+        top: auto !important;
+        padding-top: 0 !important;
+      }
+      #work {
+        padding-top: 80px !important;
+        padding-bottom: 80px !important;
+      }
+      [data-rsp="case"] img {
+        max-height: none !important;
+      }
+      [data-rsp="xp"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        padding: 40px 0 !important;
+      }
+      [data-rsp="about"] {
+        grid-template-columns: 1fr !important;
+        gap: 56px !important;
+      }
+      [data-rsp="about"] > div:first-child {
+        max-width: 340px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      [data-rsp="hero-line"] {
+        font-size: clamp(40px, 10.5vw, 104px) !important;
+      }
+      [data-rsp="hero-h1"] {
+        font-size: clamp(40px, 10.5vw, 124px) !important;
+      }
+    }
+  </style>
+
+  <!-- Cursor halo, shared with the canvas landing (styles/glow.css) -->
+  <div class="mouse-glow" aria-hidden="true"></div>
+
+  <!-- ══ MASTHEAD — shared chrome with the canvas landing (styles/header.css) ══ -->
+  <header class="toolbar">
+    <div class="toolbar__panel toolbar__panel--left">
+      <div class="toolbar__left">
+        <a class="toolbar__branding" href="#top">
+          <span class="toolbar__mark">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="46"
+              height="28"
+              fill="none"
+              viewBox="0 0 46 28"
+              aria-label="Viknesh Vijayakumar logo"
+            >
+              <path
+                fill="currentColor"
+                d="m23.475 4 4.463 3.016v.61L16.362 24.663l-.518.353h-8.73L5.077 28h-.615L0 24.984v-.61L13.84 4h.614l4.462 3.016v.61l-9.83 14.47v2.182L22.861 4h.614Zm18.063 0L46 7.016v.61L34.424 24.663l-.517.353h-8.73L23.138 28h-.614l-4.463-3.016v-.61L31.902 4h.614l4.462 3.016v.61l-9.83 14.47v2.182L40.923 4h.615Z"
+              ></path>
+            </svg>
+          </span>
+          <span class="toolbar__identity">
+            <span class="toolbar__name">Viknesh Vijayakumar</span>
+            <span class="toolbar__role">Lead Product Designer</span>
+          </span>
+        </a>
+        <nav class="header-zone-nav" data-rsp="nav" aria-label="Primary">
+          <a class="header-zone-nav__item" href="#work"
+            ><span class="header-zone-nav__label">Works</span></a
+          >
+          <a class="header-zone-nav__item" href="#experience"
+            ><span class="header-zone-nav__label">Experience</span></a
+          >
+          <a class="header-zone-nav__item" href="#gallery"
+            ><span class="header-zone-nav__label">Other Works</span></a
+          >
+          <a class="header-zone-nav__item" href="#about"
+            ><span class="header-zone-nav__label">About</span></a
+          >
+          <a class="header-zone-nav__item" href="#contact"
+            ><span class="header-zone-nav__label">Contact</span></a
+          >
+        </nav>
+      </div>
+    </div>
+
+    <div class="toolbar__panel toolbar__panel--right">
+      <div class="toolbar__actions">
+        <a
+          class="alt-landing-link"
+          href="/canvas-landing"
+          title="Canvas Landing"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M9 3v18M3 9h18"></path>
+          </svg>
+          <span class="alt-landing-link__label">Canvas Mode</span>
+        </a>
+        <a class="availability-pill" href="#contact" data-rsp="pill">
+          <span class="availability-pill__dot" aria-hidden="true"></span>Open
+          for opportunities
+        </a>
+        <button
+          class="theme-toggle-minimal"
+          id="themeToggle"
+          type="button"
+          aria-label="Switch to dark mode"
+          title="Switch to dark mode"
+        >
+          <svg
+            class="icon-sun"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 3V4M12 20V21M4 12H3M6.31412 6.31412L5.5 5.5M17.6859 6.31412L18.5 5.5M6.31412 17.69L5.5 18.5001M17.6859 17.69L18.5 18.5001M21 12H20M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z"
+            ></path>
+          </svg>
+          <svg
+            class="icon-moon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M13 6V3M18.5 12V7M14.5 4.5H11.5M21 9.5H16M15.5548 16.8151C16.7829 16.8151 17.9493 16.5506 19 16.0754C17.6867 18.9794 14.7642 21 11.3698 21C6.74731 21 3 17.2527 3 12.6302C3 9.23576 5.02061 6.31331 7.92462 5C7.44944 6.05072 7.18492 7.21708 7.18492 8.44523C7.18492 13.0678 10.9322 16.8151 15.5548 16.8151Z"
+            ></path>
+          </svg>
+        </button>
+        <a
+          class="toolbar__resume"
+          data-rsp="resume"
+          href={RESUME}
+          target="_blank"
+          rel="noopener">Download Resume</a
+        >
+        <button
+          class="toolbar__burger"
+          data-rsp="burger"
+          id="burger"
+          aria-label="Menu"
+          title="Menu"
+        >
+          <span style="display:flex;flex-direction:column;gap:4px">
+            <span
+              style="display:block;width:18px;height:2px;background:currentColor"
+            ></span>
+            <span
+              style="display:block;width:18px;height:2px;background:currentColor"
+            ></span>
+            <span
+              style="display:block;width:18px;height:2px;background:currentColor"
+            ></span>
+          </span>
+        </button>
+      </div>
+    </div>
+    <div id="progress" aria-hidden="true"></div>
+  </header>
+
+  <!-- ══ MOBILE MENU ══ -->
+  <div
+    id="menu"
+    style="display:none;position:fixed;inset:0;z-index:100;flex-direction:column;background:var(--bg);padding:12px var(--pad) 40px"
+  >
+    <div
+      style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:12px;border-bottom:1px solid var(--line)"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="46"
+        height="28"
+        fill="none"
+        viewBox="0 0 46 28"
+        aria-label="Viknesh Vijayakumar logo"
+        style="display:block;height:26px;width:auto;color:var(--text)"
+      >
+        <path
+          fill="currentColor"
+          d="m23.475 4 4.463 3.016v.61L16.362 24.663l-.518.353h-8.73L5.077 28h-.615L0 24.984v-.61L13.84 4h.614l4.462 3.016v.61l-9.83 14.47v2.182L22.861 4h.614Zm18.063 0L46 7.016v.61L34.424 24.663l-.517.353h-8.73L23.138 28h-.614l-4.463-3.016v-.61L31.902 4h.614l4.462 3.016v.61l-9.83 14.47v2.182L40.923 4h.615Z"
+        ></path>
+      </svg>
+      <button
+        id="menuClose"
+        aria-label="Close menu"
+        title="Close menu"
+        style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;font-size:20px;line-height:1;color:var(--text);padding:0"
+        >✕</button
+      >
+    </div>
+    <nav
+      style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:40px"
+    >
+      <a
+        href="#work"
+        data-menu-link
+        style="font-family:var(--font-title),Georgia,serif;font-size:clamp(32px,9vw,52px);line-height: 1.5;color:var(--text)"
+        >Works</a
+      >
+      <a
+        href="#experience"
+        data-menu-link
+        style="font-family:var(--font-title),Georgia,serif;font-size:clamp(32px,9vw,52px);line-height: 1.5;color:var(--text)"
+        >Experience</a
+      >
+      <a
+        href="#gallery"
+        data-menu-link
+        style="font-family:var(--font-title),Georgia,serif;font-size:clamp(32px,9vw,52px);line-height: 1.5;color:var(--text)"
+        >Other Works</a
+      >
+      <a
+        href="#about"
+        data-menu-link
+        style="font-family:var(--font-title),Georgia,serif;font-size:clamp(32px,9vw,52px);line-height: 1.5;color:var(--text)"
+        >About</a
+      >
+      <a
+        href="#contact"
+        data-menu-link
+        style="font-family:var(--font-title),Georgia,serif;font-size:clamp(32px,9vw,52px);line-height: 1.5;color:var(--text)"
+        >Contact</a
+      >
+    </nav>
+    <div
+      style="margin-top:auto;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
+    >
+      hello@viknesh.me · Chennai, India
+    </div>
+  </div>
+
+  <!-- ══ HERO ══ -->
+  <section
+    id="top"
+    style="position:relative;display:flex;align-items:center;min-height:100vh;box-sizing:border-box;background:var(--bg);background-image:radial-gradient(var(--dot) 1.3px,transparent 1.3px);background-size:26px 26px;padding:120px var(--pad) 100px"
+  >
+    <div id="heroInner" style="position:relative;z-index:2">
+      <div
+        class="fx"
+        style="display:inline-flex;align-items:center;gap:8px;margin-bottom:36px"
+      >
+        <div
+          style="display:inline-flex;align-items:center;gap:8px;animation:floatCursor 2.6s ease-in-out infinite"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="var(--ac)"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            style="display:block;height:20px;width:auto"
+            ><path
+              d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"
+            ></path></svg
+          >
+          <span
+            style="padding:4px 12px;border-radius:999px;background:color-mix(in srgb, var(--ac) 12%, var(--bg));border:1px solid color-mix(in srgb, var(--ac) 25%, var(--bg));color:var(--ac);font-size:12px;font-weight:600;white-space:nowrap"
+            >Viknesh Vijayakumar · Lead Product Designer</span
+          >
+        </div>
+      </div>
+      <h1
+        data-rsp="hero-h1"
+        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(52px,4vw + 12px,124px);line-height:1.02;letter-spacing: 0;text-wrap:balance"
+      >
+        <div>
+          <span data-rsp="hero-line" data-split-words
+            >I make complex B2B software feel</span
+          >
+        </div><span class="hero-l2"
+          ><span
+            style="position:relative;display:inline-block;font-style:italic;color:var(--ac);border:1.5px solid var(--ac);padding:0 16px;margin:0 4px"
+            ><span
+              class="corner"
+              style="position:absolute;top:-4.5px;right:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
+            ></span><span
+              class="corner"
+              style="position:absolute;bottom:-4.5px;left:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
+            ></span><span
+              class="corner"
+              style="position:absolute;bottom:-4.5px;right:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
+            ></span>refreshingly</span
+          > simple.</span
+        >
+      </h1>
+
+      <p
+        class="fx"
+        style="--d:.6s;font-size:20px;line-height: 1.5;margin:40px 0 0;max-width:64ch"
+      >
+        I work across early stage and enterprise. I ideate, design, and work
+        closely with engineering to get it shipped.&nbsp;12 years in, 8 of them
+        in healthcare AI. I like the messy middle. Complex workflows, unclear
+        requirements, an AI feature nobody has made usable yet. That is the work
+        I want.
+      </p>
+
+      <div
+        class="fx"
+        style="--d:.75s;display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-top:44px"
+      >
+        <a
+          href={RESUME}
+          target="_blank"
+          rel="noopener"
+          class="btn-primary"
+          style="display:inline-flex;align-items:center;gap:8px;padding:16px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
+          >Download Resume<span style="font-size:16px">↗</span></a
+        >
+        <button
+          data-copy-email
+          style="border:none;background:none;padding:0;cursor:pointer;font-family:var(--font),sans-serif;font-size:16px;font-weight:600;color:var(--text);border-bottom:1.5px solid var(--text)"
+          >Copy Email</button
+        >
+        <span
+          style="font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
+          >Chennai, India · Available Remotely</span
+        >
+      </div>
+      <div class="fx ask-ai-slot" style="--d:1s">
+        <AskAI />
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TICKER ══ -->
+  <div
+    class="ticker"
+    style="background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden"
+  >
+    <div
+      class="ticker-track"
+      style="display:flex;width:max-content;animation:tickerX 44s linear infinite"
+    >
+      {
+        [0, 1].map(() => (
+          <div style="display:flex;align-items:center;gap:40px;padding:28px 20px;font-family:var(--font-title),Georgia,serif;font-size:clamp(36px,1.5vw + 16px,60px);line-height:1;white-space:nowrap">
+            {tickerWork.map((t, i) => (
+              <>
+                {i % 2 === 0 ? (
+                  <span style="color:var(--text)">{t}</span>
+                ) : (
+                  <span style="font-style:italic;color:transparent;-webkit-text-stroke:1.2px var(--ac)">
+                    {t}
+                  </span>
+                )}
+                <span style="width:11px;height:11px;background:var(--ac);transform:rotate(45deg);flex:none" />
+              </>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- ══ WORK — stacking case studies (Ledger) ══ -->
+  <section
+    id="work"
+    style="position:relative;padding:0 var(--pad) 160px;background:var(--bg2);background-image:radial-gradient(var(--dot) 1.3px,transparent 1.3px);background-size:26px 26px;background-attachment:fixed"
+  >
+    <!-- Sticky heading: the gap above it is padding, so it pins as one block.
+         The dotted bg is background-attachment:fixed, so nothing appears to move
+         behind the pinned content while the cards stack. -->
+    <div
+      id="work-pinned"
+      style="position:sticky;top:0;padding:clamp(88px,12vh,140px) 0 40px;pointer-events:none"
+    >
+      <h2
+        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(48px,3vw + 12px,96px);letter-spacing: 0;line-height:1;pointer-events:auto;padding-bottom:40px"
+        data-reveal="words"
+        data-split-words
+      >
+        Selected Works
+      </h2>
+    </div>
+
+    <!-- Cards flow one below the other; each is sticky, so they stack while scrolling -->
+    <div id="work-cards" style="display:flex;flex-direction:column;gap:48px">
+      {
+        caseStudies.map((cs, i) => (
+          <article
+            data-rsp="case"
+            data-card-index={i}
+            style={`position:sticky;top:${cs.top};z-index:${cs.z};display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,1.25fr);align-items:center;gap:56px;box-sizing:border-box;background:var(--bg);border:${cs.border};border-radius:16px;overflow:hidden;padding:48px 52px;box-shadow:0 16px 36px -18px rgba(15,21,36,.28)`}
+          >
+            <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:20px">
+              <div
+                style={`display:flex;align-items:center;gap:8px;font-family:var(--font),sans-serif;font-size:12px;color:${cs.tagColor}`}
+              >
+                {cs.tag}
+              </div>
+              <h3
+                style={`margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(32px,1.5vw + 12px,56px);line-height:1.06;letter-spacing: 0;color:${cs.titleColor}`}
+              >
+                {cs.title}
+              </h3>
+              <p style="margin:0;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)">
+                {cs.meta}
+              </p>
+              {cs.hasLink && (
+                <a
+                  href={cs.link}
+                  class="btn-primary"
+                  style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:12px 20px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
+                >
+                  View Case Study <span style="font-size:16px">↗</span>
+                </a>
+              )}
+              {cs.draft && (
+                <span style="display:inline-block;padding:8px 12px;background:#FFE767;color:#5C4A00;font-size:12px;font-weight:700;transform:rotate(-2deg);box-shadow:0 4px 12px rgba(15,21,36,.14);white-space:nowrap">
+                  Coming soon ✎
+                </span>
+              )}
+            </div>
+            <div
+              style={`position:relative;--tint:${cs.tint};background:color-mix(in srgb, var(--tint) var(--tint-mix), transparent);border:1px solid var(--line);border-radius:8px;padding:12px;transform:rotate(1.2deg);box-shadow:0 14px 34px rgba(var(--shadow-rgb),.12)`}
+            >
+              <img
+                src={cs.img}
+                alt={cs.alt}
+                style="display:block;width:100%;height:auto;max-height:52vh;object-fit:cover;object-position:top center;border-radius:4px"
+              />
+            </div>
+            {cs.hasLink && (
+              <a
+                href={cs.link}
+                aria-label={`View case study: ${cs.title}`}
+                tabindex="-1"
+                style="position:absolute;inset:0;z-index:1"
+              />
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ══ EXPERIENCE ══ -->
+  <section
+    id="experience"
+    style="background:var(--bg);padding:140px var(--pad) 148px"
+  >
+    <div
+      style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:68px"
+      data-reveal="up"
+    >
+      <h2
+        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(48px,3vw + 12px,96px);letter-spacing: 0;line-height:1"
+        data-reveal="words"
+        data-split-words
+      >
+        Experience
+      </h2>
+      <div
+        style="font-family:var(--font-title),Georgia,serif;font-style:italic;font-size:clamp(40px,2.5vw + 12px,84px);line-height:1;color:transparent;-webkit-text-stroke:1.2px var(--ac);white-space:nowrap"
+      >
+        12+ years
+      </div>
+    </div>
+
+    <div
+      data-rsp="xp"
+      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;padding:52px 0"
+    >
+      <div
+        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+      >
+        Aug 2023 — Jan 2026
+      </div>
+      <div>
+        <h3
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(28px,1vw + 16px,40px);line-height: 1.5"
+        >
+          Product Designer
+        </h3>
+        <div
+          style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
+        >
+          Empyra
+        </div>
+      </div>
+      <p
+        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+      >
+        Redesigned the platform for .NET to React migration using MUI. Reworked
+        the core admin flows, enforced WCAG 2.2 accessibility, built and
+        maintained Figma design systems.
+      </p>
+    </div>
+
+    <div
+      data-rsp="xp"
+      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:52px 0"
+    >
+      <div
+        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+      >
+        Feb 2026 — Present<br />
+        Apr 2023 — Jul 2023
+      </div>
+      <div>
+        <h3
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(28px,1vw + 16px,40px);line-height: 1.5"
+        >
+          Independent Product Designer
+        </h3>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+          <span style="font-size:16px;font-weight:500;color:var(--muted)"
+            >Upwork</span
+          >
+        </div>
+      </div>
+      <p
+        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+      >
+        Designed 0 to 1 product designs for clients across operations, AI and
+        B2B. Reached top-rated status with a 100% job success score within three
+        months.
+      </p>
+    </div>
+
+    <div
+      data-rsp="xp"
+      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:52px 0"
+    >
+      <div
+        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+      >
+        Mar 2015 — Jul 2023
+      </div>
+      <div>
+        <h3
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(28px,1vw + 16px,40px);line-height: 1.5"
+        >
+          Founding / Lead Product Designer
+        </h3>
+        <div
+          style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
+        >
+          AmbientOne (formerly Auxo Labs)
+        </div>
+      </div>
+      <p
+        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+      >
+        Founding designer. I designed every version, from the first prototype to
+        the final documentation platform. Sole designer for multiple client
+        projects. Led 7 designers. Introduced design practices that shaped how
+        the team builds.
+      </p>
+    </div>
+
+    <div
+      data-rsp="xp"
+      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:52px 0"
+    >
+      <div
+        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+      >
+        2014 — 2015
+      </div>
+      <div>
+        <h3
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(28px,1vw + 16px,40px);line-height: 1.5"
+        >
+          UI / Graphic Designer
+        </h3>
+        <div
+          style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
+        >
+          Spiceblue
+        </div>
+      </div>
+      <p
+        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+      >
+        Implemented Material Design. Designed a leave management workflow for
+        Kissflow, a low-code workflow platform. Designed logos and marketing
+        materials.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ SKILLS TICKER ══ -->
+  <div
+    class="ticker"
+    style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden"
+  >
+    <div
+      class="ticker-track ticker-track--reverse"
+      style="display:flex;width:max-content;animation:tickerX 48s linear infinite"
+    >
+      {
+        [0, 1].map(() => (
+          <div style="display:flex;align-items:center;gap:40px;padding:28px 20px;font-family:var(--font-title),Georgia,serif;font-size:clamp(36px,1.5vw + 16px,60px);line-height:1;white-space:nowrap">
+            {tickerSkills.map((t, i) => (
+              <>
+                {i % 2 === 0 ? (
+                  <span style="color:var(--text)">{t}</span>
+                ) : (
+                  <span style="font-style:italic;color:transparent;-webkit-text-stroke:1.2px var(--ac)">
+                    {t}
+                  </span>
+                )}
+                <span style="width:11px;height:11px;background:var(--ac);transform:rotate(45deg);flex:none" />
+              </>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- ══ GALLERY ══ -->
+  <section
+    id="gallery"
+    style="position:relative;padding:140px var(--pad) 68px;background:var(--bg)"
+  >
+    <div style="margin-bottom:68px" data-reveal="up">
+      <h2
+        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(48px,3vw + 12px,96px);letter-spacing: 0;line-height:1"
+        data-reveal="words"
+        data-split-words
+      >
+        Off the record
+      </h2>
+      <p
+        style="margin:20px 0 0;font-size:20px;line-height: 1.5;color:var(--muted)"
+      >
+        Concepts, side quests, and shipped fragments.
+      </p>
+    </div>
+    <div id="galleryGrid" style="columns:3 300px;column-gap:32px">
+      <GalleryCard {...galleryItems[1]} />
+      <GalleryCard {...galleryItems[0]} />
+      <div
+        style="break-inside:avoid;margin:0 0 32px;background:var(--invert-bg);color:var(--invert-text);border-radius:8px;padding:36px 28px;transform:rotate(.8deg);box-shadow:0 12px 30px rgba(15,21,36,.16)"
+      >
+        <p
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:28px;line-height: 1.5"
+        >
+          "A pretty interface can't save a broken process."
+        </p>
+      </div>
+      <a
+        href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB"
+        target="_blank"
+        rel="noopener"
+        class="badge-link"
+        style="break-inside:avoid;margin:0 0 32px;display:flex;justify-content:center;padding:20px 0"
+      >
+        <img
+          src="/assets/google-ux.webp"
+          alt="Google UX Design Certificate"
+          style="display:block;width:56%;max-width:180px;height:auto;transform:rotate(-3deg);filter:drop-shadow(0 10px 18px rgba(15,21,36,.18))"
+        />
+        <span class="custom-tooltip">See Certificate</span>
+      </a>
+      <GalleryCard {...galleryItems[3]} />
+      <GalleryCard {...galleryItems[2]} />
+      <GalleryCard {...galleryItems[5]} />
+      <a
+        href="https://www.upwork.com/freelancers/~0124077c8ba1055975"
+        target="_blank"
+        rel="noopener"
+        class="badge-link"
+        style="break-inside:avoid;margin:0 0 32px;display:flex;justify-content:center;padding:20px 0"
+      >
+        <img
+          src="/assets/upwork-top-rated.svg"
+          alt="Upwork Top Rated badge"
+          style="display:block;width:54%;max-width:170px;height:auto;transform:rotate(2.5deg);filter:drop-shadow(0 10px 18px rgba(15,21,36,.18))"
+        />
+        <span class="custom-tooltip">View Profile</span>
+      </a>
+      <div
+        style="break-inside:avoid;margin:0 0 32px;background:var(--btn-bg);color:var(--btn-text);border-radius:8px;padding:36px 28px;transform:rotate(-.7deg);box-shadow:0 12px 30px rgba(var(--primary-rgb),.28)"
+      >
+        <p
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:28px;line-height: 1.5"
+        >
+          "I write HTML and CSS, so I spec what can actually be built."
+        </p>
+      </div>
+      <div
+        style="break-inside:avoid;margin:0 0 32px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:36px 28px;transform:rotate(1deg);box-shadow:0 12px 30px rgba(15,21,36,.1)"
+      >
+        <p
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:28px;line-height: 1.5;color:var(--text)"
+        >
+          "Accessibility is the baseline, built in from the start, not audited
+          at the end."
+        </p>
+      </div>
+      <GalleryCard {...galleryItems[4]} />
+      <GalleryCard {...galleryItems[6]} />
+    </div>
+    <div
+      style="position:relative;margin-top:-120px;padding-top:148px;text-align:center;background:linear-gradient(to bottom,transparent,var(--bg) 62%)"
+    >
+      <a
+        href="https://dribbble.com/vikneshvijayakumar"
+        target="_blank"
+        rel="noopener"
+        class="btn-primary"
+        style="display:inline-flex;align-items:center;gap:8px;padding:16px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
+        >See more on Dribbble <span style="font-size:16px">↗</span></a
+      >
+    </div>
+  </section>
+
+  <!-- ══ LIGHTBOX (same chrome as case-study pages) ══ -->
+  <div
+    id="lightbox"
+    style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;background:rgba(0,0,0,.9);padding:40px;cursor:zoom-out;opacity:0;transition:opacity .2s ease"
+  >
+    <img
+      id="lightboxImg"
+      src=""
+      alt=""
+      style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 24px 80px rgba(0,0,0,.5);cursor:default"
+    />
+    <button
+      id="lightboxClose"
+      aria-label="Close"
+      title="Close"
+      style="position:absolute;top:24px;right:24px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg
+      >
+    </button>
+  </div>
+
+  <!-- ══ ABOUT ══ -->
+  <section
+    id="about"
+    style="padding:148px var(--pad);background:var(--bg);border-top:1px solid var(--line)"
+  >
+    <div
+      data-rsp="about"
+      style="display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:88px;align-items:center"
+    >
+      <div
+        data-parallax="frame"
+        style="position:relative;will-change:transform"
+      >
+        <div
+          style="position:relative;background:var(--surface-strong);border:1px solid var(--line);padding:16px 16px 56px;box-shadow:0 26px 60px rgba(15,21,36,.16)"
+        >
+          <div style="overflow:hidden">
+            <img
+              data-parallax="img"
+              src="/assets/profile.webp"
+              alt="Viknesh Vijayakumar"
+              loading="lazy"
+              style="display:block;width:100%;height:auto;will-change:transform"
+            />
+          </div>
+          <div
+            style="position:absolute;left:16px;bottom:18px;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
+          >
+            viknesh — off the clock · kerala, jul 2025
+          </div>
+          <div
+            style="position:absolute;top:-11px;left:-26px;width:104px;height:28px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%);transform:rotate(-42deg)"
+          >
+          </div>
+          <div
+            style="position:absolute;top:-11px;right:-26px;width:104px;height:28px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%);transform:rotate(42deg)"
+          >
+          </div>
+        </div>
+      </div>
+      <div data-reveal="up">
+        <h2
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(28px,1vw + 16px,44px);line-height: 1.5;letter-spacing:0"
+        >
+          I came for the renders, <br /><span
+            style="font-style:italic;color:var(--ac)">stayed for the grid</span
+          >
+        </h2>
+        <p
+          style="margin:32px 0 0;font-size:20px;line-height: 1.5;color:var(--muted);max-width:60ch"
+        >
+          I studied Visual Communication and started looking for jobs in VFX and
+          3D modeling. Then I took a job at a design agency as a backup and
+          rightly on time, Material design was introduced. I read the complete
+          spec and started applying it to my designs. Ended up teaching the team
+          about it.
+        </p>
+        <p
+          style="margin:20px 0 0;font-size:20px;line-height: 1.5;color:var(--muted);max-width:60ch"
+        >
+          This pulled me into product design. At Auxo Labs, now AmbientOne, I
+          started as a founding designer, to leading seven people by the end.
+          For 8 years, I worked across the entire healthcare AI platform, with
+          HITL workflows at a time when ChatGPT was just a lab experiment.
+        </p>
+        <p
+          style="margin:20px 0 0;font-size:20px;line-height: 1.5;color:var(--muted);max-width:60ch"
+        >
+          Then, COVID happened. I took freelancing. The design team from Empyra
+          found me in the middle of their .NET to React migration. I took on
+          admin workflows, and streamlined them, one module at a time.
+        </p>
+        <p
+          style="margin:20px 0 0;font-size:20px;line-height: 1.5;color:var(--muted);max-width:60ch"
+        >
+          I build with AI tools now. Prototyping ideas in code, and trying out
+          new design workflows that did not exist two years ago. Execution, that
+          took most of my time, gets offloaded, so I finally have time for the
+          small design decisions that always got overlooked.
+        </p>
+        <p
+          style="margin:20px 0 0;font-size:20px;line-height: 1.5;color:var(--muted);max-width:60ch"
+        >
+          Outside work, you'll probably find me photographing my son at angles
+          he did not agree to, caring for the plants that somehow survive all my
+          experiments, or getting lost in YouTube rabbit holes about design,
+          tech engineering and history.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CONTACT ══ -->
+  <section
+    id="contact"
+    style="background:var(--invert-bg);color:var(--invert-text);padding:128px var(--pad) 40px"
+  >
+    <p
+      style="margin:0;font-size:16px;font-weight:600;color:color-mix(in srgb, var(--ac) 35%, var(--invert-text))"
+    >
+      Building something complex? Let's talk.
+    </p>
+    <div
+      style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:16px 24px;margin-top:24px;"
+      data-reveal="up"
+    >
+      <a
+        href="mailto:hello@viknesh.me"
+        class="email-link"
+        style="display:inline-flex;align-items:center;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(40px,4vw + 12px,128px);line-height:1;letter-spacing: 0;color:var(--invert-text);cursor:pointer;text-decoration:none;"
+        data-copy-email
+      >
+        hello@viknesh.me
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="email-copy-icon"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+          ></path>
+        </svg>
+      </a>
+      <span class="copied-indicator">Copied ✓</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:52px">
+      <div
+        style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;"
+        data-reveal="up"
+        data-reveal-delay="140"
+      >
+        <a
+          href={RESUME}
+          target="_blank"
+          rel="noopener"
+          class="btn-primary"
+          style="padding:12px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-family:var(--font),sans-serif;font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(255,255,255,.22) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1);text-decoration:none"
+          >Download Resume <span style="font-size:16px">↗</span></a
+        >
+        <a
+          href="https://www.linkedin.com/in/vikneshvijayakumar/"
+          target="_blank"
+          rel="noopener"
+          style="padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
+          >LinkedIn <span style="font-size:16px">↗</span></a
+        >
+        <a
+          href="https://dribbble.com/vikneshvijayakumar"
+          target="_blank"
+          rel="noopener"
+          style="padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
+          >Dribbble <span style="font-size:16px">↗</span></a
+        >
+        <a
+          href="https://wa.me/918148836036"
+          target="_blank"
+          rel="noopener"
+          style="padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
+          >WhatsApp <span style="font-size:16px">↗</span></a
+        >
+      </div>
+      <!-- Shared with the canvas landing (styles/made-with.css, lib/ai-badge.ts) -->
+      <div style="display:flex;justify-content:center;">
+        <div
+          class="made-with-card"
+          style="--surface-strong: #12131e; --text: #f1f5f9; --shadow: none;"
+          set:html={aiBadgeMarkup}
+        />
+      </div>
+    </div>
+
+    <div
+      style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-top:40px;padding-top:20px;border-top:1px solid var(--invert-line);font-family:var(--font),sans-serif;font-size:12px;color:var(--invert-soft)"
+    >
+      <span>© 2026 Viknesh Vijayakumar</span>
+      <span>Available — Remote worldwide</span>
+    </div>
+  </section>
+
+  <script>
+    // Theme — same localStorage key as the canvas landing, so the choice
+    // carries across both. Applied pre-paint by the inline script in <head>.
+    const themeToggle = document.getElementById("themeToggle");
+    const applyTheme = (theme: string) => {
+      document.documentElement.dataset.theme = theme;
+      const label =
+        theme === "ink" ? "Switch to light mode" : "Switch to dark mode";
+      themeToggle?.setAttribute("aria-label", label);
+      themeToggle?.setAttribute("title", label);
+    };
+    applyTheme(
+      document.documentElement.dataset.theme === "ink" ? "ink" : "paper",
+    );
+    themeToggle?.addEventListener("click", () => {
+      const next =
+        document.documentElement.dataset.theme === "ink" ? "paper" : "ink";
+      localStorage.setItem("viknesh-theme", next);
+      applyTheme(next);
+    });
+
+    const EMAIL = "hello@viknesh.me";
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+
+    // Split marked elements into masked word spans (hero h1 line + headings)
+    document
+      .querySelectorAll<HTMLElement>("[data-split-words]")
+      .forEach((el) => {
+        const words = (el.textContent || "").trim().split(/\s+/);
+        el.textContent = "";
+        words.forEach((w, i) => {
+          const mask = document.createElement("span");
+          mask.className = "w-mask";
+          const inner = document.createElement("span");
+          inner.className = "w-in";
+          inner.style.setProperty("--i", String(i));
+          inner.textContent = w;
+          mask.appendChild(inner);
+          el.appendChild(mask);
+          if (i < words.length - 1)
+            el.appendChild(document.createTextNode(" "));
+        });
+      });
+    // Kick off the hero word cascade once split spans exist
+    requestAnimationFrame(() => document.body.classList.add("hero-ready"));
+
+    // Cursor halo — same rAF-throttled commit the canvas uses, so the mask
+    // invalidates at most once per frame. CSS hides the glow on coarse
+    // pointers, so skip the listener entirely there.
+    if (finePointer && !reducedMotion) {
+      let gx = 0;
+      let gy = 0;
+      let glowRaf: number | null = null;
+      const commitGlow = () => {
+        glowRaf = null;
+        document.documentElement.style.setProperty("--mouse-x", `${gx}px`);
+        document.documentElement.style.setProperty("--mouse-y", `${gy}px`);
+      };
+      window.addEventListener(
+        "mousemove",
+        (e) => {
+          gx = e.clientX;
+          gy = e.clientY;
+          if (glowRaf === null) glowRaf = requestAnimationFrame(commitGlow);
+        },
+        { passive: true },
+      );
+    }
+
+    // Hero dot-grid spotlight follows the cursor
+    const hero = document.getElementById("top");
+    if (hero && finePointer && !reducedMotion) {
+      hero.addEventListener("pointermove", (e) => {
+        const r = hero.getBoundingClientRect();
+        hero.style.setProperty("--mx", e.clientX - r.left + "px");
+        hero.style.setProperty("--my", e.clientY - r.top + "px");
+      });
+    }
+
+    // Magnetic pull on primary buttons
+    if (finePointer && !reducedMotion) {
+      document.querySelectorAll<HTMLElement>(".btn-primary").forEach((btn) => {
+        btn.addEventListener("pointermove", (e) => {
+          const r = btn.getBoundingClientRect();
+          const dx = e.clientX - (r.left + r.width / 2);
+          const dy = e.clientY - (r.top + r.height / 2);
+          btn.style.transform = `translate(${dx * 0.18}px, ${dy * 0.28}px)`;
+        });
+        btn.addEventListener("pointerleave", () => {
+          btn.style.transform = "";
+        });
+      });
+    }
+
+    // Mobile menu
+    const menu = document.getElementById("menu");
+    const openMenu = () => {
+      if (menu) menu.style.display = "flex";
+    };
+    const closeMenu = () => {
+      if (menu) menu.style.display = "none";
+    };
+    document.getElementById("burger")?.addEventListener("click", openMenu);
+    document.getElementById("menuClose")?.addEventListener("click", closeMenu);
+    document
+      .querySelectorAll("[data-menu-link]")
+      .forEach((a) => a.addEventListener("click", closeMenu));
+
+    // Copy email
+    document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+      const isEmailText = btn.classList.contains("email-link");
+      const original = btn.textContent;
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigator.clipboard?.writeText(EMAIL).catch(() => {});
+        if (isEmailText) {
+          const indicator = btn.nextElementSibling;
+          if (indicator && indicator.classList.contains("copied-indicator")) {
+            indicator.classList.add("is-visible");
+            setTimeout(() => {
+              indicator.classList.remove("is-visible");
+            }, 1600);
+          }
+        } else {
+          btn.textContent = "Copied ✓";
+          setTimeout(() => {
+            btn.textContent = original;
+          }, 1600);
+        }
+      });
+    });
+
+    // Smooth-scroll for in-page anchor links (JS instead of CSS scroll-behavior,
+    // so back-navigation scroll restoration stays instant).
+    document.addEventListener("click", (e) => {
+      const a = (e.target as Element).closest?.('a[href^="#"]');
+      if (!a) return;
+      const target = document.querySelector(a.getAttribute("href") || "");
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth" });
+      history.pushState(null, "", a.getAttribute("href"));
+    });
+
+    // Stagger experience-row children and gallery cards into the reveal system
+    document.querySelectorAll('[data-rsp="xp"]').forEach((row) => {
+      [...row.children].forEach((c, i) => {
+        c.setAttribute("data-reveal", "up");
+        c.setAttribute("data-reveal-delay", String(i * 130));
+      });
+    });
+    const galleryWrap = document.getElementById("galleryGrid");
+    if (galleryWrap) {
+      [...galleryWrap.children].forEach((c, i) => {
+        c.setAttribute("data-reveal", "up");
+        c.setAttribute("data-reveal-delay", String((i % 3) * 100));
+      });
+    }
+
+    // Scroll reveals ("words" cascades masked word spans; others fade/slide).
+    // Elements with their own transform (rotated polaroids, quote cards) keep
+    // it: the hidden state composes translateY in front, the reveal restores it.
+    const els = [...document.querySelectorAll<HTMLElement>("[data-reveal]")];
+    els.forEach((el) => {
+      if (el.getAttribute("data-reveal") === "words") return;
+      el.dataset.tf0 = el.style.transform || "";
+      el.style.opacity = "0";
+      if (el.getAttribute("data-reveal") !== "fade")
+        el.style.transform = "translateY(28px) " + el.dataset.tf0;
+      el.style.transition =
+        "opacity .75s cubic-bezier(.2,.6,.2,1), transform .75s cubic-bezier(.2,.6,.2,1)";
+      el.style.willChange = "opacity, transform";
+    });
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          if (el.getAttribute("data-reveal") === "words") {
+            el.classList.add("in");
+          } else {
+            el.style.transitionDelay =
+              (el.getAttribute("data-reveal-delay") || "0") + "ms";
+            el.style.opacity = "1";
+            el.style.transform = el.dataset.tf0 || "";
+            // Hand transitions back to stylesheet rules (gal-card hover)
+            el.addEventListener(
+              "transitionend",
+              () => {
+                el.style.transition = "";
+                el.style.transitionDelay = "";
+                el.style.willChange = "";
+              },
+              { once: true },
+            );
+          }
+          io.unobserve(el);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+
+    // Equalize case-study card heights: a sticky card releases when its bottom
+    // meets the container bottom, so unequal heights make taller cards scroll
+    // away before the rest of the stack.
+    const workCards = [
+      ...document.querySelectorAll<HTMLElement>("[data-card-index]"),
+    ];
+    const workPinned = document.getElementById("work-pinned");
+    const workCardsWrap = document.getElementById("work-cards");
+    const equalizeCards = () => {
+      workCards.forEach((c) => (c.style.minHeight = "0"));
+      if (workPinned) workPinned.style.paddingBottom = "";
+      if (workCardsWrap) workCardsWrap.style.marginTop = "";
+      if (window.matchMedia("(max-width: 900px)").matches) return;
+      const h = Math.max(...workCards.map((c) => c.offsetHeight));
+      workCards.forEach((c) => (c.style.minHeight = h + "px"));
+      // Extend the pinned heading block (invisibly) so its sticky release point
+      // matches the card stack's — heading and stack then scroll away together.
+      // The cards wrapper is pulled up by the same amount so layout is unchanged.
+      const lastCard = workCards[workCards.length - 1];
+      if (workPinned && workCardsWrap && lastCard) {
+        const stickyTop = parseFloat(getComputedStyle(lastCard).top) || 0;
+        // Grow the block by the missing height, on top of its authored padding
+        // (setting paddingBottom replaces the shorthand value, so add them).
+        const padB =
+          parseFloat(getComputedStyle(workPinned).paddingBottom) || 0;
+        const grow = Math.max(0, stickyTop + h - workPinned.offsetHeight);
+        workPinned.style.paddingBottom = padB + grow + "px";
+        workCardsWrap.style.marginTop = -grow + "px";
+      }
+    };
+    equalizeCards();
+    window.addEventListener("load", equalizeCards);
+    window.addEventListener("resize", equalizeCards);
+
+    // Scroll-driven effects: progress bar, hero exit parallax,
+    // and depth scaling as work cards stack over each other.
+    const progress = document.getElementById("progress");
+    const heroInner = document.getElementById("heroInner");
+    const cardTops = () =>
+      workCards.map((c) => parseFloat(getComputedStyle(c).top) || 0);
+    let scrollRaf = 0;
+    const onScroll = () => {
+      scrollRaf = 0;
+      const doc = document.documentElement;
+      if (progress) {
+        const max = doc.scrollHeight - window.innerHeight;
+        progress.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+      }
+      if (reducedMotion) return;
+      const vh = window.innerHeight;
+      if (heroInner && window.scrollY < vh) {
+        const y = window.scrollY;
+        heroInner.style.transform = `translateY(${y * 0.18}px)`;
+        heroInner.style.opacity = String(Math.max(0, 1 - y / (vh * 0.9)));
+      }
+      if (!window.matchMedia("(max-width: 900px)").matches) {
+        const tops = cardTops();
+        workCards.forEach((card, i) => {
+          const next = workCards[i + 1];
+          if (!next) return;
+          // Progress of the incoming card, from the moment this card pins
+          // (next card sits one card-height + gap below) until the next card
+          // reaches its own sticky top. Continuous — no jump at the pin point.
+          const start = tops[i] + card.offsetHeight + 48;
+          const nr = next.getBoundingClientRect();
+          const p = Math.min(
+            1,
+            Math.max(0, (start - nr.top) / (start - tops[i + 1])),
+          );
+          card.style.transform = p > 0 ? `scale(${1 - 0.05 * p})` : "";
+          card.style.filter = p > 0 ? `brightness(${1 - 0.09 * p})` : "";
+        });
+      } else {
+        workCards.forEach((card) => {
+          card.style.transform = "";
+          card.style.filter = "";
+        });
+      }
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!scrollRaf) scrollRaf = requestAnimationFrame(onScroll);
+      },
+      { passive: true },
+    );
+    onScroll();
+
+    // Gallery lightbox
+    const lb = document.getElementById("lightbox");
+    const lbImg = document.getElementById(
+      "lightboxImg",
+    ) as HTMLImageElement | null;
+    const openLb = (src: string, alt: string) => {
+      if (!lb || !lbImg) return;
+      lbImg.src = src;
+      lbImg.alt = alt;
+      lb.style.display = "flex";
+      requestAnimationFrame(() => {
+        lb.style.opacity = "1";
+      });
+      document.body.style.overflow = "hidden";
+    };
+    const closeLb = () => {
+      if (!lb) return;
+      lb.style.opacity = "0";
+      setTimeout(() => {
+        lb.style.display = "none";
+      }, 200);
+      document.body.style.overflow = "";
+    };
+    document
+      .querySelectorAll<HTMLElement>("[data-lightbox]")
+      .forEach((card) => {
+        card.addEventListener("click", () => {
+          openLb(
+            card.getAttribute("data-lightbox") || "",
+            card.querySelector("img")?.alt || "",
+          );
+        });
+      });
+    lb?.addEventListener("click", (e) => {
+      if (e.target !== lbImg) closeLb();
+    });
+    document
+      .getElementById("lightboxClose")
+      ?.addEventListener("click", closeLb);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && lb?.style.display === "flex") closeLb();
+    });
+
+    // Masonry: distribute gallery cards into columns left-to-right (round-robin),
+    // keeping the authored order as the reading order.
+    const gal = document.getElementById("galleryGrid");
+    if (gal) {
+      const items = [...gal.children] as HTMLElement[];
+      const build = () => {
+        const n = gal.clientWidth >= 940 ? 3 : gal.clientWidth >= 640 ? 2 : 1;
+        if (gal.dataset.cols === String(n)) return;
+        gal.dataset.cols = String(n);
+        gal.style.cssText = "display:flex;gap:32px;align-items:flex-start";
+        gal.innerHTML = "";
+        const cols = Array.from({ length: n }, () => {
+          const c = document.createElement("div");
+          c.style.cssText = "flex:1;min-width:0";
+          gal.appendChild(c);
+          return c;
+        });
+        items.forEach((item, i) => cols[i % n].appendChild(item));
+      };
+      build();
+      addEventListener("resize", build);
+    }
+
+    // Springy parallax on the about portrait — only runs while on screen
+    const frame = document.querySelector<HTMLElement>(
+      '[data-parallax="frame"]',
+    );
+    const pimg = document.querySelector<HTMLElement>('[data-parallax="img"]');
+    if (frame && pimg) {
+      let cur = 0,
+        vel = 0,
+        raf = 0;
+      const tick = () => {
+        const r = frame.getBoundingClientRect();
+        const target = -(r.top + r.height / 2 - window.innerHeight / 2) * 0.07;
+        const accel = (target - cur) * 0.06;
+        vel = (vel + accel) * 0.86;
+        cur += vel;
+        const rot = Math.max(-4.5, Math.min(-0.5, -2.5 + vel * 0.6));
+        frame.style.transform =
+          "translateY(" +
+          cur.toFixed(2) +
+          "px) rotate(" +
+          rot.toFixed(2) +
+          "deg)";
+        pimg.style.transform =
+          "translateY(" + (-cur * 0.35).toFixed(2) + "px) scale(1.08)";
+        raf = requestAnimationFrame(tick);
+      };
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && !raf) raf = requestAnimationFrame(tick);
+          else if (!e.isIntersecting && raf) {
+            cancelAnimationFrame(raf);
+            raf = 0;
+          }
+        });
+      }).observe(frame);
+    }
+  </script>
+
+  <style is:global>
+    .btn-primary:hover {
+      background: var(--btn-hover) !important;
+      color: var(--btn-text) !important;
+      transform: translateY(-1px);
+    }
+  </style>
+</Layout>

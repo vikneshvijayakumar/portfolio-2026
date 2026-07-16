@@ -1,0 +1,93 @@
+/* ==========================================================================
+   Shared "Made with Claude Code" badge — a light card with an animated
+   Claude-orange gradient border. Used by both landings.
+   Markup comes from lib/ai-badge.ts.
+   ========================================================================== */
+
+:root {
+  /* Claude-orange heavy glow used for the badge border */
+  --ai-badge-gradient: linear-gradient(
+    45deg,
+    #d97757 0%,
+    #f0b429 18%,
+    #d97757 36%,
+    #b45309 54%,
+    #d97757 72%,
+    #f0b429 90%,
+    #d97757 100%
+  );
+}
+
+.made-with-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 58px;
+  padding: 8px 16px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-xl);
+  /* padding-box fill + border-box gradient = animated gradient border */
+  background:
+    linear-gradient(var(--surface-strong), var(--surface-strong)) padding-box,
+    var(--ai-badge-gradient) border-box;
+  background-size: 100% 100%, 300% 300%;
+  animation: bgShiftOnly 8s linear infinite;
+  box-shadow: var(--shadow);
+  transition: transform 240ms ease;
+  backface-visibility: hidden;
+  color: var(--text);
+  text-decoration: none;
+  contain: layout;
+}
+
+.made-with-card svg {
+  position: relative;
+  z-index: 2;
+  height: 32px;
+  width: auto;
+  display: block;
+  pointer-events: none;
+}
+
+@keyframes bgShiftOnly {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (hover: hover) {
+  .made-with-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 4px 8px 12px rgba(var(--shadow-rgb), 0.16);
+  }
+
+  .made-with-card:hover::after {
+    opacity: 1;
+  }
+
+  .made-with-card:hover::before {
+    opacity: 0.65;
+  }
+}
+
+/*
+ * Animating `background-position` forces a paint every frame. On mobile and
+ * low-power, swap to a static gradient.
+ */
+@media (hover: none),
+  (pointer: coarse),
+  (max-width: 900px),
+  (prefers-reduced-motion: reduce) {
+  .made-with-card {
+    animation: none;
+  }
+}

@@ -1,0 +1,32 @@
+---
+// Canvas landing — the Fignam-Codex pan/zoom canvas home, ported as a React
+// island with the site theme (IBM Plex fonts, indigo accent). Standalone head:
+// the canvas ships its own stylesheet, so it doesn't load global.css.
+import "../canvas/styles.css";
+import "../styles/header.css";
+import "../styles/glow.css";
+import "../styles/made-with.css";
+import CanvasApp from "../canvas/CanvasApp";
+
+const title = "Viknesh Vijayakumar — Lead Product Designer";
+const description =
+  "Lead Product Designer with 12 years of experience designing complex enterprise software, from healthcare AI and edtech to client work across domains.";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-serif-variable@2.0.0/fonts/split/woff2/IBM Plex Serif Var-Roman.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-sans-variable@0.2.0/fonts/split/woff2/IBM Plex Sans Var-Roman.min.css" />
+  </head>
+  <body>
+    <CanvasApp client:only="react" />
+  </body>
+</html>

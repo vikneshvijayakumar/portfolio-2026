@@ -1,0 +1,297 @@
+/* ==========================================================================
+   FormTaking — Password-gated Figma Slides case study overlay
+   8px grid. line-height 1.5. no letter-spacing.
+   ========================================================================== */
+
+.ft-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #ffffff;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 20px;
+  line-height: 1.5;
+  overflow-y: auto;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.ft-overlay *,
+.ft-overlay *::before,
+.ft-overlay *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Top bar ── */
+.ft-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.15));
+  background: #ffffff;
+  flex: 0 0 auto;
+}
+
+.ft-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.ft-back:hover {
+  background: rgba(127, 127, 127, 0.08);
+  border-color: var(--text);
+}
+
+.ft-back:active {
+  transform: scale(0.98);
+}
+
+.ft-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ft-topbar__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  text-align: right;
+}
+
+.ft-topbar__eyebrow {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-transform: none;
+}
+
+.ft-topbar__name {
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+/* ── Body ── */
+.ft-body {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+/* ── Password gate ── */
+.ft-gate {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 48px 40px;
+  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
+  border-radius: 20px;
+  background: var(--surface, rgba(127, 127, 127, 0.03));
+}
+
+.ft-gate__lock {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--surface-strong, rgba(127, 127, 127, 0.08));
+  color: var(--text);
+}
+
+.ft-gate__lock svg {
+  width: 24px;
+  height: 24px;
+}
+
+.ft-gate__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ft-gate__eyebrow {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-transform: none;
+}
+
+.ft-gate__title {
+  font-family: var(--font-display, var(--font-body));
+  font-size: 32px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ft-gate__desc {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-soft, #666);
+}
+
+.ft-gate__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ft-gate__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ft-gate__label {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-transform: none;
+}
+
+.ft-gate__input {
+  width: 100%;
+  height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.25));
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 20px;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.ft-gate__input:focus {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--obv3-tint-10, rgba(127, 127, 127, 0.12));
+}
+
+.ft-gate__input.is-error {
+  border-color: var(--coral, #e74c3c);
+}
+
+.ft-gate__error {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--coral, #e74c3c);
+  min-height: 24px;
+}
+
+.ft-gate__submit {
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--canvas);
+  font-family: inherit;
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.ft-gate__submit:hover {
+  opacity: 0.88;
+}
+
+.ft-gate__submit:active {
+  transform: scale(0.98);
+}
+
+.ft-gate__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ft-gate__hint {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+}
+
+/* ── Slides frame ── */
+.ft-slides {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.ft-slides__frame {
+  width: 100%;
+  max-width: 1440px;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.ft-slides__iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  pointer-events: auto;
+}
+
+.ft-slides__caption {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-align: center;
+}
+
+:root[data-theme="ink"] .ft-overlay .ft-back {
+  background: #1e1f32;
+}
+
+@media (max-width: 720px) {
+  .ft-topbar {
+    padding: 20px;
+  }
+  .ft-body {
+    padding: 20px;
+  }
+  .ft-gate {
+    padding: 32px 24px;
+    gap: 24px;
+  }
+  .ft-gate__title {
+    font-size: 24px;
+  }
+}

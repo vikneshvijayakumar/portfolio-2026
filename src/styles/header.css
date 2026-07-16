@@ -1,0 +1,384 @@
+/* ==========================================================================
+   Shared site header — the floating left/right panels used by both landings.
+
+   Loaded by the scrolling landing (alongside global.css) and by the canvas
+   (alongside canvas/styles.css). Both stylesheets define the same token
+   vocabulary (--surface, --border, --text-soft, --primary, --space-*, …),
+   so every rule here resolves against whichever theme is in play.
+   ========================================================================== */
+
+.toolbar {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.toolbar__panel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: auto;
+  min-width: 0;
+}
+
+.toolbar__panel--left {
+  justify-self: start;
+}
+
+.toolbar__panel--right {
+  justify-self: end;
+}
+
+.toolbar__left,
+.toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.toolbar__left {
+  min-width: 0;
+}
+
+.toolbar__actions {
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+/* ---------- Branding ---------- */
+
+.toolbar__branding {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+}
+
+.toolbar__mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(var(--white-rgb), 0.35);
+}
+
+.toolbar__mark svg,
+.toolbar__mark img {
+  width: 24px;
+  height: 24px;
+  overflow: visible;
+}
+
+.toolbar__mark path {
+  fill: var(--text);
+  stroke: none;
+  transition: fill 200ms ease;
+}
+
+.toolbar__branding:hover .toolbar__mark path {
+  fill: transparent;
+  stroke: var(--text);
+  stroke-width: 0.8;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation:
+    logoTrace 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards,
+    logoFadeInFill 0.6s ease-out 0.4s forwards;
+}
+
+.toolbar__branding:hover .toolbar__name {
+  color: var(--text);
+}
+
+@keyframes logoTrace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes logoFadeInFill {
+  0% {
+    fill: transparent;
+    stroke-opacity: 1;
+  }
+
+  100% {
+    fill: var(--text);
+    stroke-opacity: 0;
+  }
+}
+
+.toolbar__identity {
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar__name {
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar__role {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* ---------- Nav ---------- */
+
+.header-zone-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  overflow: visible;
+}
+
+.header-zone-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.header-zone-nav__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: var(--radius-lg);
+  white-space: nowrap;
+  background: none;
+  border: none;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 200ms ease, transform 200ms ease;
+  z-index: 1;
+}
+
+.header-zone-nav__item:hover {
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.header-zone-nav__item.is-active {
+  color: var(--text);
+}
+
+.header-zone-nav__label {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Actions ---------- */
+
+.availability-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  text-decoration: none;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.availability-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-xl);
+  background: var(--green);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.availability-pill__dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: dotPulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes dotPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* Link across to the other landing — mirrors the pill it sits beside. */
+.alt-landing-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.alt-landing-link:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.theme-toggle-minimal,
+.legend-trigger,
+.toolbar__burger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 rgba(var(--white-rgb), 0.35);
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle-minimal:hover,
+.legend-trigger:hover,
+.toolbar__burger:hover {
+  transform: translateY(-1px);
+  background: var(--surface);
+  box-shadow:
+    inset 0 1px 0 rgba(var(--white-rgb), 0.35),
+    var(--shadow-sm);
+}
+
+.legend-trigger.is-active {
+  background: var(--text);
+  color: var(--surface-strong);
+  transform: translateY(0);
+}
+
+.theme-toggle-minimal svg {
+  width: 24px !important;
+  height: 24px !important;
+  color: var(--text-soft);
+  display: block;
+}
+
+.toolbar__resume {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--lime);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: 0 16px 32px rgba(var(--lime-rgb), 0.22);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toolbar__resume:hover {
+  transform: translateY(-1px);
+}
+
+/* The toolbar runs out of room before ~1560px; drop the label so the link
+   stays reachable without pushing the nav under the right-hand panel. */
+@media (max-width: 1560px) {
+  .alt-landing-link__label {
+    display: none;
+  }
+
+  .alt-landing-link {
+    padding: 8px 8px;
+  }
+}
+
+/* ponytail: mobile is classic-mode only — the /canvas-landing URL still works
+   if hit directly, we just don't offer the switch here. */
+@media (max-width: 720px) {
+  .alt-landing-link {
+    display: none;
+  }
+}
+
+@media (max-width: 1200px) {
+  .header-zone-nav {
+    gap: 0;
+  }
+
+  .header-zone-nav__item {
+    padding: 0 8px;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .toolbar__panel {
+    padding: 12px;
+  }
+
+  .toolbar__panel--left {
+    min-width: 0;
+    justify-self: stretch;
+  }
+}

@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Shared cursor glow — the atmospheric halo that trails the pointer.
+
+   Lifted out of the canvas so both landings can use it. Driven by
+   --mouse-x / --mouse-y on :root (each page sets them from a rAF-throttled
+   mousemove). Moves via transform only, so it costs no main-thread time
+   regardless of cursor speed.
+   ========================================================================== */
+
+:root {
+  --lumos-gradient: linear-gradient(
+    45deg,
+    #ec4899 0%,
+    #eab308 12%,
+    #4f46e5 24%,
+    #06b6d4 36%,
+    #6366f1 48%,
+    #818cf8 60%,
+    #7c3aed 72%,
+    #4338ca 84%,
+    #ec4899 100%
+  );
+}
+
+.mouse-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 900px;
+  height: 900px;
+  pointer-events: none;
+  z-index: 1;
+
+  background: var(--lumos-gradient);
+  background-attachment: fixed;
+  background-size: 400% 400%;
+  animation: bgShift 12s ease infinite;
+  filter: saturate(2);
+
+  -webkit-mask-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.3) 25%,
+    transparent 55%
+  );
+  mask-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.3) 25%,
+    transparent 55%
+  );
+
+  opacity: 0.18;
+
+  transform: translate3d(
+    calc(var(--mouse-x, 50vw) - 450px),
+    calc(var(--mouse-y, 50vh) - 450px),
+    0
+  );
+  will-change: transform;
+}
+
+@keyframes bgShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/*
+ * No cursor / low-power / reduced-motion: the halo produces no visible
+ * effect without a pointer but still costs a full-viewport repaint every
+ * time JS updates --mouse-x / --mouse-y. Drop it entirely.
+ */
+@media (hover: none),
+  (pointer: coarse),
+  (max-width: 900px),
+  (prefers-reduced-motion: reduce) {
+  .mouse-glow {
+    display: none;
+  }
+}

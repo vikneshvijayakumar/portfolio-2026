@@ -1,0 +1,94 @@
+/* Shared case-study interaction FX — mirrors the landing page language.
+   Classes are added by useCaseStudyFx() after hydration, so pages stay
+   fully readable without JavaScript.
+
+   IMPORTANT: global.css nukes inline transforms inside these overlays
+   (`.obv3-overlay [style*="transform:"] { transform: none !important }`) so
+   SSR content stays visible without JS. Every JS-driven transform here is
+   therefore fed through a custom property, which that rule cannot match. */
+
+/* Scroll progress — inserted as a flex item directly after the topbar, so it
+   sits below it with no magic offset. Sticky covers the studies whose overlay
+   is itself the scroller (Form Taking, AI Stylist). */
+.csfx-progress {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex: none;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+  pointer-events: none;
+}
+
+/* Masked word cascade on section headings */
+.csfx-words .w-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.csfx-words .w-in {
+  display: inline-block;
+  transform: translateY(115%);
+  transition: transform 0.85s var(--ease-out-quart);
+  transition-delay: calc(var(--i) * 70ms);
+}
+
+.csfx-words.in .w-in {
+  transform: none;
+}
+
+/* Body content rise. The studies' own <RevealSection> Motion animations are
+   dead on arrival — the safety net above overrides their inline opacity and
+   transform — so prose, quotes and stats reveal through classes instead. */
+.csfx-rise {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.csfx-rise.in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s var(--ease-out-quart),
+    transform 0.7s var(--ease-out-quart);
+}
+
+/* Staggered child reveal for card grids and lists.
+   The hidden state carries no transition, so adding the class can't animate
+   content *out*; the transition only exists on the revealed state. */
+.csfx-stagger > * {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+.csfx-stagger.in > * {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.65s var(--ease-out-quart),
+    transform 0.65s var(--ease-out-quart);
+}
+
+/* Magnetic pull on primary actions. Tripled class outranks the buttons' own
+   hover transforms (e.g. .download-button.download-button:hover). */
+.csfx-mag.csfx-mag.csfx-mag {
+  transform: translate(var(--mx, 0px), var(--my, 0px));
+  transition: transform 0.45s var(--ease-out-back-soft);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .csfx-words .w-in,
+  .csfx-rise,
+  .csfx-stagger > * {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "astro-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 4321,
+      "autoPort": true
+    },
+    {
+      "name": "astro-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["astro", "preview", "--port", "4400"],
+      "port": 4400,
+      "autoPort": false
+    }
+  ],
+  "autoVerify": false
+}

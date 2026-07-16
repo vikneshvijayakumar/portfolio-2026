@@ -1,0 +1,88 @@
+---
+// Taped polaroid card for the "Off the record" gallery.
+const { src, label, rot, tapeRot, link } = Astro.props;
+---
+
+{
+  link ? (
+    <a
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      style="text-decoration:none;display:block;color:inherit"
+    >
+      <div
+        class="gal-card"
+        style={`--rot:${rot}deg;break-inside:avoid;margin:0 0 32px;position:relative;background:var(--surface-strong);border:1px solid var(--line);border-radius:4px;padding:12px;cursor:pointer`}
+      >
+        <img
+          src={src}
+          alt={label}
+          loading="lazy"
+          style="display:block;width:100%;height:auto;border-radius:4px"
+        />
+        <div
+          style="margin:8px 4px 0;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
+        >
+          {label}
+        </div>
+        <div
+          class="gal-tape"
+          style={`--trot:${tapeRot}deg;position:absolute;top:-9px;left:38%;width:92px;height:26px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%)`}
+        />
+      </div>
+    </a>
+  ) : (
+    <div
+      class="gal-card"
+      data-lightbox={src}
+      style={`--rot:${rot}deg;break-inside:avoid;margin:0 0 32px;position:relative;background:var(--surface-strong);border:1px solid var(--line);border-radius:4px;padding:12px;cursor:zoom-in`}
+    >
+      <img
+        src={src}
+        alt={label}
+        loading="lazy"
+        style="display:block;width:100%;height:auto;border-radius:4px"
+      />
+      <div
+        style="margin:8px 4px 0;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
+      >
+        {label}
+      </div>
+      <div
+        class="gal-tape"
+        style={`--trot:${tapeRot}deg;position:absolute;top:-9px;left:38%;width:92px;height:26px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%)`}
+      />
+    </div>
+  )
+}
+
+<style is:global>
+  /* Polaroid straightens and lifts on hover; tape twists slightly. */
+  .gal-card {
+    transform: rotate(var(--rot));
+    box-shadow: 0 12px 30px rgba(15, 21, 36, 0.12);
+    transition:
+      transform 0.5s var(--ease-out-back-soft),
+      box-shadow 0.5s var(--ease-out-quart);
+  }
+  .gal-tape {
+    transform: rotate(var(--trot));
+    transition: transform 0.5s var(--ease-out-back-soft);
+  }
+  @media (hover: hover) {
+    .gal-card:hover {
+      transform: rotate(0deg) translateY(-8px) scale(1.015);
+      box-shadow: 0 26px 48px rgba(15, 21, 36, 0.2);
+    }
+    .gal-card:hover .gal-tape {
+      transform: rotate(calc(var(--trot) * 1.8));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gal-card,
+    .gal-tape {
+      transition: none;
+    }
+  }
+</style>

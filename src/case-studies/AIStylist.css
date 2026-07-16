@@ -1,0 +1,150 @@
+/* ==========================================================================
+   AIStylist — Embedded Figma Slides case study overlay
+   8px grid. line-height 1.5. no letter-spacing.
+   ========================================================================== */
+
+.as-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #ffffff;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 20px;
+  line-height: 1.5;
+  overflow-y: auto;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.as-overlay *,
+.as-overlay *::before,
+.as-overlay *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Top bar ── */
+.as-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.15));
+  background: #ffffff;
+  flex: 0 0 auto;
+}
+
+.as-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.as-back:hover {
+  background: rgba(127, 127, 127, 0.08);
+  border-color: var(--text);
+}
+
+.as-back:active {
+  transform: scale(0.98);
+}
+
+.as-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.as-topbar__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  text-align: right;
+}
+
+.as-topbar__eyebrow {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-transform: none;
+}
+
+.as-topbar__name {
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+/* ── Body ── */
+.as-body {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+/* ── Slides frame ── */
+.as-slides {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.as-slides__frame {
+  width: 100%;
+  max-width: 1440px;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.as-slides__iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  pointer-events: auto;
+}
+
+.as-slides__caption {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-align: center;
+}
+
+:root[data-theme="ink"] .as-overlay .as-back {
+  background: #1e1f32;
+}
+
+@media (max-width: 720px) {
+  .as-topbar {
+    padding: 20px;
+  }
+  .as-body {
+    padding: 20px;
+  }
+}
