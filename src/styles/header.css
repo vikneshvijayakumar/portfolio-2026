@@ -203,6 +203,22 @@
   z-index: 1;
 }
 
+.header-zone-nav__indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  background: color-mix(in srgb, var(--surface-strong) 90%, transparent);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.header-zone-nav__item.is-active .header-zone-nav__indicator {
+  opacity: 1;
+}
+
 /* ---------- Actions ---------- */
 
 .availability-pill {
@@ -249,29 +265,42 @@
   }
 }
 
-/* Link across to the other landing — mirrors the pill it sits beside. */
+/* Link across to the other landing — styled as the square theme-toggle
+   button beside it, just wider to hold its label. */
 .alt-landing-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 16px;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  box-shadow: inset 0 1px 0 rgba(var(--white-rgb), 0.35);
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--text-soft);
+  color: var(--text);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+  transition: transform 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.alt-landing-link svg {
+  color: var(--text-soft);
 }
 
 .alt-landing-link:hover {
-  color: var(--primary);
-  background: var(--primary-soft);
+  transform: translateY(-1px);
+  background: var(--surface);
+  box-shadow:
+    inset 0 1px 0 rgba(var(--white-rgb), 0.35),
+    var(--shadow-sm);
 }
 
 .theme-toggle-minimal,
-.legend-trigger,
-.toolbar__burger {
+.legend-trigger {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -289,8 +318,7 @@
 }
 
 .theme-toggle-minimal:hover,
-.legend-trigger:hover,
-.toolbar__burger:hover {
+.legend-trigger:hover {
   transform: translateY(-1px);
   background: var(--surface);
   box-shadow:
@@ -336,6 +364,10 @@
   transform: translateY(-1px);
 }
 
+:root[data-theme="ink"] .toolbar__resume {
+  box-shadow: none;
+}
+
 /* The toolbar runs out of room before ~1560px; drop the label so the link
    stays reachable without pushing the nav under the right-hand panel. */
 @media (max-width: 1560px) {
@@ -343,8 +375,15 @@
     display: none;
   }
 
+  /* Collapse to a 48×48 square — the button styling is already inherited. */
   .alt-landing-link {
-    padding: 8px 8px;
+    width: 48px;
+    padding: 0;
+  }
+
+  .alt-landing-link svg {
+    width: 24px;
+    height: 24px;
   }
 }
 
@@ -380,5 +419,29 @@
   .toolbar__panel--left {
     min-width: 0;
     justify-self: stretch;
+  }
+
+  .toolbar__panel--right {
+    display: flex !important;
+  }
+
+  .toolbar__actions {
+    height: 100% !important;
+    display: flex !important;
+    align-items: stretch !important;
+  }
+
+  .theme-toggle-minimal {
+    height: 100% !important;
+    width: auto !important;
+    aspect-ratio: 1 !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .theme-toggle-minimal svg {
+    width: 26px !important;
+    height: 26px !important;
   }
 }

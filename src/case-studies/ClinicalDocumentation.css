@@ -17,28 +17,11 @@
   font-size: 40px;
 }
 
-.cd-module__header {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.cd-module__header .cd-module__title,
-.cd-module__header .ps-body {
-  margin: 0;
-  line-height: 1.6;
-}
-
 /* ── Modules stacked one below the other within a single section ── */
 .cd-modules {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.cd-modules .ps-eyebrow {
-  margin-bottom: 0;
 }
 
 .cd-modules-list {

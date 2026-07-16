@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Legacy page snapshots — kept locally, out of the repo and the build
+src/pages/_index-old.astro
+src/pages/_v2.astro
+src/styles/v2.css

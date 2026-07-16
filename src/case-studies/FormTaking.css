@@ -7,7 +7,7 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: #ffffff;
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 20px;
@@ -35,7 +35,7 @@
   gap: 20px;
   padding: 20px 24px;
   border-bottom: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.15));
-  background: #ffffff;
+  background: var(--surface-strong);
   flex: 0 0 auto;
 }
 
@@ -99,146 +99,6 @@
   padding: 32px;
 }
 
-/* ── Password gate ── */
-.ft-gate {
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  padding: 48px 40px;
-  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
-  border-radius: 20px;
-  background: var(--surface, rgba(127, 127, 127, 0.03));
-}
-
-.ft-gate__lock {
-  width: 48px;
-  height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: var(--surface-strong, rgba(127, 127, 127, 0.08));
-  color: var(--text);
-}
-
-.ft-gate__lock svg {
-  width: 24px;
-  height: 24px;
-}
-
-.ft-gate__heading {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ft-gate__eyebrow {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-soft, #888);
-  text-transform: none;
-}
-
-.ft-gate__title {
-  font-family: var(--font-display, var(--font-body));
-  font-size: 32px;
-  line-height: 1.5;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.ft-gate__desc {
-  font-size: 20px;
-  line-height: 1.5;
-  color: var(--text-soft, #666);
-}
-
-.ft-gate__form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.ft-gate__field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ft-gate__label {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-soft, #888);
-  text-transform: none;
-}
-
-.ft-gate__input {
-  width: 100%;
-  height: 48px;
-  padding: 0 20px;
-  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.25));
-  border-radius: 8px;
-  background: #ffffff;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 20px;
-  line-height: 1.5;
-  outline: none;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
-}
-
-.ft-gate__input:focus {
-  border-color: var(--text);
-  box-shadow: 0 0 0 3px var(--obv3-tint-10, rgba(127, 127, 127, 0.12));
-}
-
-.ft-gate__input.is-error {
-  border-color: var(--coral, #e74c3c);
-}
-
-.ft-gate__error {
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--coral, #e74c3c);
-  min-height: 24px;
-}
-
-.ft-gate__submit {
-  height: 48px;
-  padding: 0 24px;
-  border: none;
-  border-radius: 8px;
-  background: var(--text);
-  color: var(--canvas);
-  font-family: inherit;
-  font-size: 20px;
-  line-height: 1.5;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 200ms ease, transform 200ms ease;
-}
-
-.ft-gate__submit:hover {
-  opacity: 0.88;
-}
-
-.ft-gate__submit:active {
-  transform: scale(0.98);
-}
-
-.ft-gate__submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.ft-gate__hint {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-soft, #888);
-}
-
 /* ── Slides frame ── */
 .ft-slides {
   width: 100%;
@@ -277,7 +137,7 @@
 }
 
 :root[data-theme="ink"] .ft-overlay .ft-back {
-  background: #1e1f32;
+  background: var(--bg2);
 }
 
 @media (max-width: 720px) {
@@ -286,12 +146,5 @@
   }
   .ft-body {
     padding: 20px;
-  }
-  .ft-gate {
-    padding: 32px 24px;
-    gap: 24px;
-  }
-  .ft-gate__title {
-    font-size: 24px;
   }
 }

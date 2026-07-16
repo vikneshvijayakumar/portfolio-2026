@@ -32,9 +32,16 @@
   z-index: 1;
 
   background: var(--lumos-gradient);
-  background-attachment: fixed;
   background-size: 400% 400%;
-  animation: bgShift 12s ease infinite;
+  /* The colour cycle runs on hue-rotate, not background-position. Both read as
+     a slow shimmer, but background-position isn't a compositable property — it
+     re-rasterised this 900x900 layer every frame for as long as the page was
+     open. A filter on a promoted layer is a GPU shader: no repaint.
+     ponytail: hue-rotate cycles all colours together where the old sweep moved
+     them across the halo. Under an 18%-opacity radial mask the difference is
+     invisible; if it ever isn't, the sweep needs an inner element animating
+     translate3d instead. */
+  animation: hueShift 12s linear infinite;
   filter: saturate(2);
 
   -webkit-mask-image: radial-gradient(
@@ -60,6 +67,19 @@
   will-change: transform;
 }
 
+@keyframes hueShift {
+  from {
+    filter: saturate(2) hue-rotate(0deg);
+  }
+
+  to {
+    filter: saturate(2) hue-rotate(360deg);
+  }
+}
+
+/* Still used by .dynamic-grid-bg__color-layer in canvas/styles.css, where the
+   sweep shows through a per-dot mask and a hue cycle would not read the same.
+   Not .mouse-glow's any more — see above. */
 @keyframes bgShift {
   0% {
     background-position: 0% 50%;

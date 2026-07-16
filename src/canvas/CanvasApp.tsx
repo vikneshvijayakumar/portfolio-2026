@@ -21,9 +21,9 @@ import emailIcon from "./assets/email.svg?url";
 import linkedinIcon from "./assets/linkedin.svg?url";
 import logoSvg from "./assets/logo.svg?raw";
 import moonSvg from "./assets/moon.svg?raw";
-import profileImg from "./assets/profile.webp?url";
+import profileImg from "../assets/profile.webp?url";
 import sunSvg from "./assets/sun.svg?raw";
-import googleUxBadge from "./assets/google-ux.webp?url";
+import googleUxBadge from "../assets/google-ux.webp?url";
 import upworkBadge from "./assets/Upwork-TopRated-Badge.svg?url";
 import whatsappIcon from "./assets/whatsapp.svg?url";
 import { buildAiBadgeMarkup } from "../lib/ai-badge";
@@ -62,10 +62,10 @@ const CASE_STUDY_ROUTES: Record<string, string> = {
 };
 
 const zoneNavItems: { id: ZoneId; label: string; key: string }[] = [
-  { id: "about", label: "About", key: "1" },
-  { id: "case-studies", label: "Case Studies", key: "2" },
+  { id: "case-studies", label: "Works", key: "1" },
+  { id: "experience", label: "Experience", key: "2" },
   { id: "dribbble", label: "Other Works", key: "3" },
-  { id: "experience", label: "Experience", key: "4" },
+  { id: "about", label: "About", key: "4" },
   { id: "skills", label: "Skills", key: "5" },
 ];
 
@@ -869,14 +869,6 @@ function App() {
 
               <div className="toolbar__panel toolbar__panel--right">
                 <div className="toolbar__actions">
-                  {!isMobile && !isTablet && (
-                    <a className="alt-landing-link" href="/" title="Normal Landing">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M4 6h16M4 12h16M4 18h10" />
-                      </svg>
-                      <span className="alt-landing-link__label">Classic Mode</span>
-                    </a>
-                  )}
                   {!isMobile && !isTablet && <AvailabilityPill />}
                   <div className="legend-trigger-wrapper">
                     <button
@@ -894,6 +886,14 @@ function App() {
                       modifierKey={modifierKey}
                     />
                   </div>
+                  {!isMobile && !isTablet && (
+                    <a className="alt-landing-link" href="/" title="Normal Landing">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M4 6h16M4 12h16M4 18h10" />
+                      </svg>
+                      <span className="alt-landing-link__label">Classic Mode</span>
+                    </a>
+                  )}
                   <ThemeToggle theme={theme} setTheme={setTheme} />
                   {!isMobile && !isTablet && (
                     <a className="toolbar__resume" href={toolbarLinks.resume} target="_blank" rel="noreferrer">

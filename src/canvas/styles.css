@@ -82,13 +82,14 @@
   --tooltip-text-rgb: 17, 17, 24;
 }
 
+/* Same navy family as global.css's ink theme — one dark mode site-wide. */
 :root[data-theme="ink"] {
   color-scheme: dark;
-  --canvas: #0a0b10;
+  --canvas: #0f1524;
   --canvas-grid: rgba(99, 102, 241, 0.16);
-  --surface: rgba(17, 18, 28, 0.9);
-  --surface-strong: #12131e;
-  --surface-muted: rgba(10, 11, 18, 0.7);
+  --surface: rgba(23, 32, 57, 0.9);
+  --surface-strong: #172039;
+  --surface-muted: rgba(15, 21, 36, 0.7);
   --primary: #818cf8;
   --primary-dark: #4f46e5;
   --primary-soft: rgba(129, 140, 248, 0.15);
@@ -106,26 +107,26 @@
   --text-soft: rgba(241, 245, 249, 0.65);
   --border: rgba(99, 102, 241, 0.15);
   --shadow-rgb: 0, 0, 0;
-  --paper-ink: #05060a;
+  --paper-ink: #0a0f1c;
   --shadow-color: rgba(0, 0, 0, 0.25);
   --shadow: 2px 4px 12px rgba(0, 0, 0, 0.6);
   --logo-filter: invert(1) brightness(1.8);
 
   /* IDE Theme - Dark */
-  --ide-bg: #12131e;
-  --ide-sidebar: #0a0b10;
-  --ide-tab-active: #12131e;
-  --ide-tab-inactive: #0a0b10;
-  --ide-tab-border: #08090f;
+  --ide-bg: #172039;
+  --ide-sidebar: #0f1524;
+  --ide-tab-active: #172039;
+  --ide-tab-inactive: #0f1524;
+  --ide-tab-border: #0b101c;
   --ide-text: #e2e8f0;
-  --ide-gutter: #0a0b10;
+  --ide-gutter: #0f1524;
   --md-h1: #818cf8;
   --md-h2: #a5b4fc;
   --md-keyword: #c586c0;
   --md-string: #ce9178;
   --md-comment: #6a9955;
   --md-bullet: #e2e8f0;
-  --tooltip-bg: #12131e;
+  --tooltip-bg: #172039;
   --tooltip-text: #ffffff;
   --tooltip-text-rgb: 255, 255, 255;
 }
@@ -138,20 +139,6 @@
   font-variant-alternates: stylistic(ss01), stylistic(ss02);
   text-rendering: optimizeLegibility;
   font-style: normal;
-}
-
-/* Base transitions for interactive elements */
-button,
-a,
-.made-with-card,
-.principle-card,
-.project-card,
-.about-card,
-.markdown-card,
-.experience-folder {
-  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
-  transition-duration: 240ms;
-  transition-timing-function: ease;
 }
 
 html,
@@ -214,19 +201,9 @@ h6 {
   font-weight: 600;
 }
 
-.bold {
-  font-weight: 700;
-}
-
 .font-title {
   font-family: var(--font-title);
 }
-
-.font-body {
-  font-family: var(--font-body);
-}
-
-
 
 .os-windows body {
   -webkit-font-smoothing: antialiased;
@@ -253,6 +230,40 @@ button {
   padding: 0;
 }
 
+button,
+a,
+.made-with-card,
+.project-card,
+.about-card,
+.markdown-card,
+.experience-folder {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-duration: 240ms;
+  transition-timing-function: ease;
+}
+
+.social-strip span {
+  color: var(--text-soft);
+}
+
+.download-button:focus-visible,
+.header-zone-nav__item:focus-visible,
+.social-strip a:focus-visible,
+.social-strip__copy-btn:focus-visible,
+.project-card:focus-visible,
+.experience-folder:focus-visible,
+.toolbar__branding:focus-visible {
+  outline: 2px solid var(--primary-dark);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+
+.project-cards,
+.about-card,
+.markdown-card {
+  contain: layout;
+}
+
 .app-shell {
   position: relative;
   min-height: 100vh;
@@ -267,8 +278,6 @@ button {
   background: var(--canvas);
   overflow: hidden;
 }
-
-
 
 /*
  * Colorful dots revealed near the cursor — the "prism" effect.
@@ -312,8 +321,6 @@ button {
 }
 
 /* Atmospheric cursor halo -> .mouse-glow in styles/glow.css. */
-
-
 
 .zoom-controls,
 .bottom-dock {
@@ -436,8 +443,6 @@ button {
 .made-with-card--canvas {
   padding: 16px 24px;
 }
-
-
 
 .bottom-dock__center {
   position: absolute;
@@ -643,8 +648,6 @@ button {
   z-index: -1;
 }
 
-
-
 .about-card {
   position: absolute;
   top: 100px;
@@ -752,7 +755,6 @@ button {
   }
 }
 
-
 @keyframes viewport-pulse {
 
   0%,
@@ -797,10 +799,6 @@ button {
   color: var(--text-soft);
 }
 
-
-
-
-
 .about-card__footer {
   display: flex;
   justify-content: center;
@@ -808,7 +806,6 @@ button {
   gap: var(--space-3);
   margin-top: 24px;
 }
-
 
 .experience-folder {
   position: absolute;
@@ -818,8 +815,6 @@ button {
   z-index: 1;
   backface-visibility: hidden;
 }
-
-
 
 .experience-folder__back {
   position: absolute;
@@ -920,8 +915,6 @@ button {
   transform: translateY(-110px);
   box-shadow: -20px 30px 60px rgba(var(--black-rgb), 0.35);
 }
-
-
 
 .experience-folder__summary {
   font-size: 0.95rem;
@@ -1185,11 +1178,6 @@ button {
   color: var(--primary-dark);
 }
 
-.clock-widget span,
-.social-strip span {
-  color: var(--text-soft);
-}
-
 /* === Vanakkam Sticker === */
 .vanakkam-sticker {
   position: absolute;
@@ -1410,73 +1398,6 @@ button {
   transform: rotate(0deg) scale(1.04);
 }
 
-.work-cluster {
-  position: relative;
-}
-
-.principle-card {
-  position: absolute;
-  width: 256px;
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 4px 8px 24px rgba(var(--black-rgb), 0.12), 0 1px 3px rgba(var(--black-rgb), 0.06);
-  transition: box-shadow 240ms ease;
-  transform-origin: center center;
-  border: none;
-  background: none;
-  backdrop-filter: none;
-}
-
-.principle-card__header {
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.principle-card__header span {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
-
-.principle-card__body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 20px;
-}
-
-.principle-card__body h2 {
-  font-family: var(--font-body);
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.principle-card__body p {
-  font-size: 0.88rem;
-  opacity: 0.8;
-  margin: 0;
-}
-
-/* Hover handled by Framer Motion */
-
-.work-cluster.is-mobile {
-  display: grid;
-  gap: 16px;
-}
-
-.work-cluster.is-mobile .principle-card {
-  position: relative;
-  left: auto !important;
-  top: auto !important;
-  width: 100%;
-}
-
 /* Dribbble Cards / Other Works */
 .dribbble-cards {
   pointer-events: auto;
@@ -1532,79 +1453,6 @@ button {
   line-height: 1.6;
 }
 
-/* Mobile responsive styles */
-
-
-.principle-card--lime {
-  background: none !important;
-}
-
-.principle-card--lime .principle-card__header {
-  background: color-mix(in srgb, var(--surface) 75%, var(--lime));
-  color: var(--text);
-}
-
-.principle-card--lime .principle-card__body {
-  background: color-mix(in srgb, var(--surface) 55%, var(--lime));
-  color: var(--text);
-}
-
-.principle-card--blue {
-  background: none !important;
-}
-
-.principle-card--blue .principle-card__header {
-  background: color-mix(in srgb, var(--surface) 75%, var(--blue));
-  color: var(--text);
-}
-
-.principle-card--blue .principle-card__body {
-  background: color-mix(in srgb, var(--surface) 55%, var(--blue));
-  color: var(--text);
-}
-
-.principle-card--coral {
-  background: none !important;
-}
-
-.principle-card--coral .principle-card__header {
-  background: color-mix(in srgb, var(--surface) 75%, var(--coral));
-  color: var(--text);
-}
-
-.principle-card--coral .principle-card__body {
-  background: color-mix(in srgb, var(--surface) 55%, var(--coral));
-  color: var(--text);
-}
-
-.principle-card--violet {
-  background: none !important;
-}
-
-.principle-card--violet .principle-card__header {
-  background: color-mix(in srgb, var(--surface) 75%, var(--violet));
-  color: var(--text);
-}
-
-.principle-card--violet .principle-card__body {
-  background: color-mix(in srgb, var(--surface) 55%, var(--violet));
-  color: var(--text);
-}
-
-.principle-card--yellow {
-  background: none !important;
-}
-
-.principle-card--yellow .principle-card__header {
-  background: color-mix(in srgb, var(--surface) 75%, var(--yellow));
-  color: var(--text);
-}
-
-.principle-card--yellow .principle-card__body {
-  background: color-mix(in srgb, var(--surface) 55%, var(--yellow));
-  color: var(--text);
-}
-
 .social-strip {
   position: relative;
   left: auto;
@@ -1630,14 +1478,7 @@ button {
   }
 }
 
-.header-zone-nav__indicator {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-  background: color-mix(in srgb, var(--surface-strong) 90%, transparent);
-  z-index: -1;
-}
+
 
 .social-strip a,
 .social-strip__copy-btn {
@@ -1991,40 +1832,6 @@ button {
   color: inherit;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes dotPulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-
-  100% {
-    transform: scale(2.8);
-    opacity: 0;
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.85;
-    transform: scale(1.08);
-  }
-}
-
-
-
 @media (prefers-reduced-motion: reduce) {
 
   *,
@@ -2037,10 +1844,7 @@ button {
   }
 }
 
-
-
 /* Ensure HUD stays above canvas on small screens */
-
 
 /* Mobile & Tablet Refinements */
 .about-card__copyright {
@@ -2056,19 +1860,6 @@ button {
 :focus-visible {
   outline: 2px solid var(--primary-dark);
   outline-offset: 4px;
-}
-
-.download-button:focus-visible,
-.header-zone-nav__item:focus-visible,
-.social-strip a:focus-visible,
-.social-strip__copy-btn:focus-visible,
-.project-card:focus-visible,
-.experience-folder:focus-visible,
-.warp-hud__item:focus-visible,
-.toolbar__branding:focus-visible {
-  outline: 2px solid var(--primary-dark);
-  outline-offset: 4px;
-  border-radius: var(--radius-md);
 }
 
 .project-card:focus-visible {
@@ -2208,22 +1999,6 @@ button {
 
 .legend-trigger.is-active {
   color: var(--surface-strong);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Performance: containment + mobile compositor relief                        */
-/* -------------------------------------------------------------------------- */
-
-/*
- * `contain: layout` scopes layout invalidation per card without clipping
- * paint — shadows and translated children (e.g. experience-folder papers
- * that lift on hover) remain visible.
- */
-.project-cards,
-.about-card,
-.markdown-card,
-.principle-card {
-  contain: layout;
 }
 
 /*

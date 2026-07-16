@@ -16,6 +16,18 @@ const description =
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script is:inline>
+      // Resolve the theme before first paint so dark mode never flashes white.
+      (() => {
+        const saved = localStorage.getItem("viknesh-theme");
+        document.documentElement.dataset.theme =
+          saved === "ink" || saved === "paper"
+            ? saved
+            : matchMedia("(prefers-color-scheme: dark)").matches
+              ? "ink"
+              : "paper";
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
@@ -23,7 +35,8 @@ const description =
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-serif-variable@2.0.0/fonts/split/woff2/IBM Plex Serif Var-Roman.min.css" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-serif-variable@2.0.0/fonts/split/woff2/IBM Plex Serif Var-Roman.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-sans-variable@0.2.0/fonts/split/woff2/IBM Plex Sans Var-Roman.min.css" />
   </head>
   <body>

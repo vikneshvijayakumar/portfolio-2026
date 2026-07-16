@@ -58,7 +58,7 @@ export const zones: Zone[] = [
   },
   {
     id: "case-studies",
-    label: "Case Studies",
+    label: "Works",
     desktopCenter: { x: 3550, y: 1150 },
     mobileCenter: { x: 3294, y: 1576 },
     mobileEyebrow: "Selected Work",
@@ -149,7 +149,7 @@ export const projects: Project[] = [
     impact: "Zero lost users",
     summary:
       "Redesigned a massive legacy enrollment ecosystem into a guided, mobile-first workflow. Eliminated user abandonment by natively embedding legacy components inside dynamic React containers.",
-    note: "🔒 Password Protected",
+    note: "",
     tone: "Mobile-first / Persistent navigation",
     image: "form-taking.webp",
     desktopPosition: { x: 2800, y: 1430, rotation: -2 },

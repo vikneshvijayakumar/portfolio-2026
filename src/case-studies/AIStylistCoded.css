@@ -19,7 +19,7 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: #ffffff;
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   overflow: hidden;
@@ -51,7 +51,7 @@
   gap: 20px;
   padding: 20px 24px;
   border-bottom: 1px solid var(--ps-line);
-  background: #ffffff;
+  background: var(--surface-strong);
   flex: 0 0 auto;
   z-index: 200;
 }
@@ -322,28 +322,6 @@
   font-weight: 400;
 }
 
-.ps-eyebrow {
-  font-family: var(--ps-font-mono);
-  font-size: 12px;
-  letter-spacing: 0;
-  color: var(--ps-accent);
-  text-transform: none;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  line-height: 1.6;
-}
-
-.ps-eyebrow::after {
-  content: "";
-  display: block;
-  flex: 1;
-  height: 1px;
-  background: var(--ps-line);
-  max-width: 80px;
-}
-
 .ps-heading {
   font-family: var(--font-title);
   font-size: 56px;
@@ -388,7 +366,7 @@
 }
 
 .ps-section--overview {
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .ps-section--challenge {
@@ -396,7 +374,7 @@
 }
 
 .ps-section--goal {
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .ps-section--outcomes {
@@ -404,11 +382,7 @@
 }
 
 .ps-section--reflection {
-  background: #ffffff;
-}
-
-.ps-section--redesign {
-  background: var(--ps-bg2);
+  background: var(--bg);
 }
 
 /* ── Audit Cards ── */
@@ -416,119 +390,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-
-/* ═══════════════════════════════════════════════════════
-   REDESIGN — Sticky Scroll using ps-section__inner grid
-   ═══════════════════════════════════════════════════════ */
-
-.ps-redesign-scroll-container {
-  position: relative;
-}
-
-.ps-redesign-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  background: var(--ps-bg2);
-  border-top: 1px solid var(--ps-line);
-  padding: 120px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-sizing: border-box;
-}
-
-.ps-redesign-sticky .ps-section__inner {
-  align-items: start;
-}
-
-.ps-redesign-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.ps-redesign-content .ps-eyebrow::after {
-  display: none;
-}
-
-.ps-redesign-content .ps-heading {
-  margin-bottom: 20px;
-}
-
-/* Step navigation pills (matching obv3 styling) */
-.ps-step-pills {
-  display: inline-flex;
-  gap: 8px;
-  margin-left: 20px;
-  align-items: center;
-}
-
-.ps-step-pill {
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  border: none;
-  background: var(--ps-line);
-  cursor: pointer;
-  padding: 0;
-  transition: background 300ms ease, width 300ms ease;
-  flex-shrink: 0;
-}
-
-.ps-step-pill.is-active {
-  background: var(--ps-accent);
-  width: 24px;
-}
-
-.ps-redesign__head-wrap,
-.ps-redesign-card-texts-wrap {
-  display: grid;
-  grid-template-rows: 1fr;
-}
-
-.ps-redesign__head-wrap>*,
-.ps-redesign-card-texts-wrap>* {
-  grid-row: 1;
-  grid-column: 1;
-}
-
-.ps-redesign-card__pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr;
-  gap: 32px;
-}
-
-.ps-redesign-card-texts-wrap {
-  grid-column: 1 / -1;
-  grid-row: 1;
-}
-
-.ps-redesign-card__phone:nth-child(2) {
-  grid-column: 1;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.ps-redesign-card__phone:nth-child(3) {
-  grid-column: 2;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.ps-redesign-card__text-pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
 }
 
 .ps-redesign-card__text {
@@ -570,169 +431,6 @@
   line-height: 1.5;
   margin: 0;
 }
-
-/* ── Phone frame component ── */
-.ps-phone-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.ps-phone {
-  position: relative;
-}
-
-.ps-phone__shell {
-  /* Pixel 9 proportions: ~70 × 152 mm = 9:19.5 */
-  width: 220px;
-  height: 440px;
-  background: var(--ps-phone-bg);
-  border-radius: 28px;
-  padding: 12px 8px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.08),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 24px 64px rgba(0, 0, 0, 0.48),
-    0 8px 24px rgba(0, 0, 0, 0.32);
-  position: relative;
-}
-
-/* Side buttons */
-.ps-phone__shell::before {
-  content: "";
-  position: absolute;
-  right: -3px;
-  top: 72px;
-  width: 3px;
-  height: 40px;
-  background: color-mix(in srgb, var(--ps-phone-bg) 60%, #fff 40%);
-  border-radius: 0 4px 4px 0;
-}
-
-.ps-phone__shell::after {
-  content: "";
-  position: absolute;
-  left: -3px;
-  top: 56px;
-  width: 3px;
-  height: 24px;
-  background: color-mix(in srgb, var(--ps-phone-bg) 60%, #fff 40%);
-  border-radius: 4px 0 0 4px;
-  box-shadow: 0 32px 0 color-mix(in srgb, var(--ps-phone-bg) 60%, #fff 40%);
-}
-
-.ps-phone__status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px 8px;
-  flex: 0 0 auto;
-  color: #fff;
-}
-
-.ps-phone__time {
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.ps-phone__icons {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #fff;
-}
-
-.ps-phone__screen {
-  flex: 1;
-  background: var(--ps-phone-screen);
-  border-radius: 20px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-/* Subtle screen reflection */
-.ps-phone__screen::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-.ps-phone__placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.ps-phone__placeholder-icon {
-  width: 32px;
-  height: 32px;
-  opacity: 0.3;
-  color: #fff;
-}
-
-.ps-phone__placeholder-label {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.3);
-  text-transform: none;
-  font-weight: 600;
-  text-align: center;
-  padding: 0 20px;
-}
-
-.ps-phone__home-bar {
-  width: 64px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.24);
-  border-radius: 4px;
-  margin: 8px auto 0;
-  flex: 0 0 auto;
-}
-
-/* Accent ring on phone wrap */
-.ps-phone-wrap--old .ps-phone__shell {
-  box-shadow:
-    0 0 0 1px rgba(255, 156, 116, 0.24),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 24px 64px rgba(0, 0, 0, 0.48),
-    0 8px 24px rgba(0, 0, 0, 0.32);
-}
-
-.ps-phone-wrap--new .ps-phone__shell {
-  box-shadow:
-    0 0 0 1px rgba(var(--primary-rgb), 0.24),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 24px 64px rgba(0, 0, 0, 0.48),
-    0 8px 24px rgba(0, 0, 0, 0.32);
-}
-
-.ps-phone-label {
-  font-family: var(--ps-font-mono);
-  font-size: 12px;
-  text-transform: none;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.6;
-}
-
-.ps-phone-label--old {
-  color: var(--ps-red);
-}
-
-.ps-phone-label--new {
-  color: var(--ps-accent);
-}
-
 
 /* ── Outcomes ── */
 .ps-outcomes-grid {
@@ -847,30 +545,6 @@
   .ps-heading {
     font-size: 32px;
   }
-
-  .ps-redesign-sticky {
-    height: auto;
-    position: relative;
-    padding: 64px 32px;
-  }
-
-  .ps-redesign-sticky .ps-section__inner {
-    grid-template-rows: auto;
-  }
-
-  .ps-redesign-content {
-    height: auto;
-    justify-content: flex-start;
-  }
-
-  .ps-redesign-scroll-container {
-    height: auto !important;
-  }
-
-  .ps-phone__shell {
-    width: 160px;
-    height: 320px;
-  }
 }
 
 @media (max-width: 960px) {
@@ -888,10 +562,6 @@
 
   .ps-section__inner {
     gap: 24px;
-  }
-
-  .ps-redesign-sticky {
-    padding: 40px 20px;
   }
 
   .ps-audit-grid {
@@ -913,23 +583,6 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-  }
-}
-
-
-@media (max-width: 640px) {
-  .ps-phone__shell {
-    width: 140px;
-    height: 280px;
-    border-radius: 20px;
-  }
-
-  .ps-phone__status {
-    padding: 0 4px 4px;
-  }
-
-  .ps-phone__time {
-    font-size: 12px;
   }
 }
 
@@ -960,16 +613,9 @@
   font-weight: 800;
 }
 
-:root:not([data-theme="ink"]) .ps-overlay .ps-redesign-sticky {
-  background: var(--surface-strong);
-}
-
-
-
-
 /* Topbar */
 :root[data-theme="ink"] .ps-overlay .ps-back {
-  background: #1e1f32;
+  background: var(--bg2);
 }
 
 :root:not([data-theme="ink"]) .ps-overlay .ps-topbar {

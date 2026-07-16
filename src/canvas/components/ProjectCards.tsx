@@ -3,12 +3,12 @@ import { motion } from "motion/react";
 import { projects, type Project } from "../content";
 import dashboardImg from "../assets/dashboard.webp?url";
 import formBuilderImg from "../assets/form-builder.webp?url";
-import formTakingImg from "../assets/form-taking.webp?url";
-import outputBuilderImg from "../assets/output-builder.webp?url";
+import formTakingImg from "../../assets/form-taking.webp?url";
+import outputBuilderImg from "../../assets/output-builder.webp?url";
 import aiStylistImg from "../assets/aistylist.webp?url";
-import clinicalDocumentationImg from "../assets/clinical-documentation.webp?url";
-import aiTranscriptionImg from "../assets/ai-transcription.webp?url";
-import snapIntakeImg from "../assets/snapintake.webp?url";
+import clinicalDocumentationImg from "../../assets/clinical-documentation.webp?url";
+import aiTranscriptionImg from "../../assets/ai-transcription.webp?url";
+import snapIntakeImg from "../../assets/snapintake.webp?url";
 import topArrowSvg from "../assets/top-right-arrow.svg?raw";
 import { getCardTransition } from "../utils/constants";
 
@@ -206,7 +206,7 @@ const ProjectCards = memo(function ProjectCards({
         animate={isStarted ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h2 className="project-cards__title">CASE STUDIES</h2>
+        <h2 className="project-cards__title">WORKS</h2>
         {orderedProjects.map((project, index) => (
           <ProjectCard
             key={project.title}
@@ -238,7 +238,7 @@ const ProjectCards = memo(function ProjectCards({
         animate={isStarted ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.4 }}
       >
-        CASE STUDIES
+        WORKS
       </motion.h2>
       {projects.map((project, index) => (
         <ProjectCard
