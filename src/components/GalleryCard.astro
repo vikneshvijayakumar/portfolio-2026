@@ -1,6 +1,6 @@
 ---
 // Taped polaroid card for the "Off the record" gallery.
-const { src, label, rot, tapeRot, link } = Astro.props;
+const { src, label, rot, tapeRot, link, w, h } = Astro.props;
 ---
 
 {
@@ -18,7 +18,10 @@ const { src, label, rot, tapeRot, link } = Astro.props;
         <img
           src={src}
           alt=""
+          width={w}
+          height={h}
           loading="lazy"
+          decoding="async"
           style="display:block;width:100%;height:auto;border-radius:4px"
         />
         <div
