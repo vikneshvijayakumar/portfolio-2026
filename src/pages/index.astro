@@ -19,6 +19,8 @@ const base = [
     title: "No-code form output builder",
     meta: "Empyra · 90% faster template creation · 2024",
     img: "/assets/output-builder.webp",
+    imgW: 1200,
+    imgH: 900,
     alt: "Output Builder visual template editor",
     tint: "rgba(209,227,255,.4)",
     featured: true,
@@ -30,6 +32,8 @@ const base = [
     title: "AI-native clinical documentation, before AI was a thing",
     meta: "AmbientOne · 30+ modules shipped · 2018-2021",
     img: "/assets/clinical-documentation.webp",
+    imgW: 1200,
+    imgH: 900,
     alt: "Clinical documentation platform",
     tint: "rgba(225,240,255,.5)",
     featured: false,
@@ -41,6 +45,8 @@ const base = [
     title: "Getting an AI stylist app out of its own way",
     meta: "Freelance · Faster first recommendation · 2025",
     img: "/assets/aistylist.webp",
+    imgW: 1200,
+    imgH: 961,
     alt: "AI Stylist redesign",
     tint: "rgba(220,240,230,.5)",
     featured: false,
@@ -52,6 +58,8 @@ const base = [
     title: "Turning fragmented enrollment flow into a guided experience",
     meta: "Empyra · Zero lost users · 2025",
     img: "/assets/form-taking.webp",
+    imgW: 513,
+    imgH: 382,
     alt: "Form Taking enrollment flow",
     tint: "rgba(255,240,220,.5)",
     featured: false,
@@ -63,6 +71,8 @@ const base = [
     title: "Paper-to-digital patient intake",
     meta: "AmbientOne · 2020",
     img: "/assets/snapintake.webp",
+    imgW: 1200,
+    imgH: 961,
     alt: "Paper-to-digital patient intake",
     tint: "rgba(238,240,245,.6)",
     featured: false,
@@ -73,6 +83,8 @@ const base = [
     title: "AI Powered clinical transcription",
     meta: "AmbientOne · 1000+ screens · 2015–2018",
     img: "/assets/ai-transcription.webp",
+    imgW: 1200,
+    imgH: 961,
     alt: "Intelligent clinical transcription",
     tint: "rgba(238,240,245,.6)",
     featured: false,
@@ -496,8 +508,8 @@ const tickerSkills = [
       z-index: 100;
     }
     .mobile-dock__arrow {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -715,7 +727,7 @@ const tickerSkills = [
         display: block;
       }
       .social-link {
-        padding: 10px !important;
+        padding: 12px !important;
       }
 
       .email-link {
@@ -939,6 +951,7 @@ const tickerSkills = [
     </button>
   </nav>
 
+  <main>
   <!-- ══ HERO ══ -->
   <section
     id="top"
@@ -1109,10 +1122,11 @@ const tickerSkills = [
               {cs.hasLink && (
                 <a
                   href={cs.link}
+                  aria-label={`View case study: ${cs.title}`}
                   class="btn-primary"
                   style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:12px 20px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
                 >
-                  View Case Study <span style="font-size:16px">↗</span>
+                  View Case Study <span style="font-size:16px" aria-hidden="true">↗</span>
                 </a>
               )}
               {cs.draft && (
@@ -1127,6 +1141,10 @@ const tickerSkills = [
               <img
                 src={cs.img}
                 alt={cs.alt}
+                width={cs.imgW}
+                height={cs.imgH}
+                loading="lazy"
+                decoding="async"
                 style="display:block;width:100%;height:auto;max-height:44vh;object-fit:cover;object-position:top center;border-radius:4px"
               />
             </div>
@@ -1434,7 +1452,7 @@ const tickerSkills = [
       id="lightboxClose"
       aria-label="Close"
       title="Close"
-      style="position:absolute;top:24px;right:24px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer"
+      style="position:absolute;top:24px;right:24px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer"
     >
       <svg
         width="18"
@@ -1469,7 +1487,10 @@ const tickerSkills = [
               data-parallax="img"
               src="/assets/profile.webp"
               alt="Viknesh Vijayakumar"
+              width="800"
+              height="800"
               loading="lazy"
+              decoding="async"
               style="display:block;width:100%;height:auto;will-change:transform"
             />
           </div>
@@ -1679,6 +1700,7 @@ const tickerSkills = [
       <span>Available — Remote worldwide</span>
     </div>
   </section>
+  </main>
 
   <script>
     // Theme — same localStorage key as the canvas landing, so the choice

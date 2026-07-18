@@ -1,4 +1,5 @@
 ---
+import '../styles/fonts.css';
 import '../styles/global.css';
 
 interface Props {
@@ -54,10 +55,9 @@ const ogImageURL = new URL(ogImage, siteURL);
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImageURL} />
-  <!-- The canonical landing page establishes the site's editorial type system. -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-serif-variable@2.0.0/fonts/split/woff2/IBM Plex Serif Var-Roman.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-sans-variable@0.2.0/fonts/split/woff2/IBM Plex Sans Var-Roman.min.css" />
+  <!-- Self-hosted (see styles/fonts.css) — preload so text doesn't wait on CSS parse. -->
+  <link rel="preload" href="/fonts/plex-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/plex-serif-var-latin.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 <body class={pageClass}>
   <slot />
