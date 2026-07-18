@@ -48,6 +48,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 /* ── Topbar (Secondary) ── */
@@ -63,56 +64,7 @@
   z-index: 200;
 }
 
-.obv3-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 20px;
-  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
-  border-radius: 999px;
-  background: var(--surface-strong);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 16px;
-  line-height: 1.6;
-  cursor: pointer;
-  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
-}
-
-.obv3-back:hover {
-  background: rgba(127, 127, 127, 0.08);
-  border-color: var(--text);
-}
-
-.obv3-back:active {
-  transform: scale(0.98);
-}
-
-.obv3-back svg {
-  width: 18px;
-  height: 18px;
-}
-
-.obv3-topbar__title {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  text-align: right;
-}
-
-.obv3-topbar__eyebrow {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-soft, #888);
-  text-transform: none;
-}
-
-.obv3-topbar__name {
-  font-size: 16px;
-  line-height: 1.6;
-  font-weight: 600;
-}
+/* Back button + topbar title are shared — see case-study.css. */
 
 /* ── Side nav ── */
 .obv3-sidenav {
@@ -818,11 +770,7 @@
   background: #ffffff;
 }
 
-/* Topbar */
-:root[data-theme="ink"] .obv3-overlay .obv3-back {
-  background: var(--bg2);
-}
-
+/* Topbar (ink-theme back fill is shared — see case-study.css) */
 :root:not([data-theme="ink"]) .obv3-overlay .obv3-topbar {
   background: rgba(248, 248, 248, 0.92);
   backdrop-filter: blur(12px);

@@ -254,17 +254,6 @@ body {
   color: var(--text-soft);
 }
 
-/* Server-rendered studies keep their content visible without JavaScript. */
-.case-study-page .ps-overlay [style*="opacity:0"],
-.case-study-page .obv3-overlay [style*="opacity:0"] {
-  opacity: 1 !important;
-}
-
-.case-study-page .ps-overlay [style*="transform:"],
-.case-study-page .obv3-overlay [style*="transform:"] {
-  transform: none !important;
-}
-
 a {
   color: inherit;
   text-decoration: none;

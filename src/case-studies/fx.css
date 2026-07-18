@@ -92,3 +92,79 @@
     transition: none !important;
   }
 }
+
+/* ── Shared fullscreen lightbox (clinical images/video + output-builder feature
+   videos). Markup lives once in CaseStudyLayout; the script moves media in/out. */
+.cd-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 40px;
+  cursor: zoom-out;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.cd-lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cd-lightbox__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.96);
+  transition: transform 0.25s ease;
+}
+
+.cd-lightbox.is-open .cd-lightbox__content {
+  transform: scale(1);
+}
+
+.cd-lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+
+.cd-lightbox__video-slot {
+  display: flex;
+  cursor: default;
+}
+
+.cd-lightbox__video-slot .cd-lightbox__img {
+  width: auto;
+  height: auto;
+  max-width: min(100%, 90vw);
+  max-height: 90vh;
+}
+
+.cd-lightbox__close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+}
+
+.cd-lightbox__close svg {
+  width: 18px;
+  height: 18px;
+}
+

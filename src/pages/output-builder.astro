@@ -1,6 +1,46 @@
 ---
 import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
-import Obv3 from '../case-studies/Obv3';
+import CaseStudyFooter from '../components/CaseStudyFooter.astro';
+import { FLOW_ICONS } from '../case-studies/obv3-flow-icons';
+import '../case-studies/Obv3.css';
+
+const NAV_SECTIONS = [
+  { id: 'obv3-hero', label: 'Intro' },
+  { id: 'obv3-overview', label: 'Overview' },
+  { id: 'obv3-discovery', label: 'Discovery' },
+  { id: 'obv3-contrast', label: 'Actual problem' },
+  { id: 'obv3-principles', label: 'Principles' },
+  { id: 'obv3-solution', label: 'Solution' },
+  { id: 'obv3-impact', label: 'Impact' },
+  { id: 'obv3-evolution', label: 'Future' },
+  { id: 'obv3-reflection', label: 'Reflection' },
+];
+
+const FLOW = [
+  { title: 'Form Setup', desc: 'Questionnaires are created and the system generates response codes.' },
+  { title: 'PDF Template', desc: 'Engineers create a static PDF template with required fields' },
+  { title: 'Code Mapping', desc: 'Each response code is manually mapped into exact pixel coordinates' },
+  { title: 'Upload & Test', desc: 'Template is uploaded to the system, tested and corrected until production.' },
+];
+
+const PRINCIPLES = [
+  { label: 'Reduce cognitive overhead', desc: 'Users should work with question and fields that they already know, not internal system response codes.' },
+  { label: 'Support progressive complexity', desc: 'Simple templates should be fast to build. Advanced customizations should still be possible.' },
+  { label: 'Preserve existing mental models', desc: 'Users already understood forms. The output experience should build on that, not introduce new abstractions on top of it.' },
+  { label: 'Shift ownership closer to users', desc: 'Shift the template design control from engineers to the users. Engineers can focus on engineering problems, not templates and layouts.' },
+];
+
+const FEATURES = [
+  { title: 'Automated Code Mapping', body: 'Users select form questions from a list using an interface that focused on what they are trying to do, not how the system is doing it. The system handles response codes automatically in the backend.', helps: ['Less cognitive load', 'No memorisation of codes', 'Fewer mapping errors', 'Easier for new users to pick up'], videoPath: '/assets/output-builder/work-with-data.mp4', duration: '0:17' },
+  { title: 'Visual Builder', body: 'Template creation is now moved entirely inside the product. A visual builder without the bloated functions of a PDF tool is built within the product. Even non-technical admins can now create templates within minutes.', helps: ['Users can now see the output as they build', 'No need to switch between the app and PDF tools', 'Instant updates'], videoPath: '/assets/output-builder/drag-and-drop.mp4', duration: '0:11' },
+  { title: 'Flexible Customizations', body: 'Users can now adjust layouts and styling easily. Enough control to handle real variation without adding a new learning curve.', helps: ['Simple yet flexible customization', 'No need for external PDF tools'], videoPath: '/assets/output-builder/flexible-customization.mp4', duration: '0:13' },
+  { title: 'JSON Templates', body: 'The visual builder made mapping automatic. But the underlying PDF model would have kept the same problems — every modification requiring a base file regeneration, more storage, and slow maintenance. I proposed moving to a JSON-based template model. Documents are generated on demand, only when needed. No base file to maintain.', helps: ['No base PDF file to maintain', 'Edits are applied instantly', 'Documents generated on demand', 'Reduced storage'], videoPath: '/assets/output-builder/generate-template.mp4', duration: '0:15' },
+  { title: 'Smart Organizational Defaults', body: 'Most organizations were rebuilding output templates with similar headers and layouts from scratch every time. I introduced predefined org defaults so users could start from a default template and only work with the form fields.', helps: ['Faster setup', 'Reduces repetitive work', 'Ensures consistency', 'Better control for organizations'], videoPath: '/assets/output-builder/smart-defaults.mp4', duration: '0:19' },
+];
+
+const arrowSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>';
+const checkSvg = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 8.5 6.5 12 13 5" /></svg>';
+const fullscreenSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" /></svg>';
 ---
 
 <CaseStudyLayout
@@ -8,5 +48,227 @@ import Obv3 from '../case-studies/Obv3';
   description="How Viknesh Vijayakumar redesigned output-template creation so non-technical administrators could build and maintain documents without engineer intervention."
   ogImage="/assets/output-builder.webp"
 >
-  <Obv3 client:only="react" />
+  <div class="obv3-overlay" role="dialog" aria-modal="true" aria-label="Output Builder case study">
+    <div class="obv3-topbar">
+      <a class="obv3-back" href="/" aria-label="Back to the portfolio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span>Back</span>
+      </a>
+      <div class="obv3-topbar__title">
+        <span class="obv3-topbar__eyebrow">Empyra · 2024</span>
+        <span class="obv3-topbar__name">Output Builder</span>
+      </div>
+    </div>
+
+    <nav class="obv3-sidenav" aria-label="Sections">
+      {NAV_SECTIONS.map((s) => (
+        <a href={`#${s.id}`} class={s.id === 'obv3-hero' ? 'is-active' : ''}>{s.label}</a>
+      ))}
+    </nav>
+
+    <div class="obv3-scroll">
+      <section id="obv3-hero" class="obv3-hero">
+        <div class="obv3-hero__inner">
+          <div class="obv3-hero__main">
+            <div class="obv3-hero__lede">
+              <h1 class="obv3-hero__title">Cutting template creation from <em>days → hours</em></h1>
+              <p class="obv3-hero__desc">Reframing a document generation workflow to remove a 2 to 3 day engineering bottleneck.</p>
+              <div class="obv3-scroll-hint">Scroll to explore</div>
+            </div>
+            <div class="obv3-hero__meta">
+              <div class="obv3-meta-item"><span class="obv3-meta-label">Role</span><span class="obv3-meta-val">Solo Designer</span></div>
+              <div class="obv3-meta-item"><span class="obv3-meta-label">Outcomes</span><span class="obv3-meta-val">90% Faster</span></div>
+              <div class="obv3-meta-item"><span class="obv3-meta-label">Type</span><span class="obv3-meta-val">Workflow Redesign</span></div>
+              <div class="obv3-meta-item"><span class="obv3-meta-label">Timeline</span><span class="obv3-meta-val">4 months</span></div>
+              <p class="obv3-hero__meta-note">This is a deep dive into output generation, a part of a broader form ecosystem.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-overview" class="obv3-section obv3-section--overview">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">01<span>Overview</span></div>
+          <div>
+            <h2 class="obv3-heading">A Hidden Dependency<br />Behind Every Document</h2>
+            <p class="obv3-body">Organizations use complex forms to collect student data and generate official form outputs. But the workflow behind it required an engineer to manually create a template for each form. It required manual data mapping, multiple validation cycles, back and forth before the template reached production.</p>
+            <p class="obv3-body">The original requirement was to improve the PDF creation experience. But as I mapped the actual workflow, it became clear that PDF creation wasn't the problem. The real issue was a hidden dependency that required days of an engineer's work to manually map form data into an output template layout.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-discovery" class="obv3-section obv3-section--contrast">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">02<span>Discovery</span></div>
+          <div>
+            <h2 class="obv3-heading">Where Effort Was<br />Actually Being Spent</h2>
+            <p class="obv3-body">I started by mapping the full workflow of the users, admins, engineers, and system dependencies to understand where effort was actually wasted and who was affected by it the most. I found that most of the time was going into linking the template with the system rather than designing it.</p>
+            <div class="obv3-flow-container">
+              {FLOW.map((f, i) => (
+                <>
+                  <div class="obv3-flow-card">
+                    <div class="obv3-flow-icon-wrap" set:html={FLOW_ICONS[i]} />
+                    <div class="obv3-flow-content">
+                      <h4 class="obv3-flow-title">{f.title}</h4>
+                      <p class="obv3-flow-desc">{f.desc}</p>
+                    </div>
+                  </div>
+                  {i < FLOW.length - 1 && (
+                    <div class="obv3-flow-arrow" aria-hidden="true" set:html={arrowSvg} />
+                  )}
+                </>
+              ))}
+            </div>
+            <p class="obv3-body" style="margin-bottom:0">This process introduced friction at every step. Users had no way to easily configure the outputs these forms generated. What was supposed to be a self-serve model the platform was built on, stopped working the moment a document was involved.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-contrast" class="obv3-section obv3-section--overview">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">03<span>Actual problem</span></div>
+          <div>
+            <h2 class="obv3-heading">From Interface Polish<br />to Workflow Redesign</h2>
+            <p class="obv3-body">The original requirement was to make PDF creation easier.</p>
+            <blockquote class="obv3-blockquote">“How might we make PDF creation easier?”</blockquote>
+            <p class="obv3-body">But once I understood the workflow, I realised that it was not really a PDF issue. It was the manual mapping that was taking up the engineer's time. So, I rephrased the requirement:</p>
+            <blockquote class="obv3-blockquote">“How might we remove manual mapping and enable non-technical admins to create templates on their own?”</blockquote>
+            <p class="obv3-body">This reframing changed the scope from a simple UI revamp to workflow redesign. By removing unnecessary steps, we would make the complex manual workflow simple.</p>
+            <h3 class="obv3-subheading">Challenge</h3>
+            <p class="obv3-body" style="margin-bottom:0">The challenge was to build it in a way without affecting the legacy backend and build on the mental models that users already understand.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-principles" class="obv3-section obv3-section--contrast">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">04<span>Principles</span></div>
+          <div>
+            <h2 class="obv3-heading">Rethinking the Workflow</h2>
+            <p class="obv3-body">After several rounds of discussions with the stakeholders, we shortlisted 4 design principles that formed the basis for the new design.</p>
+            <div class="obv3-principles-cards">
+              {PRINCIPLES.map((p) => (
+                <div class="obv3-principle-card">
+                  <div class="obv3-principle-card__label">{p.label}</div>
+                  <div class="obv3-principle-card__desc">{p.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-solution" class="obv3-section obv3-section--solution">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">05<span>Solution</span></div>
+          <div>
+            <div class="obv3-solution-info" style="margin-bottom:40px">
+              <h2 class="obv3-heading">From Manual Workflows<br />to a Visual System</h2>
+            </div>
+            <div class="obv3-features-list">
+              {FEATURES.map((feature) => (
+                <div class="obv3-feature-card">
+                  <div class="obv3-feature__header">
+                    <h3 class="obv3-feature__title">{feature.title}</h3>
+                    <p class="obv3-feature__body">{feature.body}</p>
+                  </div>
+                  <div class="obv3-feature__helps-wrap">
+                    <div class="obv3-feature__helps-label">How it helps</div>
+                    <ul class="obv3-feature__helps-list">
+                      {feature.helps.map((h) => (
+                        <li>
+                          <span class="obv3-feature__helps-mark" aria-hidden="true" set:html={checkSvg} />
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div class="obv3-feature__media-wrap">
+                    <div class="obv3-feature__media" style="transform:none">
+                      <div class="obv3-feature__media-frame">
+                        <video class="obv3-feature__video" data-src={feature.videoPath} muted loop playsinline preload="none"></video>
+                        <button type="button" class="obv3-feature__fullscreen" aria-label="Expand video" title="Expand video" set:html={fullscreenSvg} />
+                        <div class="obv3-feature__duration">{feature.duration}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-impact" class="obv3-section obv3-section--impact">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">06<span>Impact</span></div>
+          <div>
+            <h2 class="obv3-heading">Engineering bottleneck to<br />a Self-Serve Capability</h2>
+            <p class="obv3-body">Output creation went from an engineering workflow to a self-serve functionality.</p>
+            <p class="obv3-body"><strong>Operational impact:</strong> Time to create a template reduced from multiple days to a few hours. Onboarding new organizations has gotten faster. Customer requirements could be turned around more quickly.</p>
+            <p class="obv3-body"><strong>Product impact:</strong> Engineering was no longer needed for routine template work. The platform became more autonomous. Self-serve capabilities got meaningfully stronger.</p>
+            <p class="obv3-body"><strong>User impact:</strong> Non-technical admins could create, manage, and iterate on output templates without knowing anything about response identifiers, coordinate systems, or PDF tooling.</p>
+            <div class="obv3-impact-stats">
+              <div class="obv3-impact-stat">
+                <div class="obv3-stat-label">Template Creation</div>
+                <div class="obv3-stat-num"><span class="obv3-stat-unit">↓</span>90<span class="obv3-stat-unit">%</span></div>
+                <div class="obv3-stat-desc">Days of dev time down to hours by any non-technical team member</div>
+              </div>
+              <div class="obv3-impact-stat">
+                <div class="obv3-stat-label">Eng Dependency</div>
+                <div class="obv3-stat-num">Zero</div>
+                <div class="obv3-stat-desc">Non-technical admins create, manage, and iterate on templates without engineers</div>
+              </div>
+              <div class="obv3-impact-stat">
+                <div class="obv3-stat-label">Static Storage</div>
+                <div class="obv3-stat-num"><span class="obv3-stat-unit">↓</span>100<span class="obv3-stat-unit">%</span></div>
+                <div class="obv3-stat-desc">PDFs generated on-demand only — no base files stored or maintained</div>
+              </div>
+            </div>
+            <div class="obv3-impact-compare">
+              <div>
+                <div class="obv3-meta-label" style="margin-bottom:16px">Before</div>
+                <p><span class="obv3-emph-red">2–3 days</span> of dedicated engineer time per template, with external software and manual coordinate entry.</p>
+              </div>
+              <div>
+                <div class="obv3-meta-label" style="margin-bottom:16px">After</div>
+                <p><span class="obv3-emph-accent">1–3 hours</span> by any non-technical team member, entirely inside the product. No external tools. No engineers.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-evolution" class="obv3-section obv3-section--evolution">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">07<span>Future</span></div>
+          <div>
+            <h2 class="obv3-heading">Exploring a More Radical Idea</h2>
+            <p class="obv3-body">During discovery, I proposed a larger improvement that could make the entire process even more seamless. The current workflow still treated forms as the source of truth. But most of the information users were collecting already existed somewhere in the platform.</p>
+            <div class="obv3-evolution-box">
+              <p class="obv3-evolution-quote">"What if we design the output first and let the system determine what information is actually missing?"</p>
+            </div>
+            <p class="obv3-body obv3-evolution-tail" style="margin-bottom:0">This was out of scope for this release as it required rewriting core system logic. But it shaped how we started thinking about where the platform could go.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="obv3-reflection" class="obv3-section obv3-section--reflection">
+        <div class="obv3-section__inner">
+          <div class="obv3-section__number">08<span>Reflection</span></div>
+          <div>
+            <p class="obv3-body">The ask was to make PDF creation easier. The real opportunity was understanding why it was hard in the first place. Once I mapped the workflow and found the hidden dependencies, I could remove a major part of the workflow rather than just making it less annoying.</p>
+            <p class="obv3-body" style="margin-bottom:0">The result was more than a better interface. <span class="obv3-reflection-tail">It was a simpler system.</span></p>
+          </div>
+        </div>
+      </section>
+
+      <CaseStudyFooter
+        title="Open to the right opportunity"
+        sub="Looking for roles where I can work on complex systems, collaborate deeply with engineering, and drive real product impact."
+      />
+    </div>
+  </div>
 </CaseStudyLayout>

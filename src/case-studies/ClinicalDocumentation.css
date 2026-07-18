@@ -126,59 +126,7 @@
   height: 18px;
 }
 
-/* ── Fullscreen lightbox ── */
-.cd-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.9);
-  padding: 40px;
-  cursor: zoom-out;
-}
-
-.cd-lightbox__img {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 8px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-  cursor: default;
-}
-
-.cd-lightbox__video-slot {
-  display: flex;
-  cursor: default;
-}
-
-.cd-lightbox__video-slot .cd-lightbox__img {
-  width: auto;
-  height: auto;
-  max-width: min(100%, 90vw);
-  max-height: 90vh;
-}
-
-.cd-lightbox__close {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  cursor: pointer;
-}
-
-.cd-lightbox__close svg {
-  width: 18px;
-  height: 18px;
-}
+/* Fullscreen lightbox styles moved to fx.css (shared by clinical + output-builder). */
 
 /* ── Solid rectangle placeholder (stand-in for a real screen capture) ── */
 .cd-placeholder {

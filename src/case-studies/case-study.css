@@ -1,0 +1,170 @@
+/* ==========================================================================
+   Shared case-study chrome — a single source for elements common to all four
+   study pages: clinical (.ps-*), output-builder (.obv3-*), and the Figma-deck
+   pages (.as-*, .ft-*). Loaded once via CaseStudyLayout.
+
+   Per-page accent tints still come through the --ps-line / --obv3-line vars
+   (identical values; only clinical/output-builder define them, decks fall back
+   to grey), so grouping preserves each page's border colour. Sizes are unified
+   to the shape used by 3 of the 4 — clinical's chrome had drifted to 20px.
+   Page-specific theme refinements (light/ink topbar borders, blur, z-index)
+   stay in the per-study CSS files and override these by specificity.
+   ========================================================================== */
+
+/* ── Topbar ── (output-builder keeps its own .obv3-topbar: it uses a --canvas
+   background instead of --surface-strong.) Scoped under the overlay so the
+   overlay's `* { padding:0 }` reset can't win the specificity tie and strip the
+   padding — which it did once these rules moved to this shared file. */
+.ps-overlay .ps-topbar, .as-overlay .as-topbar, .ft-overlay .ft-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ps-line, var(--obv3-line, rgba(127, 127, 127, 0.15)));
+  background: var(--surface-strong);
+  flex: 0 0 auto;
+  z-index: 200;
+}
+
+/* ── Back button ── (scoped under the overlay to beat the `* { padding:0 }`
+   reset — see the topbar note above.) */
+.ps-overlay .ps-back, .obv3-overlay .obv3-back, .as-overlay .as-back, .ft-overlay .ft-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--ps-line, var(--obv3-line, rgba(127, 127, 127, 0.2)));
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.ps-back:hover, .obv3-back:hover, .as-back:hover, .ft-back:hover {
+  background: rgba(127, 127, 127, 0.08);
+  border-color: var(--text);
+}
+
+.ps-back:active, .obv3-back:active, .as-back:active, .ft-back:active {
+  transform: scale(0.98);
+}
+
+.ps-back svg, .obv3-back svg, .as-back svg, .ft-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Topbar title ── */
+.ps-topbar__title, .obv3-topbar__title, .as-topbar__title, .ft-topbar__title {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.ps-topbar__eyebrow, .obv3-topbar__eyebrow, .as-topbar__eyebrow, .ft-topbar__eyebrow {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-transform: none;
+}
+
+.ps-topbar__name, .obv3-topbar__name, .as-topbar__name, .ft-topbar__name {
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+/* Ink-theme back fill */
+:root[data-theme="ink"] .ps-overlay .ps-back,
+:root[data-theme="ink"] .obv3-overlay .obv3-back,
+:root[data-theme="ink"] .as-overlay .as-back,
+:root[data-theme="ink"] .ft-overlay .ft-back {
+  background: var(--bg2);
+}
+
+/* ==========================================================================
+   Figma-deck pages (.as-* = AI Stylist, .ft-* = Form Taking) — identical
+   layouts, so their overlay/body/slides live here once instead of in two files.
+   ========================================================================== */
+
+.as-overlay *, .as-overlay *::before, .as-overlay *::after,
+.ft-overlay *, .ft-overlay *::before, .ft-overlay *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.as-overlay, .ft-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 20px;
+  line-height: 1.5;
+  overflow-y: auto;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.as-body, .ft-body {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.as-slides, .ft-slides {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.as-slides__frame, .ft-slides__frame {
+  width: 100%;
+  max-width: 1440px;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--obv3-line, rgba(127, 127, 127, 0.2));
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.as-slides__iframe, .ft-slides__iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  pointer-events: auto;
+}
+
+.as-slides__caption, .ft-slides__caption {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-soft, #888);
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .as-topbar, .ft-topbar {
+    padding: 20px;
+  }
+  .as-body, .ft-body {
+    padding: 20px;
+  }
+}

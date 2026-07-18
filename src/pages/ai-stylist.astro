@@ -1,6 +1,9 @@
 ---
 import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
-import AIStylist from '../case-studies/AIStylist';
+import CaseStudyFooter from '../components/CaseStudyFooter.astro';
+
+const FIGMA_SRC =
+  "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdeck%2Fiy15baRKp84wLmLnkXz6tP%2FPockeStylist%3Fnode-id%3D5-36%26t%3D3zDoeSAS7Ukuojnm-1";
 ---
 
 <CaseStudyLayout
@@ -8,5 +11,41 @@ import AIStylist from '../case-studies/AIStylist';
   description="How Viknesh Vijayakumar redesigned an AI styling journey to help people reach their first relevant recommendation with less friction."
   ogImage="/assets/aistylist.webp"
 >
-  <AIStylist client:only="react" />
+  <div class="as-overlay" role="dialog" aria-modal="true" aria-label="AIStylist AI Redesign presentation">
+    <div class="as-topbar">
+      <a class="as-back" href="/" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span>Back</span>
+      </a>
+      <div class="as-topbar__title">
+        <span class="as-topbar__eyebrow">AIStylist · 2025</span>
+        <span class="as-topbar__name">AI Redesign Deck</span>
+      </div>
+    </div>
+
+    <div class="as-body">
+      <section class="as-slides">
+        <div class="as-slides__frame">
+          <iframe
+            class="as-slides__iframe"
+            src={FIGMA_SRC}
+            title="AIStylist AI Redesign — Figma Slides"
+            allowfullscreen
+            allow="clipboard-write; fullscreen"
+            loading="lazy"
+          ></iframe>
+        </div>
+        <p class="as-slides__caption">
+          Use the slide controls inside the frame to navigate. Press F for fullscreen.
+        </p>
+      </section>
+    </div>
+
+    <CaseStudyFooter
+      title="Let's build something together"
+      sub="Have questions about the AI stylist design system or looking to collaborate on B2C SaaS and mobile personalization workflows?"
+    />
+  </div>
 </CaseStudyLayout>

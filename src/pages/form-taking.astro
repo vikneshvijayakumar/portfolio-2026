@@ -1,6 +1,9 @@
 ---
 import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
-import FormTaking from '../case-studies/FormTaking';
+import CaseStudyFooter from '../components/CaseStudyFooter.astro';
+
+const FIGMA_SRC =
+  "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdeck%2FAstzpq5hdC0rIVFP8qBOek%2FForm-Taking%3Fnode-id%3D1-42%26t%3DGPbiU7ok5J07P8BF-1";
 ---
 
 <CaseStudyLayout
@@ -8,5 +11,41 @@ import FormTaking from '../case-studies/FormTaking';
   description="How Viknesh Vijayakumar turned fragmented enrollment forms into one guided, mobile-first experience."
   ogImage="/assets/form-taking.webp"
 >
-  <FormTaking client:only="react" />
+  <div class="ft-overlay" role="dialog" aria-modal="true" aria-label="Form Taking case study">
+    <div class="ft-topbar">
+      <a class="ft-back" href="/" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span>Back</span>
+      </a>
+      <div class="ft-topbar__title">
+        <span class="ft-topbar__eyebrow">Empyra · 2025</span>
+        <span class="ft-topbar__name">Form Taking</span>
+      </div>
+    </div>
+
+    <div class="ft-body">
+      <section class="ft-slides">
+        <div class="ft-slides__frame">
+          <iframe
+            class="ft-slides__iframe"
+            src={FIGMA_SRC}
+            title="Form Taking — Figma Slides"
+            allowfullscreen
+            allow="clipboard-write; fullscreen"
+            loading="lazy"
+          ></iframe>
+        </div>
+        <p class="ft-slides__caption">
+          Use the slide controls inside the frame to navigate. Press F for fullscreen.
+        </p>
+      </section>
+    </div>
+
+    <CaseStudyFooter
+      title="Let's build something together"
+      sub="Have questions about this case study or looking to collaborate on form design systems and user experience architecture?"
+    />
+  </div>
 </CaseStudyLayout>

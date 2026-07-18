@@ -1,5 +1,7 @@
 ---
 import Layout from './Layout.astro';
+import '../case-studies/case-study.css';
+import '../case-studies/fx.css';
 
 interface Props {
   title: string;
@@ -11,7 +13,40 @@ const { title, description, ogImage } = Astro.props;
 ---
 
 <Layout {title} {description} {ogImage} pageClass="case-study-page">
+  {/* FOUC guard. The shared case-study script adds the reveal classes after
+      load, which would flash content visible-then-hidden. This marker + pre-hide
+      CSS live in the server HTML so they apply at first paint. Gated on the class
+      (JS present) so no-JS crawlers still get visible content, and on
+      no-preference because the script skips reveals under reduced motion.
+      NOTE: selector lists mirror src/scripts/case-study.ts — keep in sync. */}
+  <script is:inline>document.documentElement.classList.add("csfx-armed");</script>
+  <style is:inline>
+    @media (prefers-reduced-motion: no-preference) {
+      .csfx-armed :is(h2.obv3-heading, h2.ps-heading, h2.case-footer__title):not(.csfx-words) {
+        opacity: 0;
+      }
+      .csfx-armed :is(.obv3-principles-cards, .obv3-flow-container, .obv3-feature__helps-list, .ps-audit-grid, .ps-outcomes-grid):not(.in) > * {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+      .csfx-armed :is(.obv3-body, .obv3-blockquote, .obv3-subheading, .obv3-section__number, .obv3-feature-card, .obv3-impact-stat, .ps-body, .ps-section__number, .ps-redesign-card__text, .cd-stat, .case-footer__sub):not(.in) {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
+  </style>
   <main>
     <slot />
   </main>
+  {/* Shared fullscreen lightbox for study media (images + expandable videos).
+      Inert unless a page has media that opens it. */}
+  <div class="cd-lightbox" role="dialog" aria-modal="true" aria-label="Full screen media" aria-hidden="true">
+    <button type="button" class="cd-lightbox__close" aria-label="Close full screen view" title="Close full screen view">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+    </button>
+    <div class="cd-lightbox__content"></div>
+  </div>
+  <script>
+    import "../scripts/case-study";
+  </script>
 </Layout>

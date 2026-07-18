@@ -1,6 +1,75 @@
 ---
 import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
-import ClinicalDocumentation from '../case-studies/ClinicalDocumentation';
+import CaseStudyFooter from '../components/CaseStudyFooter.astro';
+import '../case-studies/AIStylistCoded.css';
+import '../case-studies/ClinicalDocumentation.css';
+import intakeVideo from '../assets/intake-v3.webm';
+import companionAppImage from '../assets/companion-app.webp';
+import trainerImage from '../assets/trainer.webp';
+
+const MODULES = [
+  {
+    id: 'patient-intake',
+    num: '01',
+    tag: 'Patient Intake',
+    title: 'Patient Intake',
+    subtitle: 'Fix the data at the source, before the visit even starts.',
+    problem:
+      'Physical intake forms are long and complex. Patients are expected to fill in a lot of fields, full of medical terms they cannot read or understand. So they end up needing a nurse to fill it in for them, or worse, enter incorrect information.',
+    challenge:
+      'The design has to work on any device, in any language, and support patients who cannot fill the form by themselves.',
+    solution:
+      'I show one question at a time. This single design decision had a cascading effect. Only the questions relevant to the patient are shown, the conditions resolve dynamically as they answer, and help adapts to each question and stays within reach. One answer can hide or reveal many others. Smoking cessation questions appear only for a patient who is both a minor and a smoker, so no one else ever sees them.',
+  },
+  {
+    id: 'companion-app',
+    num: '02',
+    tag: 'Companion App',
+    title: 'Companion App, the core',
+    subtitle: 'The provider talks to the patient, not a screen.',
+    problem:
+      'The provider spends most of the day on data entry and ends up with very little time for the patient conversation. The patient does not get their questions answered and feels neglected.',
+    challenge:
+      'AI produces a lot of insight. The challenge was to organize and disclose it progressively, without interrupting the conversation, while still letting the assistant take requests.',
+    solution:
+      'I proposed a realtime chat interface. The screen glows in a color when the AI has something to say, and requests like a lab order or a reminder appear as color coded bubbles, so a single glance confirms they registered. If a detail is missing, the provider can check the EHR or the live summary and confirm it with the patient on the spot, instead of dictating an addendum later.',
+  },
+  {
+    id: 'ai-trainer',
+    num: '03',
+    tag: 'AI Assistant Trainer',
+    title: 'AI Assistant Trainer',
+    subtitle: 'Teaching the assistant to take real clinical actions.',
+    problem:
+      'These workflows hold a lot of questions. Showing them all at once results in endless scrolling, and conditional questions get hidden.',
+    challenge:
+      'Let a non engineer build a complex flow with clinical logic and still see the whole flow, without it collapsing into a list no one can follow.',
+    solution:
+      'I proposed a node based canvas. Questions are laid out spatially and linked to the answers that lead to them, so the logic is something you can see, not scroll through.',
+  },
+];
+
+const TAKEAWAYS = [
+  { title: 'Design for the last user', body: 'I learned how a permission set at the top reaches all the way down to the last person who uses it, the nurse, the patient. Now I start with that whole flow in mind before I design a screen.' },
+  { title: 'Build to ship', body: 'An idea only matters if it can be built. The auto arranging canvas worked only because I designed it together with the developers. Now I bring engineering in early, while the idea is still forming.' },
+  { title: 'Edge cases first', body: 'The happy path is the easy part. The real design is in the dropped connection, or the patient who says no to AI. Now I look for what breaks the flow, not what makes it.' },
+  { title: 'How AI works behind the scenes', body: 'I designed the training modules, an inference engine, a realtime assistant, and more. That gave me a real sense of how AI lives and works inside a product.' },
+];
+
+const NAV_SECTIONS = [
+  { id: 'cd-hero', label: 'Intro' },
+  { id: 'cd-overview', label: 'Overview' },
+  { id: 'cd-modules', label: 'Modules' },
+  { id: 'cd-takeaways', label: 'Takeaways' },
+  { id: 'cd-reflection', label: 'Reflection' },
+];
+
+const mediaByModule: Record<string, { src: string; alt: string }> = {
+  'companion-app': { src: companionAppImage.src, alt: 'Companion App, the core' },
+  'ai-trainer': { src: trainerImage.src, alt: 'AI Assistant Trainer' },
+};
+
+const maximizeSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" /></svg>';
 ---
 
 <CaseStudyLayout
@@ -8,5 +77,182 @@ import ClinicalDocumentation from '../case-studies/ClinicalDocumentation';
   description="How Viknesh Vijayakumar designed AI-native clinical documentation workflows that keep providers focused on patients instead of screens."
   ogImage="/assets/clinical-documentation.webp"
 >
-  <ClinicalDocumentation client:only="react" />
+  <div class="ps-overlay" role="dialog" aria-modal="true" aria-label="Clinical Documentation case study">
+    <div class="ps-topbar">
+      <a class="ps-back" href="/" aria-label="Back to the portfolio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span>Back</span>
+      </a>
+      <div class="ps-topbar__title">
+        <span class="ps-topbar__eyebrow">Healthcare AI · 2018–2021</span>
+        <span class="ps-topbar__name">Clinical Documentation Platform</span>
+      </div>
+    </div>
+
+    <nav class="ps-sidenav" aria-label="Sections">
+      {NAV_SECTIONS.map((s) => (
+        <a href={`#${s.id}`} class={s.id === 'cd-hero' ? 'is-active' : ''}>{s.label}</a>
+      ))}
+    </nav>
+
+    <div class="ps-scroll">
+      <section id="cd-hero" class="ps-hero">
+        <div class="ps-hero__inner">
+          <div class="ps-hero__main">
+            <div class="ps-hero__lede">
+              <h1 class="ps-hero__title">Realtime Clinical<br /><em>Documentation</em></h1>
+              <p class="ps-hero__desc">
+                Designing the interface for AI native clinical documentation, before AI was a thing. A realtime clinical AI platform that listens to provider and patient conversations and gives realtime insights and reports as they happen.
+              </p>
+              <div class="ps-scroll-hint">Scroll to explore</div>
+            </div>
+            <div class="ps-hero__meta">
+              <div class="ps-meta-item"><span class="ps-meta-label">Role</span><span class="ps-meta-val">Lead UI Designer</span></div>
+              <div class="ps-meta-item"><span class="ps-meta-label">Duration</span><span class="ps-meta-val">2018 — 2021</span></div>
+              <div class="ps-meta-item"><span class="ps-meta-label">Platform</span><span class="ps-meta-val">Web (Angular Material), iOS, Android</span></div>
+              <div class="ps-meta-item"><span class="ps-meta-label">Scale</span><span class="ps-meta-val">1000+ Screens</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cd-overview" class="ps-section ps-section--overview">
+        <div class="ps-section__inner">
+          <div class="ps-section__number">01<span>Overview</span></div>
+          <div>
+            <div class="ps-heading-body-group">
+              <h2 class="ps-heading">Designing for AI native documentation</h2>
+              <p class="ps-body">I built the design for the entire platform, designed the core modules, and led the design team to expand on them. The platform listens to provider and patient conversations and produces realtime insights and reports as they happen.</p>
+              <p class="ps-body">It is a natural evolution of an AI transcription platform I designed with the CEO before, reusing its speech recognition, NLP and inference engines.</p>
+            </div>
+            <div class="cd-stats">
+              <div class="cd-stat"><span class="cd-stat__num">0 → 1</span><span class="cd-stat__label">End to end platform design</span></div>
+              <div class="cd-stat"><span class="cd-stat__num">30+</span><span class="cd-stat__label">Modules designed for web & mobile</span></div>
+              <div class="cd-stat"><span class="cd-stat__num">4 yrs</span><span class="cd-stat__label">From a solo designer to design lead</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cd-challenge" class="ps-section ps-section--challenge">
+        <div class="ps-section__inner">
+          <div class="ps-section__number">02<span>Challenge</span></div>
+          <div>
+            <div class="ps-heading-body-group">
+              <h2 class="ps-heading">A doctor should be able to look at their patient, not a screen.</h2>
+              <p class="ps-body">Manual clinical documentation steals time from providers and nurses. They spend extended hours completing documentation and less time on patient care and conversation.</p>
+            </div>
+            <div class="ps-audit-grid">
+              <div class="ps-audit-card"><p class="ps-body"><strong>The Problem:</strong> Manual documentation and EHRs pull providers away from the patient. Hours go into paperwork instead of care and conversation.</p></div>
+              <div class="ps-audit-card"><p class="ps-body"><strong>The Vision:</strong> Move beyond manual clinical documentation and EHRs to a platform that transforms the healthcare workflow with AI.</p></div>
+              <div class="ps-audit-card"><p class="ps-body"><strong>The Precursor:</strong> A natural evolution of an AI transcription platform I designed before, reusing its speech recognition, NLP, and inference engines.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cd-approach" class="ps-section ps-section--goal">
+        <div class="ps-section__inner">
+          <div class="ps-section__number">03<span>Approach</span></div>
+          <div>
+            <div class="ps-heading-body-group">
+              <h2 class="ps-heading">Reduce documentation by managing the data across the whole visit.</h2>
+              <p class="ps-body">Documentation cannot be fixed with one screen. It has to be handled across the journey, from the moment a patient checks in until the report is done. The complete flow included 1000+ screens, for every user and every edge case.</p>
+              <p class="ps-body">A birds eye view: the flow starts by capturing the provider and patient conversation and streaming it to speech recognition that transcribes it in realtime. A conversational AI assistant interacts with the provider directly, while an NLP engine extracts the context and generates reports automatically, with a complete human in the loop workflow for fixing lower confidence results.</p>
+            </div>
+            <div class="ps-audit-grid">
+              <div class="ps-audit-card"><p class="ps-body"><strong>Patient Intake:</strong> So the data is right from the start.</p></div>
+              <div class="ps-audit-card"><p class="ps-body"><strong>The Companion App:</strong> So the provider documents nothing by hand.</p></div>
+              <div class="ps-audit-card"><p class="ps-body"><strong>The AI Trainer:</strong> So the assistant can take real clinical actions.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cd-modules" class="ps-section ps-section--modules">
+        <div class="ps-section__inner">
+          <div class="ps-section__number">04<span>Modules</span></div>
+          <div class="cd-modules">
+            <div class="cd-modules-list">
+              {MODULES.map((module) => (
+                <div class="cd-module">
+                  <div class="cd-module__meta">{module.num} / {module.tag}</div>
+                  <h3 class="ps-heading cd-module__title">{module.title}</h3>
+                  <p class="ps-body">{module.subtitle}</p>
+                  <div class="cd-module__texts">
+                    <div class="cd-module__blocks">
+                      <div class="ps-redesign-card__text">
+                        <div class="ps-redesign-card__block-label"><span class="ps-redesign-card__dot ps-redesign-card__dot--old"></span>The Problem</div>
+                        <p>{module.problem}</p>
+                      </div>
+                      <div class="ps-redesign-card__text">
+                        <div class="ps-redesign-card__block-label"><span class="ps-redesign-card__dot cd-dot--mid"></span>The Challenge</div>
+                        <p>{module.challenge}</p>
+                      </div>
+                      <div class="ps-redesign-card__text">
+                        <div class="ps-redesign-card__block-label"><span class="ps-redesign-card__dot ps-redesign-card__dot--new"></span>The Solution</div>
+                        <p>{module.solution}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="cd-media">
+                    {module.id === 'patient-intake' ? (
+                      <>
+                        <div class="cd-media-video-slot">
+                          <video class="cd-module__video" src={intakeVideo} autoplay loop muted playsinline></video>
+                        </div>
+                        <button type="button" class="cd-media-maximize" data-lightbox="video" aria-label="View full screen" title="View full screen" set:html={maximizeSvg} />
+                      </>
+                    ) : (
+                      <>
+                        <img class="cd-module__video" src={mediaByModule[module.id].src} alt={mediaByModule[module.id].alt} />
+                        <button type="button" class="cd-media-maximize" data-lightbox="image" aria-label="View full screen" title="View full screen" set:html={maximizeSvg} />
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cd-takeaways" class="ps-section ps-section--outcomes">
+        <div class="ps-section__inner">
+          <div class="ps-section__number">05<span>Takeaways</span></div>
+          <div>
+            <div class="ps-heading-body-group">
+              <h2 class="ps-heading">An early view of AI inside a clinical product</h2>
+              <p class="ps-body">Designing this gave me a rare, early view of how AI can live inside a clinical product, and that is what I bring to healthcare design now.</p>
+            </div>
+            <div class="ps-outcomes-grid">
+              {TAKEAWAYS.map((t) => (
+                <div class="ps-outcome-card"><h4>{t.title}</h4><p>{t.body}</p></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cd-reflection" class="ps-section ps-section--reflection">
+        <div class="ps-section__inner">
+          <div class="ps-section__number">06<span>Reflection</span></div>
+          <div>
+            <p class="ps-reflection-big">AI can be on every screen, but the human should be the <em>decision maker</em>.</p>
+            <div class="ps-body-group">
+              <p class="ps-body">This is one belief that formed the base of all my designs. I learned how a permission set at the top reaches all the way down to the last person who uses it, the nurse, the patient.</p>
+              <p class="ps-body">The happy path is the easy part. The real design is in the dropped connection, or the patient who says no to AI. Now I look for what breaks the flow, not what makes it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <CaseStudyFooter
+        title="Let's build something together"
+        sub="Have questions about this case study or looking to collaborate on AI native clinical products and complex healthcare workflows?"
+      />
+    </div>
+  </div>
 </CaseStudyLayout>

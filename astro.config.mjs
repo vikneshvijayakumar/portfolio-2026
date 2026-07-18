@@ -2,10 +2,13 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 
+import sitemap from '@astrojs/sitemap';
+
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://viknesh.me',
   output: 'static',
-  integrations: [react()],
+  integrations: [react(), sitemap()],
   vite: {
     // lightningcss (Astro's default prod CSS minifier) drops the standard
     // `backdrop-filter` when `-webkit-backdrop-filter` is also present,

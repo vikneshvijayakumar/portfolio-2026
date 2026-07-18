@@ -41,67 +41,10 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
-/* ── Topbar ── */
-.ps-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--ps-line);
-  background: var(--surface-strong);
-  flex: 0 0 auto;
-  z-index: 200;
-}
-
-.ps-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 20px;
-  border: 1px solid var(--ps-line);
-  border-radius: 96px;
-  background: var(--surface-strong);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 20px;
-  cursor: pointer;
-  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
-}
-
-.ps-back:hover {
-  background: rgba(127, 127, 127, 0.08);
-  border-color: var(--text);
-}
-
-.ps-back:active {
-  transform: scale(0.98);
-}
-
-.ps-back svg {
-  width: 18px;
-  height: 18px;
-}
-
-.ps-topbar__title {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.ps-topbar__eyebrow {
-  font-size: 20px;
-  color: var(--text-soft);
-  text-transform: none;
-}
-
-.ps-topbar__name {
-  font-size: 20px;
-  font-weight: 600;
-}
+/* Topbar / back button / topbar title are shared — see case-study.css. */
 
 /* ── Sidebar Nav ── */
 .ps-sidenav {
@@ -613,11 +556,7 @@
   font-weight: 800;
 }
 
-/* Topbar */
-:root[data-theme="ink"] .ps-overlay .ps-back {
-  background: var(--bg2);
-}
-
+/* Topbar (ink-theme back fill is shared — see case-study.css) */
 :root:not([data-theme="ink"]) .ps-overlay .ps-topbar {
   background: rgba(248, 248, 248, 0.92);
   backdrop-filter: blur(12px);
