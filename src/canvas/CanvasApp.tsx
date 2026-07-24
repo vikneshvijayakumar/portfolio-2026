@@ -899,6 +899,7 @@ function App() {
               <div className="toolbar__panel toolbar__panel--right">
                 <div className="toolbar__actions">
                   {!isMobile && !isTablet && <AvailabilityPill />}
+                  <ThemeToggle theme={theme} setTheme={setTheme} />
                   <div className="legend-trigger-wrapper">
                     <button
                       onClick={(e) => {
@@ -923,7 +924,6 @@ function App() {
                       <span className="alt-landing-link__label">Classic Mode</span>
                     </a>
                   )}
-                  <ThemeToggle theme={theme} setTheme={setTheme} />
                   {!isMobile && !isTablet && (
                     <a className="toolbar__resume" href={toolbarLinks.resume} target="_blank" rel="noreferrer">
                       Download Resume
