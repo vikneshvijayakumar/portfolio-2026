@@ -158,6 +158,8 @@ const FEATURES = [
     ],
     videoPath: "/assets/output-builder/work-with-data.mp4",
     duration: "0:17",
+    caption:
+      "Picking form questions from a plain-language list; the matching response codes are wired up automatically in the background, never shown to the user.",
   },
   {
     title: "Visual builder",
@@ -169,6 +171,8 @@ const FEATURES = [
     ],
     videoPath: "/assets/output-builder/drag-and-drop.mp4",
     duration: "0:11",
+    caption:
+      "Dragging fields onto the canvas and watching the output update live as the template is built, all inside the product.",
   },
   {
     title: "Flexible Customizations",
@@ -180,6 +184,8 @@ const FEATURES = [
     ],
     videoPath: "/assets/output-builder/flexible-customization.mp4",
     duration: "0:13",
+    caption:
+      "Adjusting layout and styling from a small set of controls; the system re-flows the columns on its own.",
   },
   {
     title: "Smart Organizational Defaults",
@@ -192,6 +198,8 @@ const FEATURES = [
     ],
     videoPath: "/assets/output-builder/smart-defaults.mp4",
     duration: "0:19",
+    caption:
+      "Starting from a saved organization default and filling in only the form fields, instead of rebuilding headers and layout each time.",
   },
 ];
 
@@ -295,10 +303,6 @@ const fullscreenSvg =
                   functional alignment</span
                 >
               </div>
-              <p class="obv3-hero__meta-note">
-                This is a deep dive into output generation, a part of a broader
-                form ecosystem.
-              </p>
             </div>
           </div>
         </div>
@@ -548,11 +552,11 @@ const fullscreenSvg =
               codes into the template rather than designing it.
             </p>
             <p class="obv3-body">
-              Every answer carried its own response code, a . The example form
-              below was one of the most common, and it had twenty three
-              question, but forty five codes to map. Every form requires at
-              least one output with all the fields mapped by default, and larger
-              forms ended up requiring hundreds of mappings per form.
+              Every answer carried its own response code. The example form below
+              was one of the most common, and it had twenty three questions, but
+              forty five codes to map. Every form requires at least one output
+              with all the fields mapped by default, and larger forms ended up
+              requiring hundreds of mappings per form.
             </p>
             <p class="obv3-body">
               Missing or mistyping a single code meant the field would not get
@@ -565,7 +569,7 @@ const fullscreenSvg =
                 src={responsemapping.src}
                 width={responsemapping.width}
                 height={responsemapping.height}
-                alt="Response code mapping example showing form questions mapped to response codes"
+                alt="Response mapping for one form: 23 questions expand into 45 response codes, since every possible answer needs its own code"
                 loading="lazy"
                 decoding="async"
                 data-lightbox-trigger
@@ -984,7 +988,7 @@ const fullscreenSvg =
               request and made my theory a reality. <strong
                 >It was faster and more efficient than creating a PDF document.
                 So we decided to adopt it.</strong
-              > The template became a struture that the system fills on demand, which
+              > The template became a structure that the system fills on demand, which
               required no server side changes to the legacy backend.
             </p>
           </div>
@@ -1201,6 +1205,7 @@ const fullscreenSvg =
                         </div>
                       </div>
                     </div>
+                    <p class="obv3-feature__caption">{feature.caption}</p>
                   </div>
                 ))
               }
@@ -1240,16 +1245,16 @@ const fullscreenSvg =
                   >
                 </div>
                 <div class="obv3-stat-desc">
-                  Days of engineer time down to a few hours, even for engineers
-                  who knew the old process
+                  Days of engineer time down to less than an hour, even for
+                  engineers who knew the old process
                 </div>
               </div>
               <div class="obv3-impact-stat">
                 <div class="obv3-stat-label">Manual Mapping</div>
                 <div class="obv3-stat-num">Zero</div>
                 <div class="obv3-stat-desc">
-                  Gone entirely, along with the errors that came from hand
-                  scripting each field
+                  Gone entirely, along with the errors that came from mapping
+                  each field manually
                 </div>
               </div>
               <div class="obv3-impact-stat">
@@ -1456,7 +1461,9 @@ const fullscreenSvg =
       if (moveFocus) tabs[activeIndex].focus();
     };
 
-    const start = autoCarousel(carousel, (delta) => update(activeIndex + delta));
+    const start = autoCarousel(carousel, (delta) =>
+      update(activeIndex + delta),
+    );
 
     tabs.forEach((tab, index) => {
       tab.addEventListener("click", () => {
@@ -1510,7 +1517,9 @@ const fullscreenSvg =
       });
     };
 
-    const start = autoCarousel(carousel, (delta) => update(activeIndex + delta));
+    const start = autoCarousel(carousel, (delta) =>
+      update(activeIndex + delta),
+    );
 
     prev?.addEventListener("click", () => {
       update(activeIndex - 1);

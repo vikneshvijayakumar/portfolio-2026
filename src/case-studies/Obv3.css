@@ -530,6 +530,22 @@
   grid-column: 1 / -1;
 }
 
+/* Text description of what each (muted, silent) demo video shows, so the
+   content isn't lost to anyone who can't or won't play it. */
+.obv3-feature__caption {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+@media (min-width: 960px) {
+  .obv3-feature-card .obv3-feature__caption {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
 .obv3-feature__media-wrap>* {
   grid-row: 1;
   grid-column: 1;
