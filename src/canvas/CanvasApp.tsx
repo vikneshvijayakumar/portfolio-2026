@@ -61,6 +61,21 @@ const CASE_STUDY_ROUTES: Record<string, string> = {
   "clinical-documentation": "/clinical-documentation",
 };
 
+// Where the camera is parked while a case study is open, so browser-back lands
+// on the card that was clicked instead of replaying the entry zoom. Read and
+// cleared once at load: a remount (StrictMode, HMR) must not see it a second
+// time, and a manual reload should get the normal entry.
+const CAM_KEY = "canvas-cam";
+const restoredCam: Camera | null = (() => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(CAM_KEY);
+    return raw ? (JSON.parse(raw) as Camera) : null;
+  } catch {
+    return null;
+  }
+})();
+
 const zoneNavItems: { id: ZoneId; label: string; key: string }[] = [
   { id: "case-studies", label: "Works", key: "1" },
   { id: "experience", label: "Experience", key: "2" },
@@ -206,7 +221,7 @@ function App() {
   const [isTablet, setIsTablet] = useState(typeof window !== "undefined" ? (window.innerWidth > MOBILE_BREAKPOINT && window.innerWidth <= 1024) : false);
   const startAnimations = true;
   const [activeZone, setActiveZone] = useState<ZoneId>("about");
-  const [isEntering, setIsEntering] = useState(true);
+  const [isEntering, setIsEntering] = useState(!restoredCam);
   const [isLoaded, setIsLoaded] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isLegendOpen, setIsLegendOpen] = useState(false);
@@ -281,7 +296,12 @@ function App() {
 
   const openCaseStudy = (id: string, _origin?: { x: number; y: number }) => {
     const route = CASE_STUDY_ROUTES[id];
-    if (route) window.location.href = route;
+    if (!route) return;
+    sessionStorage.setItem(
+      CAM_KEY,
+      JSON.stringify({ x: camX.get(), y: camY.get(), scale: camScale.get() }),
+    );
+    window.location.href = route;
   };
 
   useEffect(() => {
@@ -295,6 +315,15 @@ function App() {
 
   // Initialize camera
   useEffect(() => {
+    if (restoredCam) {
+      // Cleared here, not at read time: the module can be evaluated more than
+      // once (HMR, double mount) and every copy must agree on the entry state.
+      sessionStorage.removeItem(CAM_KEY);
+      camX.set(restoredCam.x);
+      camY.set(restoredCam.y);
+      camScale.set(restoredCam.scale);
+      return;
+    }
     const initScale = 0.40;
     camX.set(window.innerWidth / 2 - (STAGE.width / 2) * initScale);
     camY.set(window.innerHeight / 2 - (STAGE.height / 2) * initScale);

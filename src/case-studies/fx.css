@@ -119,6 +119,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Fill the padded lightbox with a DEFINITE size so the image's max-height: 100%
+     has something to resolve against — otherwise tall/square images overflow the
+     height and can't be fitted (the flexbox indefinite-height trap). */
+  width: 100%;
+  height: 100%;
   transform: scale(0.96);
   transition: transform 0.25s ease;
 }
@@ -128,11 +133,92 @@
 }
 
 .cd-lightbox__img {
+  /* Fit-to-screen at scale: 1 — bounded by the content wrapper, which fills the
+     padded lightbox — so the user zooms in/out from a fitted baseline. */
   max-width: 100%;
   max-height: 100%;
   border-radius: 8px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
   cursor: default;
+  transform-origin: center center;
+  transition: transform 0.2s ease;
+  touch-action: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+@keyframes cd-lb-slide-next {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes cd-lb-slide-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Zoom toolbar (images only). */
+.cd-lightbox__zoom {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(10, 10, 14, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  z-index: 1010;
+}
+
+.cd-lightbox__zoom[hidden] {
+  display: none;
+}
+
+.cd-lightbox__zoom-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cd-lightbox__zoom-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.cd-lightbox__zoom-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cd-lightbox__zoom-level {
+  min-width: 48px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .cd-lightbox__video-slot {
@@ -166,5 +252,86 @@
 .cd-lightbox__close svg {
   width: 18px;
   height: 18px;
+}
+
+/* Lightbox Navigation & Counter */
+.cd-lightbox__nav {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(10, 10, 14, 0.65);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  z-index: 1010;
+  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cd-lightbox__nav:hover {
+  background: rgba(10, 10, 14, 0.9);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.cd-lightbox__nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.cd-lightbox__prev {
+  left: 24px;
+}
+
+.cd-lightbox__next {
+  right: 24px;
+}
+
+.cd-lightbox__nav svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Page counter now lives inside the zoom bar, left of the zoom buttons. */
+.cd-lightbox__counter {
+  display: none;
+  padding: 0 12px 0 8px;
+  margin-right: 4px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .cd-lightbox__prev {
+    left: 12px;
+  }
+  .cd-lightbox__next {
+    right: 12px;
+  }
+  .cd-lightbox__nav {
+    width: 40px;
+    height: 40px;
+  }
+  .cd-lightbox__nav svg {
+    width: 18px;
+    height: 18px;
+  }
+  .cd-lightbox__zoom-btn {
+    width: 44px;
+    height: 44px;
+  }
 }
 

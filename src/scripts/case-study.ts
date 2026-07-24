@@ -103,6 +103,7 @@ function initFx() {
         [
           ".obv3-principles-cards",
           ".obv3-flow-container",
+          ".obv3-datamodel-grid",
           ".obv3-feature__helps-list",
           ".ps-audit-grid",
           ".ps-outcomes-grid",
@@ -176,19 +177,50 @@ function initFx() {
       });
   }
 
+  // Leaving a study: step back through history when we came from the site, so
+  // the portfolio restores its scroll position at the card that was clicked.
+  // Only a fresh entry (direct link, new tab) falls through to a real "/" load.
+  // Same-origin isn't enough: a direct hit (or a reload) can carry a referrer
+  // pointing at this very page, and stepping back from that lands on whatever
+  // the tab was showing before. Only a referrer that IS a landing page means
+  // the previous entry is the portfolio.
+  const LANDING_PATHS = ["/", "/canvas-landing"];
+  const cameFromSite = () => {
+    try {
+      const from = new URL(document.referrer);
+      return (
+        from.origin === window.location.origin &&
+        LANDING_PATHS.includes(from.pathname.replace(/\/$/, "") || "/") &&
+        window.history.length > 1
+      );
+    } catch {
+      return false;
+    }
+  };
+  const goBack = () => {
+    if (cameFromSite()) window.history.back();
+    else window.location.href = "/";
+  };
+
+  // The on-page Back link is an <a href="/"> so it works without JS; upgrade it
+  // to a history step when there's history to step through.
+  document
+    .querySelectorAll<HTMLAnchorElement>('a[aria-label^="Back"]')
+    .forEach((a) => {
+      a.addEventListener("click", (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        if (!cameFromSite()) return;
+        e.preventDefault();
+        window.history.back();
+      });
+    });
+
   // Escape returns to the portfolio (same as the Back link) — unless a lightbox
   // is open, in which case its own handler closes it first.
   window.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (document.querySelector(".cd-lightbox.is-open")) return;
-    if (
-      document.referrer.startsWith(window.location.origin) &&
-      window.history.length > 1
-    ) {
-      window.history.back();
-    } else {
-      window.location.href = "/";
-    }
+    goBack();
   });
 }
 
@@ -226,10 +258,12 @@ function initScrollSpy() {
   sections.forEach((s) => io.observe(s));
 }
 
-// Fullscreen media lightbox, shared by clinical (image + intake video) and
-// Output Builder (feature videos). Images are cloned in; a <video> node is
-// *moved* into the lightbox and back so playback never restarts. The video's
-// original class is saved and restored so it fits its home slot again on close.
+// Fullscreen media lightbox, shared by every case study: single images, image
+// galleries/carousels (Output Builder flow steps + explorations, with prev/next,
+// counter, arrow keys and swipe), and expandable videos. Images support zoom +
+// pan/pinch. Images are cloned in; a <video> node is *moved* into the lightbox
+// and back so playback never restarts — its original class is saved and restored
+// so it fits its home slot again on close.
 function initLightbox() {
   const box = document.querySelector<HTMLElement>(".cd-lightbox");
   const content = box?.querySelector<HTMLElement>(".cd-lightbox__content");
@@ -239,9 +273,63 @@ function initLightbox() {
   let videoHomeClass = "";
   let videoWasMuted = true;
 
+  // Zoom/pan state for the current image (videos keep their native controls).
+  const zoomBar = box.querySelector<HTMLElement>(".cd-lightbox__zoom");
+  const zoomLabel = box.querySelector<HTMLElement>(".cd-lightbox__zoom-level");
+  const MIN_ZOOM = 1;
+  const MAX_ZOOM = 5;
+  let zoomImg: HTMLImageElement | null = null;
+  let scale = 1;
+  let tx = 0;
+  let ty = 0;
+
+  const applyTransform = () => {
+    if (!zoomImg) return;
+    zoomImg.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+    zoomImg.style.cursor = scale > 1 ? "grab" : "zoom-in";
+    if (zoomLabel) zoomLabel.textContent = `${Math.round(scale * 100)}%`;
+  };
+  const setZoom = (next: number) => {
+    scale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
+    if (scale === 1) {
+      tx = 0;
+      ty = 0;
+    }
+    applyTransform();
+  };
+  // Zoom so the point under (cx, cy) stays put — derived from transform-origin
+  // center: t1 = t0 + (click - currentCenter) * (1 - s1/s0).
+  const zoomToPoint = (next: number, cx: number, cy: number) => {
+    if (!zoomImg) return;
+    const s1 = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
+    const rc = zoomImg.getBoundingClientRect();
+    const k = s1 / scale;
+    tx += (cx - (rc.left + rc.width / 2)) * (1 - k);
+    ty += (cy - (rc.top + rc.height / 2)) * (1 - k);
+    scale = s1;
+    applyTransform();
+  };
+
+  // Gallery/carousel state — a lone image is just a one-item gallery.
+  const prevBtn = box.querySelector<HTMLElement>(".cd-lightbox__prev");
+  const nextBtn = box.querySelector<HTMLElement>(".cd-lightbox__next");
+  const counter = box.querySelector<HTMLElement>(".cd-lightbox__counter");
+  let galleryImages: HTMLImageElement[] = [];
+  let galleryIndex = 0;
+  let onGalleryChange: ((i: number) => void) | null = null;
+  const setNav = (visible: boolean) => {
+    if (prevBtn) prevBtn.style.display = visible ? "flex" : "none";
+    if (nextBtn) nextBtn.style.display = visible ? "flex" : "none";
+    if (counter) counter.style.display = visible ? "block" : "none";
+  };
+
+  let trigger: HTMLElement | null = null;
   const open = () => {
+    trigger = document.activeElement as HTMLElement | null;
     box.classList.add("is-open");
     box.setAttribute("aria-hidden", "false");
+    // Direct focus into the dialog for keyboard/AT users.
+    box.querySelector<HTMLElement>(".cd-lightbox__close")?.focus();
   };
   const close = () => {
     const vid = content.querySelector("video");
@@ -253,8 +341,19 @@ function initLightbox() {
       videoHome = null;
     }
     content.innerHTML = "";
+    zoomImg = null;
+    galleryImages = [];
+    onGalleryChange = null;
+    setNav(false);
+    zoomBar?.setAttribute("hidden", "");
+    // Move focus out of the dialog before hiding it from assistive tech,
+    // otherwise aria-hidden traps focus on the close button.
+    if (box.contains(document.activeElement)) {
+      (document.activeElement as HTMLElement).blur();
+    }
     box.classList.remove("is-open");
     box.setAttribute("aria-hidden", "true");
+    trigger?.focus();
   };
 
   const openVideo = (vid: HTMLVideoElement | null | undefined) => {
@@ -274,20 +373,165 @@ function initLightbox() {
     slot.className = "cd-lightbox__video-slot";
     slot.appendChild(vid);
     content.appendChild(slot);
+    zoomBar?.setAttribute("hidden", "");
+    galleryImages = [];
+    setNav(false);
     vid.play().catch(() => {});
     open();
   };
 
-  const openImage = (img: HTMLImageElement | null) => {
-    if (!img) return;
+  // Render the gallery image at `index`: reset zoom, sync the counter, and mirror
+  // the change back to the source carousel so closing leaves it on the same slide.
+  const showImage = (index: number, dir = 0) => {
+    if (!galleryImages.length) return;
+    galleryIndex = (index + galleryImages.length) % galleryImages.length;
+    const src = galleryImages[galleryIndex];
     content.innerHTML = "";
     const full = document.createElement("img");
     full.className = "cd-lightbox__img";
-    full.src = img.src;
-    full.alt = img.alt;
+    full.src = src.src;
+    full.alt = src.alt;
+    full.draggable = false; // else the browser's native image-drag hijacks panning
+    if (dir !== 0) full.style.animation = `cd-lb-slide-${dir < 0 ? "prev" : "next"} 0.3s ease`;
     content.appendChild(full);
+    zoomImg = full;
+    scale = 1;
+    tx = 0;
+    ty = 0;
+    applyTransform();
+    if (counter) counter.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
+    onGalleryChange?.(galleryIndex);
+  };
+  const step = (delta: number) => {
+    if (galleryImages.length > 1) showImage(galleryIndex + delta, delta);
+  };
+  const openImages = (
+    images: HTMLImageElement[],
+    start = 0,
+    onChange: ((i: number) => void) | null = null,
+  ) => {
+    if (!images.length) return;
+    galleryImages = images;
+    onGalleryChange = onChange;
+    zoomBar?.removeAttribute("hidden");
+    setNav(images.length > 1);
+    showImage(start);
     open();
   };
+  const openImage = (img: HTMLImageElement | null) => {
+    if (img) openImages([img]);
+  };
+
+  // Zoom controls: buttons, wheel-to-zoom, and drag-to-pan (images only).
+  zoomBar?.querySelectorAll<HTMLElement>("[data-zoom]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const kind = btn.dataset.zoom;
+      if (kind === "in") setZoom(scale + 0.5);
+      else if (kind === "out") setZoom(scale - 0.5);
+      else setZoom(1);
+    });
+  });
+  content.addEventListener(
+    "wheel",
+    (e) => {
+      if (!zoomImg) return;
+      e.preventDefault();
+      if (e.ctrlKey) {
+        // Trackpad pinch (and ctrl + wheel) zoom toward the cursor.
+        zoomToPoint(scale - e.deltaY * 0.01, e.clientX, e.clientY);
+      } else if (scale > 1) {
+        // Zoomed in: a plain wheel / two-finger scroll pans instead of zooming,
+        // so trackpad users don't zoom out when they mean to pan.
+        tx -= e.deltaX;
+        ty -= e.deltaY;
+        applyTransform();
+      } else {
+        // Fitted: scroll up to zoom in toward the cursor.
+        zoomToPoint(scale + (e.deltaY < 0 ? 0.25 : -0.25), e.clientX, e.clientY);
+      }
+    },
+    { passive: false },
+  );
+  // Click/tap toggles zoom (fit ↔ 2×, toward the point); drag pans when zoomed;
+  // two fingers pinch. A tap on the backdrop (not the image) closes the lightbox.
+  const pointers = new Map<number, { x: number; y: number }>();
+  let panning = false;
+  let startX = 0;
+  let startY = 0;
+  let pinchDist = 0;
+  let pinchScale = 1;
+  let downX = 0;
+  let downY = 0;
+  let moved = false;
+  let multiTouch = false;
+  let downOnImg = false;
+
+  const twoFingerDist = () => {
+    const [a, b] = [...pointers.values()];
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  };
+  content.addEventListener("pointerdown", (e) => {
+    if (!zoomImg) return;
+    const onImg = e.target === zoomImg;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    // Capture only when the press is on the image. Capturing a backdrop press
+    // would retarget its click event to the image, breaking click-away-to-close.
+    if (onImg) zoomImg.setPointerCapture?.(e.pointerId);
+    zoomImg.style.transition = "none";
+    if (pointers.size === 2) {
+      multiTouch = true;
+      panning = false;
+      pinchDist = twoFingerDist();
+      pinchScale = scale;
+    } else if (pointers.size === 1) {
+      downX = e.clientX;
+      downY = e.clientY;
+      moved = false;
+      downOnImg = onImg;
+      if (scale > 1 && onImg) {
+        panning = true;
+        startX = e.clientX - tx;
+        startY = e.clientY - ty;
+        zoomImg.style.cursor = "grabbing";
+      }
+    }
+  });
+  content.addEventListener("pointermove", (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) moved = true;
+    if (pointers.size === 2 && pinchDist > 0) {
+      setZoom(pinchScale * (twoFingerDist() / pinchDist));
+    } else if (panning) {
+      tx = e.clientX - startX;
+      ty = e.clientY - startY;
+      applyTransform();
+    }
+  });
+  const endPointer = (e: PointerEvent) => {
+    if (!pointers.delete(e.pointerId)) return;
+    if (pointers.size < 2) pinchDist = 0;
+    if (pointers.size !== 0) return;
+    if (zoomImg) zoomImg.style.transition = "";
+    // A clean tap on the image toggles zoom (fit ↔ 2× toward the point). Measure
+    // the release distance too, not just the moved flag, so a fast drag whose
+    // move events were sparse isn't misread as a tap (which would zoom out).
+    const tapDist = Math.hypot(e.clientX - downX, e.clientY - downY);
+    if (!multiTouch && !moved && tapDist <= 6 && downOnImg) {
+      if (scale > 1) setZoom(1);
+      else zoomToPoint(2, downX, downY);
+    } else {
+      applyTransform();
+    }
+    panning = false;
+    multiTouch = false;
+  };
+  content.addEventListener("pointerup", endPointer);
+  content.addEventListener("pointercancel", endPointer);
+  // Click on the empty area around the media (not the media itself) closes.
+  content.addEventListener("click", (e) => {
+    if (e.target === content) close();
+  });
 
   // Clinical image/video maximize buttons.
   document.querySelectorAll<HTMLElement>(".cd-media-maximize").forEach((btn) => {
@@ -310,12 +554,76 @@ function initLightbox() {
       );
     });
 
+  // Output Builder gallery images (flow steps + exploration versions): open the
+  // whole set as a swipeable gallery, mirroring navigation back to the source
+  // carousel so closing lands on the same slide.
+  document.querySelectorAll<HTMLElement>("[data-lightbox-trigger]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const img =
+        btn instanceof HTMLImageElement
+          ? btn
+          : btn.parentElement?.querySelector<HTMLImageElement>("img");
+      if (!img) return;
+      const flow = btn.closest("[data-flow-carousel]");
+      const exp = btn.closest("[data-exploration-carousel]");
+      if (flow) {
+        const imgs = [...flow.querySelectorAll<HTMLImageElement>("img")];
+        const tabs = [...flow.querySelectorAll<HTMLButtonElement>("[data-flow-tab]")];
+        openImages(imgs, Math.max(0, imgs.indexOf(img)), (i) => tabs[i]?.click());
+      } else if (exp) {
+        const imgs = [...exp.querySelectorAll<HTMLImageElement>("img")];
+        const panels = [...exp.querySelectorAll<HTMLElement>("[data-exploration-panel]")];
+        openImages(imgs, Math.max(0, imgs.indexOf(img)), (i) =>
+          panels.forEach((p, pi) => {
+            p.classList.toggle("is-active", pi === i);
+            p.hidden = pi !== i;
+          }),
+        );
+      } else {
+        openImages([img]);
+      }
+    });
+  });
+
+  prevBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    step(-1);
+  });
+  nextBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    step(1);
+  });
+
+  // Swipe between gallery images — only when not zoomed in, so a pan gesture
+  // isn't hijacked into navigation.
+  let swipeX = 0;
+  box.addEventListener(
+    "touchstart",
+    (e) => {
+      swipeX = e.changedTouches[0].screenX;
+    },
+    { passive: true },
+  );
+  box.addEventListener(
+    "touchend",
+    (e) => {
+      if (!box.classList.contains("is-open") || galleryImages.length <= 1 || scale > 1) return;
+      const dx = e.changedTouches[0].screenX - swipeX;
+      if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+    },
+    { passive: true },
+  );
+
   box.querySelector(".cd-lightbox__close")?.addEventListener("click", close);
   box.addEventListener("click", (e) => {
     if (e.target === box) close();
   });
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && box.classList.contains("is-open")) close();
+    if (!box.classList.contains("is-open")) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowLeft") step(-1);
+    else if (e.key === "ArrowRight") step(1);
   });
 }
 

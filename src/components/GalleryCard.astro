@@ -1,6 +1,7 @@
 ---
 // Taped polaroid card for the "Off the record" gallery.
-const { src, label, rot, tapeRot, link, w, h } = Astro.props;
+const { src, label, alt, rot, tapeRot, link, w, h } = Astro.props;
+const imgAlt = alt ?? label;
 ---
 
 {
@@ -17,7 +18,7 @@ const { src, label, rot, tapeRot, link, w, h } = Astro.props;
       >
         <img
           src={src}
-          alt=""
+          alt={imgAlt}
           width={w}
           height={h}
           loading="lazy"
@@ -39,11 +40,14 @@ const { src, label, rot, tapeRot, link, w, h } = Astro.props;
     <div
       class="gal-card"
       data-lightbox={src}
+      role="button"
+      tabindex="0"
+      aria-label={`View ${label} full screen`}
       style={`--rot:${rot}deg;break-inside:avoid;margin:0 0 32px;position:relative;background:var(--surface-strong);border:1px solid var(--line);border-radius:4px;padding:12px;cursor:zoom-in`}
     >
       <img
         src={src}
-        alt=""
+        alt={imgAlt}
         loading="lazy"
         style="display:block;width:100%;height:auto;border-radius:4px"
       />

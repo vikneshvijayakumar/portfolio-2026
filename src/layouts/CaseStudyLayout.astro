@@ -10,9 +10,33 @@ interface Props {
 }
 
 const { title, description, ogImage } = Astro.props;
+
+const siteURL = Astro.site ?? new URL("https://viknesh.me");
+const canonicalURL = new URL(Astro.url.pathname, siteURL).href;
+const caseStudySchema = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: title,
+  headline: title,
+  description,
+  url: canonicalURL,
+  ...(ogImage ? { image: new URL(ogImage, siteURL).href } : {}),
+  inLanguage: "en",
+  author: {
+    "@type": "Person",
+    name: "Viknesh Vijayakumar",
+    url: siteURL.origin,
+    jobTitle: "Lead Product Designer",
+  },
+  creator: {
+    "@type": "Person",
+    name: "Viknesh Vijayakumar",
+  },
+};
 ---
 
 <Layout {title} {description} {ogImage} pageClass="case-study-page">
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(caseStudySchema)} />
   {/* FOUC guard. The shared case-study script adds the reveal classes after
       load, which would flash content visible-then-hidden. This marker + pre-hide
       CSS live in the server HTML so they apply at first paint. Gated on the class
@@ -45,6 +69,25 @@ const { title, description, ogImage } = Astro.props;
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
     </button>
     <div class="cd-lightbox__content"></div>
+    <button type="button" class="cd-lightbox__nav cd-lightbox__prev" aria-label="Previous image" style="display: none">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
+    </button>
+    <button type="button" class="cd-lightbox__nav cd-lightbox__next" aria-label="Next image" style="display: none">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+    </button>
+    <div class="cd-lightbox__zoom" hidden>
+      <span class="cd-lightbox__counter" style="display: none"></span>
+      <button type="button" class="cd-lightbox__zoom-btn" data-zoom="out" aria-label="Zoom out" title="Zoom out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+      </button>
+      <span class="cd-lightbox__zoom-level" aria-live="polite">100%</span>
+      <button type="button" class="cd-lightbox__zoom-btn" data-zoom="in" aria-label="Zoom in" title="Zoom in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+      </button>
+      <button type="button" class="cd-lightbox__zoom-btn" data-zoom="reset" aria-label="Reset zoom" title="Reset zoom">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
+      </button>
+    </div>
   </div>
   <script>
     import "../scripts/case-study";

@@ -207,7 +207,7 @@ const maximizeSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
                       </>
                     ) : (
                       <>
-                        <img class="cd-module__video" src={mediaByModule[module.id].src} alt={mediaByModule[module.id].alt} />
+                        <img class="cd-module__video" src={mediaByModule[module.id].src} alt={mediaByModule[module.id].alt} data-lightbox-trigger style="cursor: pointer;" />
                         <button type="button" class="cd-media-maximize" data-lightbox="image" aria-label="View full screen" title="View full screen" set:html={maximizeSvg} />
                       </>
                     )}

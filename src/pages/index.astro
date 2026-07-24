@@ -110,6 +110,7 @@ const galleryItems = [
   {
     src: "/assets/investor-pitchdeck.webp",
     label: "Healthcare AI Pitch Deck",
+    alt: "Healthcare AI investor pitch deck slides, presentation design by product designer Viknesh Vijayakumar",
     link: "https://www.figma.com/deck/1GRsT7aJxwDo8Dsc7JgJfh",
     w: 800,
     h: 600,
@@ -119,6 +120,7 @@ const galleryItems = [
   {
     src: "/assets/orgusta-otherwork.webp",
     label: "Orgusta Logo Design",
+    alt: "Orgusta brand identity and logo design exploration by Viknesh Vijayakumar",
     link: "https://www.figma.com/deck/Gav4HFOlEX7DXmJdeF8OhI",
     w: 800,
     h: 600,
@@ -128,6 +130,7 @@ const galleryItems = [
   {
     src: "/assets/other-work-2.webp",
     label: "Tango App Exploration",
+    alt: "Tango mobile app UI design exploration, product and interface design concept",
     link: "https://dribbble.com/shots/21047586-Tango-App-Exploration",
     w: 752,
     h: 564,
@@ -137,6 +140,7 @@ const galleryItems = [
   {
     src: "/assets/other-work-3.webp",
     label: "Reiki Website",
+    alt: "Reiki healing website landing page, web UI and visual design concept",
     link: "https://dribbble.com/shots/21037521-Website-Reiki-Healing",
     w: 752,
     h: 564,
@@ -146,6 +150,7 @@ const galleryItems = [
   {
     src: "/assets/3dnissan.webp",
     label: "Nissan GTR, yes, I modeled it",
+    alt: "3D modeled and rendered Nissan GTR sports car, personal 3D design project",
     w: 1400,
     h: 788,
     rot: -0.6,
@@ -154,6 +159,7 @@ const galleryItems = [
   {
     src: "/assets/other-work-1.webp",
     label: "Healing Studio Landing",
+    alt: "Healing studio website landing page, wellness brand web UI design concept",
     link: "https://dribbble.com/shots/21096185-Healing-Studio-Website-Landing",
     w: 752,
     h: 564,
@@ -163,6 +169,7 @@ const galleryItems = [
   {
     src: "/assets/collabcoyn.webp",
     label: "CollabCoyn Mining Dashboard",
+    alt: "CollabCoyn crypto mining dashboard, fintech app and data dashboard UI design concept",
     link: "https://dribbble.com/shots/21044656-Crypto-App-Concept",
     w: 1920,
     h: 1440,
@@ -204,6 +211,33 @@ const tickerSkills = [
   "Information Architecture",
   "User Research",
 ];
+
+const siteURL = (Astro.site ?? new URL("https://viknesh.me")).origin;
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Viknesh Vijayakumar",
+  url: siteURL,
+  image: `${siteURL}/assets/profile.webp`,
+  jobTitle: "Lead Product Designer",
+  description:
+    "Lead Product Designer with 12 years across healthcare AI, edtech, and B2B SaaS, turning complex systems into interfaces people can actually use.",
+  knowsAbout: [
+    "Product Design",
+    "UX Design",
+    "UI Design",
+    "Design Systems",
+    "Healthcare AI",
+    "Enterprise SaaS",
+    "Interaction Design",
+    "User Research",
+  ],
+  sameAs: [
+    "https://www.linkedin.com/in/vikneshvijayakumar/",
+    "https://dribbble.com/vikneshvijayakumar",
+    "https://www.upwork.com/freelancers/~0124077c8ba1055975",
+  ],
+};
 ---
 
 <Layout
@@ -212,6 +246,8 @@ const tickerSkills = [
   ogImage="/assets/profile.webp"
   pageClass="home-page"
 >
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(personSchema)} />
+
   <style is:global>
     @keyframes pulseDot {
       0%,
@@ -2312,8 +2348,10 @@ const tickerSkills = [
     const lbImg = document.getElementById(
       "lightboxImg",
     ) as HTMLImageElement | null;
+    let lbTrigger: HTMLElement | null = null;
     const openLb = (src: string, alt: string) => {
       if (!lb || !lbImg) return;
+      lbTrigger = document.activeElement as HTMLElement | null;
       lbImg.src = src;
       lbImg.alt = alt;
       lb.style.display = "flex";
@@ -2321,6 +2359,8 @@ const tickerSkills = [
         lb.style.opacity = "1";
       });
       document.body.style.overflow = "hidden";
+      // Direct focus to the dialog so keyboard users land inside the new content.
+      document.getElementById("lightboxClose")?.focus();
     };
     const closeLb = () => {
       if (!lb) return;
@@ -2329,15 +2369,22 @@ const tickerSkills = [
         lb.style.display = "none";
       }, 200);
       document.body.style.overflow = "";
+      lbTrigger?.focus();
     };
     document
       .querySelectorAll<HTMLElement>("[data-lightbox]")
       .forEach((card) => {
-        card.addEventListener("click", () => {
+        const open = () =>
           openLb(
             card.getAttribute("data-lightbox") || "",
             card.querySelector("img")?.alt || "",
           );
+        card.addEventListener("click", open);
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
         });
       });
     lb?.addEventListener("click", (e) => {
