@@ -1,6 +1,7 @@
 import { memo, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import { projects, type Project } from "../content";
+import { CanvasImage } from "../CanvasImage";
 import dashboardImg from "../assets/dashboard.webp?url";
 import formBuilderImg from "../assets/form-builder.webp?url";
 import formTakingImg from "../../assets/form-taking.webp?url";
@@ -124,13 +125,10 @@ const ProjectCard = memo(function ProjectCard({
     >
       <div className="project-card__visual">
         <div className="project-card__image-wrapper">
-          <img
+          <CanvasImage
             src={projectImages[project.image]}
             alt={project.title}
             className={`project-card__image ${project.note?.includes("Password") ? "is-locked" : ""}`}
-            draggable="false"
-            loading="lazy"
-            decoding="async"
           />
           {project.note?.includes("Password") && (
             <div className="project-card__lock-overlay">

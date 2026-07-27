@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { motion } from "motion/react";
+import { CanvasImage } from "../CanvasImage";
 import work1Img from "../assets/other-work-1.webp?url";
 import work2Img from "../assets/other-work-2.webp?url";
 import work3Img from "../assets/other-work-3.webp?url";
@@ -104,7 +105,7 @@ const DribbbleCards = memo(function DribbbleCards({
             whileTap={{ scale: 0.98 }}
           >
             <div className="dribbble-card__image-container">
-              <img src={item.img} alt="" className="dribbble-card__img" draggable="false" loading="lazy" decoding="async" />
+              <CanvasImage src={item.img} alt="" className="dribbble-card__img" />
             </div>
             <div className="dribbble-card__caption">
               {item.label}
