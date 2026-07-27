@@ -41,5 +41,12 @@ const description =
   </head>
   <body>
     <CanvasApp client:only="react" />
+    <script>
+      // Records this page as "home", so a case study's Back returns to the
+      // canvas rather than the classic landing. Camera position is restored
+      // separately by CanvasApp.
+      import { initLanding } from "../scripts/landing-return";
+      initLanding();
+    </script>
   </body>
 </html>

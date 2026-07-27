@@ -1761,6 +1761,12 @@ const personSchema = {
   </main>
 
   <script>
+    // Record this page as "home" for the case studies, and restore the scroll
+    // position when one navigates back into it. Runs first so the restore lands
+    // before the reveal/measure passes below.
+    import { initLanding } from "../scripts/landing-return";
+    initLanding();
+
     // Theme — same localStorage key as the canvas landing, so the choice
     // carries across both. Applied pre-paint by the inline script in <head>.
     const themeToggle = document.getElementById("themeToggle");

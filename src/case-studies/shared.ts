@@ -1,15 +1,5 @@
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
-// ponytail: history.back() preserves home-page scroll; direct entries fall back to "/"
-export function goBack(e?: { preventDefault: () => void }) {
-  if (document.referrer.startsWith(window.location.origin) && window.history.length > 1) {
-    e?.preventDefault();
-    window.history.back();
-  } else if (!e) {
-    window.location.href = "/";
-  }
-  // anchors without preventDefault fall through to their href="/"
-}
 export const toolbarLinks = {
   email: "mailto:hello@viknesh.me",
   linkedin: "https://www.linkedin.com/in/vikneshvijayakumar/",

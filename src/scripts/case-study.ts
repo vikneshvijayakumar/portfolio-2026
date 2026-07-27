@@ -7,6 +7,12 @@
 // this must not double-run alongside their in-island fx. Skip when an island is
 // present; remove the guard once every study is static.
 
+import { goHome } from "./landing-return";
+
+// Every study's Back control. Keyed on class, not aria-label, so an unrelated
+// "Back to top" link can never be mistaken for "leave this study".
+const BACK_SEL = ".obv3-back, .ps-back, .ft-back, .as-back";
+
 function splitWords(el: HTMLElement) {
   let i = 0;
   const walk = (node: Node) => {
@@ -147,7 +153,14 @@ function initFx() {
         ].join(", "),
       )
       .forEach((el) => {
-        if (el.closest(".csfx-stagger")) return;
+        // Inside a stagger container the parent's reveal already animates this
+        // element, so it must not get its own rise — but it still needs `in`,
+        // or the layout's pre-hide CSS (which keys off :not(.in)) leaves it
+        // invisible forever. Nested .ps-body inside .ps-audit-card hit this.
+        if (el.closest(".csfx-stagger")) {
+          el.classList.add("in");
+          return;
+        }
         el.classList.add("csfx-rise");
         rio.observe(el);
       });
@@ -156,9 +169,7 @@ function initFx() {
   // Magnetic pull on back buttons and footer CTA
   if (fine && !reduced) {
     document
-      .querySelectorAll<HTMLElement>(
-        ".download-button, .obv3-back, .ps-back, .ft-back, .as-back",
-      )
+      .querySelectorAll<HTMLElement>(`.download-button, ${BACK_SEL}`)
       .forEach((btn) => {
         btn.classList.add("csfx-mag");
         const move = (e: PointerEvent) => {
@@ -177,50 +188,23 @@ function initFx() {
       });
   }
 
-  // Leaving a study: step back through history when we came from the site, so
-  // the portfolio restores its scroll position at the card that was clicked.
-  // Only a fresh entry (direct link, new tab) falls through to a real "/" load.
-  // Same-origin isn't enough: a direct hit (or a reload) can carry a referrer
-  // pointing at this very page, and stepping back from that lands on whatever
-  // the tab was showing before. Only a referrer that IS a landing page means
-  // the previous entry is the portfolio.
-  const LANDING_PATHS = ["/", "/canvas-landing"];
-  const cameFromSite = () => {
-    try {
-      const from = new URL(document.referrer);
-      return (
-        from.origin === window.location.origin &&
-        LANDING_PATHS.includes(from.pathname.replace(/\/$/, "") || "/") &&
-        window.history.length > 1
-      );
-    } catch {
-      return false;
-    }
-  };
-  const goBack = () => {
-    if (cameFromSite()) window.history.back();
-    else window.location.href = "/";
-  };
-
   // The on-page Back link is an <a href="/"> so it works without JS; upgrade it
-  // to a history step when there's history to step through.
-  document
-    .querySelectorAll<HTMLAnchorElement>('a[aria-label^="Back"]')
-    .forEach((a) => {
-      a.addEventListener("click", (e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-        if (!cameFromSite()) return;
-        e.preventDefault();
-        window.history.back();
-      });
+  // to goHome(), which returns to whichever landing the visitor actually came
+  // from (classic or canvas) with its scroll position intact.
+  document.querySelectorAll<HTMLAnchorElement>(BACK_SEL).forEach((a) => {
+    a.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      goHome();
     });
+  });
 
   // Escape returns to the portfolio (same as the Back link) — unless a lightbox
   // is open, in which case its own handler closes it first.
   window.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (document.querySelector(".cd-lightbox.is-open")) return;
-    goBack();
+    goHome();
   });
 }
 
@@ -256,6 +240,21 @@ function initScrollSpy() {
     { root: scroll, rootMargin: "-35% 0px -55% 0px", threshold: 0 },
   );
   sections.forEach((s) => io.observe(s));
+
+  // Section links replace the history entry instead of pushing one. Left native,
+  // every ToC click stacks another entry on this page, and Back then walks those
+  // hashes one by one instead of leaving the study — the main reason Back felt
+  // like it did nothing.
+  nav.querySelectorAll("a").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      const id = a.getAttribute("href")?.slice(1);
+      const target = id && document.getElementById(id);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.replaceState(null, "", `#${id}`);
+    });
+  });
 }
 
 // Fullscreen media lightbox, shared by every case study: single images, image
