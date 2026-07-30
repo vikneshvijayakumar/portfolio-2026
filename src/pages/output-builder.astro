@@ -3,7 +3,8 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import CaseStudyLayout from "../layouts/CaseStudyLayout.astro";
 import CaseStudyFooter from "../components/CaseStudyFooter.astro";
-import { FLOW_ICONS } from "../case-studies/obv3-flow-icons";
+import { FLOW_ICONS } from "../case-studies/cs-flow-icons";
+import { previousSvg, nextSvg, fullscreenSvg } from "../case-studies/shared";
 import step1Questionnaire from "../assets/step1-questionnaire.webp";
 import step2ResponseCodes from "../assets/step2-response codes.webp";
 import step3CreatePdf from "../assets/step3-createpdf.webp";
@@ -12,7 +13,7 @@ import initialExploration from "../assets/initial-exploration.webp";
 import initialVersion1 from "../assets/initialversion1.webp";
 import initialVersion2 from "../assets/initialversion2.webp";
 import responsemapping from "../assets/responsemapping.webp";
-import "../case-studies/Obv3.css";
+import "../case-studies/study-output-builder.css";
 
 const EXPLORATION_IMAGES = [
   {
@@ -30,18 +31,18 @@ const EXPLORATION_IMAGES = [
 ];
 
 const NAV_SECTIONS = [
-  { id: "obv3-overview", label: "Overview" },
-  { id: "obv3-scope", label: "Scope" },
-  { id: "obv3-research", label: "Research" },
-  { id: "obv3-discovery", label: "Discovery" },
-  { id: "obv3-reframing", label: "Reframing" },
-  { id: "obv3-datamodel", label: "Mapping Model" },
-  { id: "obv3-firstversion", label: "First version" },
-  { id: "obv3-concerns", label: "Concerns" },
-  { id: "obv3-solution", label: "Solution" },
-  { id: "obv3-impact", label: "Impact" },
-  { id: "obv3-evolution", label: "Future" },
-  { id: "obv3-reflection", label: "Reflection" },
+  { id: "cs-overview", label: "Overview" },
+  { id: "cs-scope", label: "Scope" },
+  { id: "cs-research", label: "Research" },
+  { id: "cs-discovery", label: "Discovery" },
+  { id: "cs-reframing", label: "Reframing" },
+  { id: "cs-datamodel", label: "Mapping Model" },
+  { id: "cs-firstversion", label: "First version" },
+  { id: "cs-concerns", label: "Concerns" },
+  { id: "cs-solution", label: "Solution" },
+  { id: "cs-impact", label: "Impact" },
+  { id: "cs-evolution", label: "Future" },
+  { id: "cs-reflection", label: "Reflection" },
 ];
 
 const FLOW = [
@@ -208,16 +209,10 @@ const chevronSvg =
 
 const checkSvg =
   '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 8.5 6.5 12 13 5" /></svg>';
-const previousSvg =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6" /></svg>';
-const nextSvg =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6" /></svg>';
 const pauseSvg =
   '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>';
 const playSvg =
   '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.5-6.8a1 1 0 0 0 0-1.7l-10.5-6.8A1 1 0 0 0 8 5.2Z" /></svg>';
-const fullscreenSvg =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" /></svg>';
 ---
 
 <CaseStudyLayout
@@ -226,13 +221,13 @@ const fullscreenSvg =
   ogImage="/assets/output-builder.webp"
 >
   <div
-    class="obv3-overlay"
+    class="cs-overlay cs-overlay--obv"
     role="dialog"
     aria-modal="true"
     aria-label="Output Builder case study"
   >
-    <div class="obv3-topbar">
-      <a class="obv3-back" href="/" aria-label="Back to the portfolio">
+    <div class="cs-topbar">
+      <a class="cs-back" href="/" aria-label="Back to the portfolio">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -245,60 +240,60 @@ const fullscreenSvg =
         </svg>
         <span>Back</span>
       </a>
-      <div class="obv3-topbar__title">
-        <span class="obv3-topbar__eyebrow">Empyra · 2024</span>
-        <span class="obv3-topbar__name">Output Builder</span>
+      <div class="cs-topbar__title">
+        <span class="cs-topbar__eyebrow">Empyra · 2024</span>
+        <span class="cs-topbar__name">Output Builder</span>
       </div>
     </div>
 
-    <nav class="obv3-sidenav" aria-label="Sections">
+    <nav class="cs-sidenav" aria-label="Sections">
       {
         NAV_SECTIONS.map((s) => (
-          <a href={`#${s.id}`} class={s.id === "obv3-hero" ? "is-active" : ""}>
+          <a href={`#${s.id}`} class={s.id === "cs-hero" ? "is-active" : ""}>
             {s.label}
           </a>
         ))
       }
     </nav>
 
-    <div class="obv3-scroll">
-      <section id="obv3-hero" class="obv3-hero">
-        <div class="obv3-hero__inner">
-          <div class="obv3-hero__main">
-            <div class="obv3-hero__lede">
-              <h1 class="obv3-hero__title">
+    <div class="cs-scroll">
+      <section id="cs-hero" class="cs-hero">
+        <div class="cs-hero__inner">
+          <div class="cs-hero__main">
+            <div class="cs-hero__lede">
+              <h1 class="cs-hero__title">
                 Cutting template creation from <em>days → hours</em>
               </h1>
-              <p class="obv3-hero__desc">
+              <p class="cs-hero__desc">
                 Reframing a document generation workflow to remove a 2 to 3 day
                 engineering bottleneck.
               </p>
-              <div class="obv3-scroll-hint">Scroll to explore</div>
+              <div class="cs-scroll-hint">Scroll to explore</div>
             </div>
-            <div class="obv3-hero__meta">
-              <div class="obv3-meta-item">
-                <span class="obv3-meta-label">Role</span><span
-                  class="obv3-meta-val">Solo Designer</span
+            <div class="cs-hero__meta">
+              <div class="cs-meta-item">
+                <span class="cs-meta-label">Role</span><span
+                  class="cs-meta-val">Solo Designer</span
                 >
               </div>
-              <div class="obv3-meta-item">
-                <span class="obv3-meta-label">Outcomes</span><span
-                  class="obv3-meta-val">90% Faster</span
+              <div class="cs-meta-item">
+                <span class="cs-meta-label">Outcomes</span><span
+                  class="cs-meta-val">90% Faster</span
                 >
               </div>
-              <div class="obv3-meta-item">
-                <span class="obv3-meta-label">Type</span><span
-                  class="obv3-meta-val">Workflow Redesign</span
+              <div class="cs-meta-item">
+                <span class="cs-meta-label">Type</span><span
+                  class="cs-meta-val">Workflow Redesign</span
                 >
               </div>
-              <div class="obv3-meta-item">
-                <span class="obv3-meta-label">Timeline</span><span
-                  class="obv3-meta-val">4 months</span
+              <div class="cs-meta-item">
+                <span class="cs-meta-label">Timeline</span><span
+                  class="cs-meta-val">4 months</span
                 >
               </div>
-              <div class="obv3-meta-item">
-                <span class="obv3-meta-label">Skills</span><span
-                  class="obv3-meta-val"
+              <div class="cs-meta-item">
+                <span class="cs-meta-label">Skills</span><span
+                  class="cs-meta-val"
                   >Systems design, workflow redesign, feasibility, cross
                   functional alignment</span
                 >
@@ -308,27 +303,27 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-overview" class="obv3-section obv3-section--overview">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">01<span>Overview</span></div>
+      <section id="cs-overview" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">01<span>Overview</span></div>
           <div>
-            <h2 class="obv3-heading">
+            <h2 class="cs-heading">
               Days of engineering behind every document
             </h2>
-            <p class="obv3-body">
+            <p class="cs-body">
               Organizations on the platform use forms to collect student data
               and generate official form outputs. Each output used a PDF
               template built from the form fields, which was uploaded to the
               system. User responses got filled into it automatically when they
               submitted a form.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               But the workflow behind it required an engineer to recreate the
               form layout in external PDF tools and do the data mapping manually
               into the template, resulting in multiple validation cycles and
               back and forth before the template reached production.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               This case study presents my design process behind creating a
               modern output builder that reduced template creation time from
               days to hours.
@@ -337,24 +332,24 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-scope" class="obv3-section obv3-section--overview">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">02<span>Scope</span></div>
+      <section id="cs-scope" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">02<span>Scope</span></div>
           <div>
-            <h2 class="obv3-heading">
+            <h2 class="cs-heading">
               Deconstructing the problem space and execution scope
             </h2>
-            <p class="obv3-body">
+            <p class="cs-body">
               Most of the work went into understanding the legacy workflow and
               designing the builder around what the system and the teams could
               support. This case study covers the output builder, one module of
               a form ecosystem I designed end to end.
             </p>
 
-            <div class="obv3-scope-grid">
-              <div class="obv3-scope-card">
-                <h3 class="obv3-scope-card__title">Observation</h3>
-                <ul class="obv3-scope-card__list">
+            <div class="cs-scope-grid">
+              <div class="cs-scope-card">
+                <h3 class="cs-scope-card__title">Observation</h3>
+                <ul class="cs-scope-card__list">
                   <li>Workflow mapping</li>
                   <li>Legacy screen audit</li>
                   <li>Template and code teardown</li>
@@ -363,9 +358,9 @@ const fullscreenSvg =
                 </ul>
               </div>
 
-              <div class="obv3-scope-card">
-                <h3 class="obv3-scope-card__title">Analysis</h3>
-                <ul class="obv3-scope-card__list">
+              <div class="cs-scope-card">
+                <h3 class="cs-scope-card__title">Analysis</h3>
+                <ul class="cs-scope-card__list">
                   <li>Response code counting</li>
                   <li>Obsolete feature tracing</li>
                   <li>Feature carry over decisions</li>
@@ -373,9 +368,9 @@ const fullscreenSvg =
                 </ul>
               </div>
 
-              <div class="obv3-scope-card">
-                <h3 class="obv3-scope-card__title">Validation</h3>
-                <ul class="obv3-scope-card__list">
+              <div class="cs-scope-card">
+                <h3 class="cs-scope-card__title">Validation</h3>
+                <ul class="cs-scope-card__list">
                   <li>Cross client template review</li>
                   <li>Technical feasibility check</li>
                   <li>PoC with engineering</li>
@@ -383,9 +378,9 @@ const fullscreenSvg =
                 </ul>
               </div>
 
-              <div class="obv3-scope-card">
-                <h3 class="obv3-scope-card__title">Implementation</h3>
-                <ul class="obv3-scope-card__list">
+              <div class="cs-scope-card">
+                <h3 class="cs-scope-card__title">Implementation</h3>
+                <ul class="cs-scope-card__list">
                   <li>Design system reuse</li>
                   <li>Builder interaction design</li>
                   <li>Preset and constraint scoping</li>
@@ -397,14 +392,14 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-research" class="obv3-section obv3-section--contrast">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">03<span>Research</span></div>
+      <section id="cs-research" class="cs-section cs-section--contrast">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">03<span>Research</span></div>
           <div>
-            <h2 class="obv3-heading">
+            <h2 class="cs-heading">
               Learning the work from the people who did it
             </h2>
-            <p class="obv3-body">
+            <p class="cs-body">
               Before I designed anything, I spent time researching how this work
               was actually done. I mapped the full workflow across users,
               admins, engineers, and the system dependencies between them, to
@@ -414,64 +409,64 @@ const fullscreenSvg =
               see exactly how a finished output was wired.
             </p>
             <section
-              class="obv3-flow-container"
+              class="cs-flow-container"
               aria-label="Legacy output workflow"
               data-flow-carousel
             >
               <div
-                class="obv3-flow-tabs"
+                class="cs-flow-tabs"
                 role="tablist"
                 aria-label="Workflow steps"
               >
                 {
                   FLOW.map((f, i) => (
                     <button
-                      class:list={["obv3-flow-tab", { "is-active": i === 0 }]}
+                      class:list={["cs-flow-tab", { "is-active": i === 0 }]}
                       type="button"
                       role="tab"
-                      id={`obv3-flow-tab-${i}`}
-                      aria-controls={`obv3-flow-panel-${i}`}
+                      id={`cs-flow-tab-${i}`}
+                      aria-controls={`cs-flow-panel-${i}`}
                       aria-selected={i === 0 ? "true" : "false"}
                       tabindex={i === 0 ? "0" : "-1"}
                       data-flow-tab
                     >
                       <span
-                        class="obv3-flow-icon-wrap"
+                        class="cs-flow-icon-wrap"
                         aria-hidden="true"
-                        set:html={FLOW_ICONS[i] ?? FLOW_ICONS[0]}
+                        set:html={(FLOW_ICONS[i] ?? FLOW_ICONS[0]).replaceAll("clip_", `clip${i}_`)}
                       />
-                      <span class="obv3-flow-tab__copy">
-                        <span class="obv3-flow-eyebrow">
+                      <span class="cs-flow-tab__copy">
+                        <span class="cs-flow-eyebrow">
                           Step {String(i + 1).padStart(2, "0")}
                         </span>
-                        <span class="obv3-flow-title">{f.title}</span>
+                        <span class="cs-flow-title">{f.title}</span>
                       </span>
                       <span
-                        class="obv3-flow-tab__progress"
+                        class="cs-flow-tab__progress"
                         aria-hidden="true"
                       />
                     </button>
                   ))
                 }
               </div>
-              <div class="obv3-flow-panels">
+              <div class="cs-flow-panels">
                 {
                   FLOW.map((f, i) => (
                     <div
-                      class:list={["obv3-flow-panel", { "is-active": i === 0 }]}
-                      id={`obv3-flow-panel-${i}`}
+                      class:list={["cs-flow-panel", { "is-active": i === 0 }]}
+                      id={`cs-flow-panel-${i}`}
                       role="tabpanel"
-                      aria-labelledby={`obv3-flow-tab-${i}`}
-                      aria-describedby={`obv3-flow-desc-${i}`}
+                      aria-labelledby={`cs-flow-tab-${i}`}
+                      aria-describedby={`cs-flow-desc-${i}`}
                       hidden={i !== 0}
                       data-flow-panel
                     >
-                      <p id={`obv3-flow-desc-${i}`} class="obv3-flow-status">
+                      <p id={`cs-flow-desc-${i}`} class="cs-flow-status">
                         {f.desc}
                       </p>
-                      <div class="obv3-flow-panel__media">
+                      <div class="cs-flow-panel__media">
                         <img
-                          class="obv3-flow-panel__image"
+                          class="cs-flow-panel__image"
                           src={f.image.src}
                           width={f.image.width}
                           height={f.image.height}
@@ -483,7 +478,7 @@ const fullscreenSvg =
                         />
                         <button
                           type="button"
-                          class="cd-media-maximize"
+                          class="cs-media-maximize"
                           aria-label="Maximize image"
                           title="Maximize image"
                           data-lightbox-trigger
@@ -494,18 +489,18 @@ const fullscreenSvg =
                   ))
                 }
               </div>
-              <p class="obv3-flow-status" aria-live="polite">
+              <p class="cs-flow-status" aria-live="polite">
                 Showing step 1 of {FLOW.length}
               </p>
             </section>
-            <p class="obv3-body">
+            <p class="cs-body">
               The people building these templates were the engineers themselves.
               So rather than running a formal study with unfamiliar
               participants, I worked alongside the people who lived inside this
               workflow every day.
             </p>
             <p
-              class="obv3-body"
+              class="cs-body"
               style={hasAsset(LEGACY_FIGURE.src) ? "" : "margin-bottom:0"}
             >
               I interviewed the implementation team manager whose team built
@@ -517,7 +512,7 @@ const fullscreenSvg =
             </p>
             {
               hasAsset(LEGACY_FIGURE.src) && (
-                <figure class="obv3-figure">
+                <figure class="cs-figure">
                   <img
                     src={LEGACY_FIGURE.src}
                     alt={LEGACY_FIGURE.alt}
@@ -528,7 +523,7 @@ const fullscreenSvg =
                   />
                   <button
                     type="button"
-                    class="cd-media-maximize"
+                    class="cs-media-maximize"
                     aria-label="Maximize image"
                     title="Maximize image"
                     data-lightbox-trigger
@@ -542,29 +537,29 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-discovery" class="obv3-section obv3-section--overview">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">04<span>Discovery</span></div>
+      <section id="cs-discovery" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">04<span>Discovery</span></div>
           <div>
-            <h2 class="obv3-heading">Where effort was actually being spent</h2>
-            <p class="obv3-body">
+            <h2 class="cs-heading">Where effort was actually being spent</h2>
+            <p class="cs-body">
               I found that most of the time was going into mapping the response
               codes into the template rather than designing it.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               Every answer carried its own response code. The example form below
               was one of the most common, and it had twenty three questions, but
               forty five codes to map. Every form requires at least one output
               with all the fields mapped by default, and larger forms ended up
               requiring hundreds of mappings per form.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               Missing or mistyping a single code meant the field would not get
               filled, or worse, wrong information would be filled in on an
               official document.
             </p>
 
-            <figure class="obv3-figure">
+            <figure class="cs-figure">
               <img
                 src={responsemapping.src}
                 width={responsemapping.width}
@@ -577,7 +572,7 @@ const fullscreenSvg =
               />
               <button
                 type="button"
-                class="cd-media-maximize"
+                class="cs-media-maximize"
                 aria-label="Maximize image"
                 title="Maximize image"
                 data-lightbox-trigger
@@ -585,7 +580,7 @@ const fullscreenSvg =
               />
             </figure>
 
-            <p class="obv3-body" style="margin-top:24px">
+            <p class="cs-body" style="margin-top:24px">
               The audit also turned up things nobody remembered the reason for.
               One option, File Category, had been added for a single client and
               carried through every build since, though no one used it and no
@@ -597,26 +592,26 @@ const fullscreenSvg =
           </div>
         </div>
       </section>
-      <section id="obv3-reframing" class="obv3-section obv3-section--overview">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">05<span>Reframing</span></div>
+      <section id="cs-reframing" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">05<span>Reframing</span></div>
           <div>
-            <h2 class="obv3-heading">
+            <h2 class="cs-heading">
               From building a PDF editor to redesigning the workflow
             </h2>
-            <p class="obv3-body">The original requirement was simple:</p>
-            <blockquote class="obv3-blockquote">
+            <p class="cs-body">The original requirement was simple:</p>
+            <blockquote class="cs-blockquote">
               “How might we make PDF creation easier?”
             </blockquote>
-            <p class="obv3-body">
+            <p class="cs-body">
               But once I realised that it was the manual mapping that was taking
               up the engineer's time, I rephrased the requirement:
             </p>
-            <blockquote class="obv3-blockquote">
+            <blockquote class="cs-blockquote">
               “How might we remove manual mapping, so the engineers just build
               the layout?”
             </blockquote>
-            <p class="obv3-body">
+            <p class="cs-body">
               This reframing simplified the scope from building a brand new PDF
               editor inside the platform to a workflow redesign. By removing
               unnecessary steps, we would make the complex manual workflow
@@ -628,25 +623,25 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-datamodel" class="obv3-section obv3-section--overview">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">06<span>Mapping Model</span></div>
+      <section id="cs-datamodel" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">06<span>Mapping Model</span></div>
           <div>
-            <h2 class="obv3-heading">
+            <h2 class="cs-heading">
               Automating the mapping model before the interface
             </h2>
-            <p class="obv3-body">
+            <p class="cs-body">
               There are two parts to the output builder: a mapping layer and the
               layout builder. PDF was the container which had both of these
               layers packed together.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               If layout is built into the system, why keep PDF as the container
               at all? Can't the mapping data be stored separately as data
               bindings? I had worked on similar mapping systems before and
               immediately thought of JSON as a viable alternative.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               That was my theory, so I went and checked it. I reviewed the
               output templates built for several clients over the period and
               found that the design of them all followed a simple layout
@@ -656,7 +651,7 @@ const fullscreenSvg =
             </p>
 
             <div
-              class="obv3-datamodel-grid"
+              class="cs-datamodel-grid"
               style="--ink:#0f1524; --body:#253149; --soft:rgba(37,49,73,0.7); --muted:#5b6478; --line:rgba(79,70,229,0.16); --accent:#4f46e5; --accent-dim:#3730a3; --tint:rgba(79,70,229,0.06); --tint2:rgba(79,70,229,0.10); --red:#ef4444; --red-tint:rgba(239,68,68,0.06); --red-line:rgba(239,68,68,0.22); --mono:'IBM Plex Mono',Menlo,monospace; --serif:var(--font-title); --sans:var(--font); margin:32px 0 0; box-sizing:border-box; color:var(--body); font-family:var(--sans); display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:32px; align-items:start"
             >
               <!-- OLD WAY -->
@@ -673,7 +668,7 @@ const fullscreenSvg =
                       Before
                     </div>
                     <div
-                      style="font-family:var(--mono); font-size:11px; color:var(--red); border:1px solid var(--red-line); border-radius:999px; padding:4px 12px"
+                      style="font-family:var(--mono); font-size:12px; color:var(--red); border:1px solid var(--red-line); border-radius:999px; padding:4px 12px"
                     >
                       Stored on upload
                     </div>
@@ -747,15 +742,15 @@ const fullscreenSvg =
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap">
                           <span
-                            style="font-family:var(--mono); font-size:10px; color:var(--red); background:#fff; border:1px solid var(--red-line); border-radius:3px; padding:2px 6px"
+                            style="font-family:var(--mono); font-size:12px; color:var(--red); background:#fff; border:1px solid var(--red-line); border-radius:3px; padding:2px 6px"
                             >Q_10235_RESPONSE</span
                           >
                           <span
-                            style="font-family:var(--mono); font-size:10px; color:var(--red); background:#fff; border:1px solid var(--red-line); border-radius:3px; padding:2px 6px"
+                            style="font-family:var(--mono); font-size:12px; color:var(--red); background:#fff; border:1px solid var(--red-line); border-radius:3px; padding:2px 6px"
                             >Q_10238_RESPONSE</span
                           >
                           <span
-                            style="font-family:var(--mono); font-size:10px; color:var(--red); background:#fff; border:1px solid var(--red-line); border-radius:3px; padding:2px 6px"
+                            style="font-family:var(--mono); font-size:12px; color:var(--red); background:#fff; border:1px solid var(--red-line); border-radius:3px; padding:2px 6px"
                             >Q_10240_RESPONSE</span
                           >
                         </div>
@@ -763,7 +758,7 @@ const fullscreenSvg =
                     </div>
                   </div>
                   <div
-                    style="text-align:center; margin-top:12px; font-family:var(--mono); font-size:11px; color:var(--red)"
+                    style="text-align:center; margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--red)"
                   >
                     layout + mapping fused together
                   </div>
@@ -850,7 +845,7 @@ const fullscreenSvg =
                       After
                     </div>
                     <div
-                      style="font-family:var(--mono); font-size:11px; color:var(--accent); border:1px solid var(--line); border-radius:999px; padding:4px 12px"
+                      style="font-family:var(--mono); font-size:12px; color:var(--accent); border:1px solid var(--line); border-radius:999px; padding:4px 12px"
                     >
                       generated on demand
                     </div>
@@ -863,7 +858,7 @@ const fullscreenSvg =
                       style="border:1px solid var(--line); border-radius:12px; background:#fff; padding:16px; box-shadow:0 12px 30px rgba(79,70,229,0.08)"
                     >
                       <div
-                        style="font-family:var(--mono); font-size:11px; color:var(--accent); margin-bottom:12px"
+                        style="font-family:var(--mono); font-size:12px; color:var(--accent); margin-bottom:12px"
                       >
                         Layout · in system
                       </div>
@@ -903,12 +898,12 @@ const fullscreenSvg =
                       style="border:1px solid var(--line); border-radius:12px; background:#0f1524; padding:16px; box-shadow:0 12px 30px rgba(79,70,229,0.08)"
                     >
                       <div
-                        style="font-family:var(--mono); font-size:11px; color:#818cf8; margin-bottom:12px"
+                        style="font-family:var(--mono); font-size:12px; color:#818cf8; margin-bottom:12px"
                       >
                         bindings.json · stored
                       </div>
                       <pre
-                        style="margin:0; font-family:var(--mono); font-size:11px; line-height:1.7; color:#c7d2fe; white-space:pre">{"{"}
+                        style="margin:0; font-family:var(--mono); font-size:12px; line-height:1.7; color:#c7d2fe; white-space:pre">{"{"}
   <span style="color:#a5b4fc">"Q_10235_RESPONSE"</span>: <span style="color:#8fe3b8">"name"</span>,
   <span style="color:#a5b4fc">"Q_10238_RESPONSE"</span>: <span style="color:#8fe3b8">"gender"</span>,
   <span style="color:#a5b4fc">"Q_10240_RESPONSE"</span>: <span style="color:#8fe3b8">"ssn"</span>
@@ -916,7 +911,7 @@ const fullscreenSvg =
                     </div>
                   </div>
                   <div
-                    style="text-align:center; margin-top:12px; font-family:var(--mono); font-size:11px; color:var(--accent)"
+                    style="text-align:center; margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--accent)"
                   >
                     layout + mapping decoupled
                   </div>
@@ -983,7 +978,7 @@ const fullscreenSvg =
                 </ul>
               </div>
             </div>
-            <p class="obv3-body" style="margin-top:40px;">
+            <p class="cs-body" style="margin-top:40px;">
               I took this idea to the react team and they did a PoC based on my
               request and made my theory a reality. <strong
                 >It was faster and more efficient than creating a PDF document.
@@ -996,20 +991,20 @@ const fullscreenSvg =
       </section>
 
       <section
-        id="obv3-firstversion"
-        class="obv3-section obv3-section--contrast"
+        id="cs-firstversion"
+        class="cs-section cs-section--contrast"
       >
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">07<span>First version</span></div>
+        <div class="cs-section__inner">
+          <div class="cs-section__number">07<span>First version</span></div>
           <div>
-            <h2 class="obv3-heading">Going Wide on Purpose</h2>
-            <p class="obv3-body">
+            <h2 class="cs-heading">Going Wide on Purpose</h2>
+            <p class="cs-body">
               For the builder I wanted to build on the mental models users
               already understand. Like the modern form builders like Google
               Forms and Microsoft Forms, only change is that instead of dragging
               fields, users drag questions.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               To make this work seamlessly, I used existing react
               functionalities that I already designed for a customizable staff
               dashboard. It was already built and running. So, I took the core
@@ -1019,32 +1014,32 @@ const fullscreenSvg =
               allowing non technical users to build layouts without
               customisation.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               The point was to build a concrete foundation for the people to
               react to. It was how I turned a vague brief into a real
               conversation about what the product should and should not do.
             </p>
             <div
-              class="obv3-exploration-container"
+              class="cs-exploration-container"
               aria-label="First version mockups exploration"
               data-exploration-carousel
             >
-              <div class="obv3-exploration-wrap">
+              <div class="cs-exploration-wrap">
                 {
                   EXPLORATION_IMAGES.map((f, i) => (
                     <div
                       class:list={[
-                        "obv3-exploration-panel",
+                        "cs-exploration-panel",
                         { "is-active": i === 0 },
                       ]}
-                      id={`obv3-exploration-panel-${i}`}
+                      id={`cs-exploration-panel-${i}`}
                       role="tabpanel"
                       hidden={i !== 0}
                       data-exploration-panel
                     >
-                      <div class="obv3-exploration-media">
+                      <div class="cs-exploration-media">
                         <img
-                          class="obv3-exploration-image"
+                          class="cs-exploration-image"
                           src={f.image.src}
                           width={f.image.width}
                           height={f.image.height}
@@ -1056,7 +1051,7 @@ const fullscreenSvg =
                         />
                         <button
                           type="button"
-                          class="cd-media-maximize"
+                          class="cs-media-maximize"
                           aria-label="Maximize image"
                           title="Maximize image"
                           data-lightbox-trigger
@@ -1068,7 +1063,7 @@ const fullscreenSvg =
                 }
                 <button
                   type="button"
-                  class="obv3-exploration-control obv3-exploration-control--prev"
+                  class="cs-carousel-control cs-carousel-control--prev"
                   aria-label="Show previous mockup image"
                   title="Previous image"
                   data-exploration-previous
@@ -1076,7 +1071,7 @@ const fullscreenSvg =
                 />
                 <button
                   type="button"
-                  class="obv3-exploration-control obv3-exploration-control--next"
+                  class="cs-carousel-control cs-carousel-control--next"
                   aria-label="Show next mockup image"
                   title="Next image"
                   data-exploration-next
@@ -1088,14 +1083,14 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-concerns" class="obv3-section obv3-section--contrast">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">08<span>Concerns</span></div>
+      <section id="cs-concerns" class="cs-section cs-section--contrast">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">08<span>Concerns</span></div>
           <div>
-            <h2 class="obv3-heading">
+            <h2 class="cs-heading">
               What each team <br /> was worried about
             </h2>
-            <p class="obv3-body">
+            <p class="cs-body">
               Once stakeholders saw the initial designs, the concerns and
               suggestions came in fast. Each one pointed at something in the
               exploration that was too open, too risky, or too costly to
@@ -1104,7 +1099,7 @@ const fullscreenSvg =
             </p>
             {
               hasAsset(CONSTRAINTS_FIGURE.src) && (
-                <figure class="obv3-figure">
+                <figure class="cs-figure">
                   <img
                     src={CONSTRAINTS_FIGURE.src}
                     alt={CONSTRAINTS_FIGURE.alt}
@@ -1115,7 +1110,7 @@ const fullscreenSvg =
                   />
                   <button
                     type="button"
-                    class="cd-media-maximize"
+                    class="cs-media-maximize"
                     aria-label="Maximize image"
                     title="Maximize image"
                     data-lightbox-trigger
@@ -1126,16 +1121,16 @@ const fullscreenSvg =
               )
             }
 
-            <div class="obv3-concerns">
+            <div class="cs-concerns">
               {
                 CONCERNS.map((c) => (
-                  <div class={`obv3-concern obv3-concern--${c.color}`}>
-                    <span class="obv3-concern__team">{c.team}</span>
-                    <h3 class="obv3-concern__worry">“{c.worry}”</h3>
-                    <div class="obv3-concern__content">
-                      <p class="obv3-concern__context">{c.context}</p>
-                      <div class="obv3-concern__outcome">
-                        <span class="obv3-concern__outcome-label">
+                  <div class={`cs-concern cs-concern--${c.color}`}>
+                    <span class="cs-concern__team">{c.team}</span>
+                    <h3 class="cs-concern__worry">“{c.worry}”</h3>
+                    <div class="cs-concern__content">
+                      <p class="cs-concern__context">{c.context}</p>
+                      <div class="cs-concern__outcome">
+                        <span class="cs-concern__outcome-label">
                           {c.outcomeLabel ?? "What I did"}
                         </span>
                         <p>{c.outcome}</p>
@@ -1149,30 +1144,30 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-solution" class="obv3-section obv3-section--solution">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">09<span>Solution</span></div>
+      <section id="cs-solution" class="cs-section cs-section--solution">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">09<span>Solution</span></div>
           <div>
-            <div class="obv3-solution-info" style="margin-bottom:40px">
-              <h2 class="obv3-heading">
+            <div class="cs-solution-info" style="margin-bottom:40px">
+              <h2 class="cs-heading">
                 From manual workflows<br />to a visual system
               </h2>
             </div>
-            <div class="obv3-features-list">
+            <div class="cs-features-list">
               {
                 FEATURES.map((feature) => (
-                  <div class="obv3-feature-card">
-                    <div class="obv3-feature__header">
-                      <h3 class="obv3-feature__title">{feature.title}</h3>
-                      <p class="obv3-feature__body">{feature.body}</p>
+                  <div class="cs-feature-card">
+                    <div class="cs-feature__header">
+                      <h3 class="cs-feature__title">{feature.title}</h3>
+                      <p class="cs-feature__body">{feature.body}</p>
                     </div>
-                    <div class="obv3-feature__helps-wrap">
-                      <div class="obv3-feature__helps-label">How it helps</div>
-                      <ul class="obv3-feature__helps-list">
+                    <div class="cs-feature__helps-wrap">
+                      <div class="cs-feature__helps-label">How it helps</div>
+                      <ul class="cs-feature__helps-list">
                         {feature.helps.map((h) => (
                           <li>
                             <span
-                              class="obv3-feature__helps-mark"
+                              class="cs-feature__helps-mark"
                               aria-hidden="true"
                               set:html={checkSvg}
                             />
@@ -1181,11 +1176,11 @@ const fullscreenSvg =
                         ))}
                       </ul>
                     </div>
-                    <div class="obv3-feature__media-wrap">
-                      <div class="obv3-feature__media" style="transform:none">
-                        <div class="obv3-feature__media-frame">
+                    <div class="cs-feature__media-wrap">
+                      <div class="cs-feature__media" style="transform:none">
+                        <div class="cs-feature__media-frame">
                           <video
-                            class="obv3-feature__video"
+                            class="cs-feature__video"
                             data-src={feature.videoPath}
                             muted
                             loop
@@ -1194,18 +1189,18 @@ const fullscreenSvg =
                           />
                           <button
                             type="button"
-                            class="obv3-feature__fullscreen"
+                            class="cs-feature__fullscreen"
                             aria-label="Expand video"
                             title="Expand video"
                             set:html={fullscreenSvg}
                           />
-                          <div class="obv3-feature__duration">
+                          <div class="cs-feature__duration">
                             {feature.duration}
                           </div>
                         </div>
                       </div>
                     </div>
-                    <p class="obv3-feature__caption">{feature.caption}</p>
+                    <p class="cs-caption cs-feature__caption">{feature.caption}</p>
                   </div>
                 ))
               }
@@ -1214,21 +1209,21 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-impact" class="obv3-section obv3-section--impact">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">10<span>Impact</span></div>
+      <section id="cs-impact" class="cs-section cs-section--impact">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">10<span>Impact</span></div>
           <div>
-            <h2 class="obv3-heading">
+            <h2 class="cs-heading">
               A Faster Workflow,<br />and a Door It Opened
             </h2>
-            <p class="obv3-body">
+            <p class="cs-body">
               The clearest win was speed. Time to create a template reduced from
               multiple days to a few hours, even for the engineers who already
               knew the old process. Onboarding new organizations got faster, and
               customer requirements could be turned around more quickly instead
               of joining a long queue.
             </p>
-            <p class="obv3-body">
+            <p class="cs-body">
               The quieter win was what it opened up. With the mapping gone,
               building a template no longer demanded engineering knowledge, only
               an understanding of the form. Engineers still run the builder
@@ -1236,57 +1231,57 @@ const fullscreenSvg =
               step is handing it to the organizations directly, so they can
               update their own outputs without waiting on anyone.
             </p>
-            <div class="obv3-impact-stats">
-              <div class="obv3-impact-stat">
-                <div class="obv3-stat-label">Template Creation</div>
-                <div class="obv3-stat-num">
-                  <span class="obv3-stat-unit">↓</span>90<span
-                    class="obv3-stat-unit">%</span
+            <div class="cs-impact-stats">
+              <div class="cs-impact-stat">
+                <div class="cs-stat-label">Template Creation</div>
+                <div class="cs-stat-num">
+                  <span class="cs-stat-unit">↓</span>90<span
+                    class="cs-stat-unit">%</span
                   >
                 </div>
-                <div class="obv3-stat-desc">
+                <div class="cs-stat-desc">
                   Days of engineer time down to less than an hour, even for
                   engineers who knew the old process
                 </div>
               </div>
-              <div class="obv3-impact-stat">
-                <div class="obv3-stat-label">Manual Mapping</div>
-                <div class="obv3-stat-num">Zero</div>
-                <div class="obv3-stat-desc">
+              <div class="cs-impact-stat">
+                <div class="cs-stat-label">Manual Mapping</div>
+                <div class="cs-stat-num">Zero</div>
+                <div class="cs-stat-desc">
                   Gone entirely, along with the errors that came from mapping
                   each field manually
                 </div>
               </div>
-              <div class="obv3-impact-stat">
-                <div class="obv3-stat-label">Static Storage</div>
-                <div class="obv3-stat-num">
-                  <span class="obv3-stat-unit">↓</span>100<span
-                    class="obv3-stat-unit">%</span
+              <div class="cs-impact-stat">
+                <div class="cs-stat-label">Static Storage</div>
+                <div class="cs-stat-num">
+                  <span class="cs-stat-unit">↓</span>100<span
+                    class="cs-stat-unit">%</span
                   >
                 </div>
-                <div class="obv3-stat-desc">
+                <div class="cs-stat-desc">
                   Documents generated on demand, with no base files stored or
                   maintained
                 </div>
               </div>
             </div>
-            <div class="obv3-impact-compare">
+            <div class="cs-impact-compare">
               <div>
-                <div class="obv3-meta-label" style="margin-bottom:16px">
+                <div class="cs-meta-label" style="margin-bottom:16px">
                   Before
                 </div>
                 <p>
-                  <span class="obv3-emph-red">2 to 3 days</span> of dedicated engineer
+                  <span class="cs-emph-red">2 to 3 days</span> of dedicated engineer
                   time per template, external software, and a manual mapping for every
                   field.
                 </p>
               </div>
               <div>
-                <div class="obv3-meta-label" style="margin-bottom:16px">
+                <div class="cs-meta-label" style="margin-bottom:16px">
                   After
                 </div>
                 <p>
-                  <span class="obv3-emph-accent"> Less than an hour</span>,
+                  <span class="cs-emph-accent"> Less than an hour</span>,
                   entirely inside the product, with no external tools and no
                   manual mapping.
                 </p>
@@ -1296,24 +1291,24 @@ const fullscreenSvg =
         </div>
       </section>
 
-      <section id="obv3-evolution" class="obv3-section obv3-section--evolution">
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">11<span>Future</span></div>
+      <section id="cs-evolution" class="cs-section cs-section--evolution">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">11<span>Future</span></div>
           <div>
-            <h2 class="obv3-heading">Exploring a More Radical Idea</h2>
-            <p class="obv3-body">
+            <h2 class="cs-heading">Exploring a More Radical Idea</h2>
+            <p class="cs-body">
               During discovery, I proposed a larger improvement that could make
               the entire process even more seamless. The current workflow still
               treated forms as the source of truth. But most of the information
               users were collecting already existed somewhere in the platform.
             </p>
-            <div class="obv3-evolution-box">
-              <p class="obv3-evolution-quote">
+            <div class="cs-evolution-box">
+              <p class="cs-evolution-quote">
                 "What if we design the output first and let the system determine
                 what information is actually missing?"
               </p>
             </div>
-            <p class="obv3-body obv3-evolution-tail" style="margin-bottom:0">
+            <p class="cs-body cs-evolution-tail" style="margin-bottom:0">
               This was out of scope for this release as it required rewriting
               core system logic. But it shaped how we started thinking about
               where the platform could go.
@@ -1323,22 +1318,22 @@ const fullscreenSvg =
       </section>
 
       <section
-        id="obv3-reflection"
-        class="obv3-section obv3-section--reflection"
+        id="cs-reflection"
+        class="cs-section cs-section--reflection"
       >
-        <div class="obv3-section__inner">
-          <div class="obv3-section__number">12<span>Reflection</span></div>
+        <div class="cs-section__inner">
+          <div class="cs-section__number">12<span>Reflection</span></div>
           <div>
-            <p class="obv3-body">
+            <p class="cs-body">
               The ask was to make PDF creation easier. The real opportunity was
               understanding why it was hard in the first place. Once I mapped
               the workflow and found the hidden dependencies, I could remove a
               major part of the workflow rather than just making it less
               annoying.
             </p>
-            <p class="obv3-body" style="margin-bottom:0">
+            <p class="cs-body" style="margin-bottom:0">
               The result was more than a better interface. <span
-                class="obv3-reflection-tail">It was a simpler system.</span
+                class="cs-reflection-tail">It was a simpler system.</span
               >
             </p>
           </div>
@@ -1354,65 +1349,7 @@ const fullscreenSvg =
 </CaseStudyLayout>
 
 <script>
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  // Shared wiring for both carousels: 10s autoplay (paused on hover, focus, or
-  // an open lightbox — re-checked live each tick so a stale flag can't strand
-  // it), horizontal swipe, in-view gating, and reduced-motion. `advance(delta)`
-  // is the only thing each carousel supplies. Returns `start` so click/keyboard
-  // handlers can restart the timer after a manual move.
-  const autoCarousel = (
-    carousel: HTMLElement,
-    advance: (delta: number) => void,
-  ) => {
-    let intervalId: number | undefined;
-    let isVisible = false;
-
-    const start = () => {
-      if (intervalId !== undefined) window.clearInterval(intervalId);
-      intervalId = undefined;
-      if (!isVisible || reduceMotion.matches) return;
-      intervalId = window.setInterval(() => {
-        if (
-          carousel.matches(":hover") ||
-          carousel.contains(document.activeElement) ||
-          document.querySelector(".cd-lightbox.is-open")
-        )
-          return;
-        advance(1);
-      }, 10000);
-    };
-
-    let touchStartX = 0;
-    carousel.addEventListener(
-      "touchstart",
-      (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      },
-      { passive: true },
-    );
-    carousel.addEventListener(
-      "touchend",
-      (e) => {
-        start();
-        const dx = e.changedTouches[0].screenX - touchStartX;
-        if (dx < -50) advance(1);
-        if (dx > 50) advance(-1);
-      },
-      { passive: true },
-    );
-
-    new IntersectionObserver(
-      ([entry]) => {
-        isVisible = entry.isIntersecting;
-        start();
-      },
-      { threshold: 0.25 },
-    ).observe(carousel);
-
-    reduceMotion.addEventListener("change", start);
-    return start;
-  };
+  import { autoCarousel } from "../scripts/auto-carousel";
 
   const carousels = document.querySelectorAll<HTMLElement>(
     "[data-flow-carousel]",
@@ -1424,7 +1361,7 @@ const fullscreenSvg =
     const panels = Array.from(
       carousel.querySelectorAll<HTMLElement>("[data-flow-panel]"),
     );
-    const status = carousel.querySelector<HTMLElement>(".obv3-flow-status");
+    const status = carousel.querySelector<HTMLElement>(".cs-flow-status");
     let activeIndex = 0;
 
     const update = (index: number, moveFocus = false) => {
@@ -1438,7 +1375,7 @@ const fullscreenSvg =
 
         if (selected) {
           const fill = tab.querySelector<HTMLElement>(
-            ".obv3-flow-tab__progress",
+            ".cs-flow-tab__progress",
           );
           if (fill) {
             fill.style.animation = "none";

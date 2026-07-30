@@ -9,6 +9,7 @@ import {
   type ZoneId,
 } from "./content";
 import { MOBILE_BREAKPOINT, STAGE, EASE } from "./utils/constants";
+import { formTakingHref } from "../case-studies/shared";
 
 import SkillsCard from "./components/SkillsCard";
 import Legend from "./components/Legend";
@@ -24,9 +25,12 @@ import logoSvg from "./assets/logo.svg?raw";
 import moonSvg from "./assets/moon.svg?raw";
 import profileImg from "../assets/profile.webp?url";
 import sunSvg from "./assets/sun.svg?raw";
-import googleUxBadge from "../assets/google-ux.webp?url";
-import upworkBadge from "./assets/Upwork-TopRated-Badge.svg?url";
 import whatsappIcon from "./assets/whatsapp.svg?url";
+
+// Also served to the landing page from public/assets — referenced by URL rather
+// than bundled a second time.
+const googleUxBadge = "/assets/google-ux.webp";
+const upworkBadge = "/assets/upwork-top-rated.svg";
 import { buildAiBadgeMarkup } from "../lib/ai-badge";
 import topArrowSvg from "./assets/top-right-arrow.svg?raw";
 import pinIcon from "./assets/pin.svg?url";
@@ -58,7 +62,7 @@ const MAX_ZOOM = 2;
 const CASE_STUDY_ROUTES: Record<string, string> = {
   "output-builder": "/output-builder",
   "form-taking": "/form-taking",
-  "aistylist": "/ai-stylist",
+  "aistylist": "/aistylist",
   "clinical-documentation": "/clinical-documentation",
 };
 
@@ -223,7 +227,6 @@ function App() {
   const startAnimations = true;
   const [activeZone, setActiveZone] = useState<ZoneId>("about");
   const [isEntering, setIsEntering] = useState(!restoredCam);
-  const [isLoaded, setIsLoaded] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const camX = useMotionValue(0);
@@ -274,11 +277,6 @@ function App() {
     animate(camScale, target.scale, config);
   };
 
-  const isMac = typeof window !== 'undefined'
-    ? navigator.userAgent.toUpperCase().indexOf('MAC') >= 0
-    : false;
-  const modifierKey = isMac ? '⌘' : 'Ctrl';
-
   const socialPos = {
     x: isMobile ? 1950 : 2192,
     y: 1220,
@@ -296,8 +294,15 @@ function App() {
   }, []);
 
   const openCaseStudy = (id: string, _origin?: { x: number; y: number }) => {
-    const route = CASE_STUDY_ROUTES[id];
+    // Form Taking is a deck, not a page — on a phone it resolves straight to
+    // the Figma slides instead of a route we would only render a link on.
+    const route =
+      id === "form-taking" ? formTakingHref() : CASE_STUDY_ROUTES[id];
     if (!route) return;
+    if (route.startsWith("http")) {
+      window.open(route, "_blank", "noopener");
+      return;
+    }
     sessionStorage.setItem(
       CAM_KEY,
       JSON.stringify({ x: camX.get(), y: camY.get(), scale: camScale.get() }),
@@ -349,7 +354,7 @@ function App() {
         return () => window.clearTimeout(timer);
       }
     }
-  }, [isLoaded, isEntering, isMobile]);
+  }, [isEntering, isMobile]);
 
   useEffect(() => {
     window.localStorage.setItem("viknesh-theme", theme);
@@ -912,10 +917,7 @@ function App() {
                     >
                       ?
                     </button>
-                    <Legend
-                      isOpen={isLegendOpen}
-                      modifierKey={modifierKey}
-                    />
+                    <Legend isOpen={isLegendOpen} />
                   </div>
                   {!isMobile && !isTablet && (
                     <a className="alt-landing-link" href="/" title="Normal Landing">

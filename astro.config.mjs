@@ -9,6 +9,9 @@ export default defineConfig({
   site: 'https://viknesh.me',
   output: 'static',
   integrations: [react(), sitemap()],
+  // The AI Stylist Figma-deck page was replaced by the written study at
+  // /aistylist; keep the old URL working for anything already linking to it.
+  redirects: { '/ai-stylist': '/aistylist' },
   // Inline each page's CSS into its <head> so first paint doesn't wait on a
   // separate stylesheet fetch (the render-blocking-request / network-tree
   // findings). Trades cross-page CSS caching for faster FCP — worth it on a

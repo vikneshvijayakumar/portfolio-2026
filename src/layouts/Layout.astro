@@ -1,6 +1,7 @@
 ---
 import '../styles/fonts.css';
 import '../styles/global.css';
+import ThemeInit from '../components/ThemeInit.astro';
 
 interface Props {
   title?: string;
@@ -12,11 +13,11 @@ interface Props {
 const {
   title = "Viknesh Vijayakumar — Senior Product Designer",
   description = "Senior Product Designer with 10+ years across healthcare AI, edtech, and B2B SaaS. I take complex systems and turn them into interfaces people can actually use.",
-  ogImage = "/og-image.png",
+  ogImage = "/assets/profile.webp",
   pageClass = "",
 } = Astro.props;
 
-const siteURL = Astro.site ?? "https://vikneshv.com";
+const siteURL = Astro.site ?? "https://viknesh.me";
 const canonicalURL = new URL(Astro.url.pathname, siteURL);
 const ogImageURL = new URL(ogImage, siteURL);
 ---
@@ -24,18 +25,7 @@ const ogImageURL = new URL(ogImage, siteURL);
 <!DOCTYPE html>
 <html lang="en" class={pageClass}>
 <head>
-  <script is:inline>
-    // Resolve the theme before first paint so dark mode never flashes white.
-    (() => {
-      const saved = localStorage.getItem("viknesh-theme");
-      document.documentElement.dataset.theme =
-        saved === "ink" || saved === "paper"
-          ? saved
-          : matchMedia("(prefers-color-scheme: dark)").matches
-            ? "ink"
-            : "paper";
-    })();
-  </script>
+  <ThemeInit />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>

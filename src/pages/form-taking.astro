@@ -2,8 +2,14 @@
 import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
 import CaseStudyFooter from '../components/CaseStudyFooter.astro';
 
-const FIGMA_SRC =
-  "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdeck%2FAstzpq5hdC0rIVFP8qBOek%2FForm-Taking%3Fnode-id%3D1-42%26t%3DGPbiU7ok5J07P8BF-1";
+import { FORM_TAKING_DECK } from '../case-studies/shared';
+
+// The embed URL is derived from the deck URL, so the link people open and the
+// frame they scrub are always the same slides. Phones are normally sent
+// straight to the deck from the card and never land here — this page still
+// handles a direct hit or a shared link on a narrow screen.
+const DECK_URL = FORM_TAKING_DECK;
+const FIGMA_SRC = `https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(DECK_URL)}`;
 ---
 
 <CaseStudyLayout
@@ -11,41 +17,75 @@ const FIGMA_SRC =
   description="How Viknesh Vijayakumar turned fragmented enrollment forms into one guided, mobile-first experience."
   ogImage="/assets/form-taking.webp"
 >
-  <div class="ft-overlay" role="dialog" aria-modal="true" aria-label="Form Taking case study">
-    <div class="ft-topbar">
-      <a class="ft-back" href="/" aria-label="Back">
+  <div class="cs-overlay" role="dialog" aria-modal="true" aria-label="Form Taking case study">
+    <div class="cs-topbar">
+      <a class="cs-back" href="/" aria-label="Back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6" />
         </svg>
         <span>Back</span>
       </a>
-      <div class="ft-topbar__title">
-        <span class="ft-topbar__eyebrow">Empyra · 2025</span>
-        <span class="ft-topbar__name">Form Taking</span>
+      <div class="cs-topbar__title">
+        <span class="cs-topbar__eyebrow">Empyra · 2025</span>
+        <span class="cs-topbar__name">Form Taking</span>
       </div>
     </div>
 
-    <div class="ft-body">
-      <section class="ft-slides">
-        <div class="ft-slides__frame">
-          <iframe
-            class="ft-slides__iframe"
-            src={FIGMA_SRC}
-            title="Form Taking — Figma Slides"
-            allowfullscreen
-            allow="clipboard-write; fullscreen"
-            loading="lazy"
-          ></iframe>
-        </div>
-        <p class="ft-slides__caption">
+    <div class="cs-scroll">
+      <section class="cs-deck">
+        {/* Empty in the server HTML on purpose — the embed is injected below,
+            and only on viewports wide enough to read a 16:9 slide. `:empty`
+            hides the frame everywhere else. */}
+        <div class="cs-deck__frame" data-embed={FIGMA_SRC}></div>
+        <p class="cs-caption cs-deck__caption">
           Use the slide controls inside the frame to navigate. Press F for fullscreen.
         </p>
+        <a
+          class="cs-deck__open download-button"
+          href={DECK_URL}
+          target="_blank"
+          rel="noopener"
+        >
+          Open the deck in Figma ↗
+        </a>
       </section>
-    </div>
 
-    <CaseStudyFooter
-      title="Let's build something together"
-      sub="Have questions about this case study or looking to collaborate on form design systems and user experience architecture?"
-    />
+      <CaseStudyFooter
+        title="Let's build something together"
+        sub="Have questions about this case study or looking to collaborate on form design systems and user experience architecture?"
+      />
+    </div>
   </div>
+
+  <script is:inline>
+    // A 16:9 deck at phone width is ~200px tall — unreadable, and it is the
+    // whole page. Below the breakpoint we ship the link alone and let Figma's
+    // own viewer handle small screens, which it does far better than an iframe
+    // we squeeze. Building the element here rather than hiding one in CSS also
+    // keeps a heavy third-party embed off mobile connections entirely.
+    (function () {
+      var mq = window.matchMedia("(min-width: 641px)");
+      function sync() {
+        var frame = document.querySelector(".cs-deck__frame");
+        if (!frame) return;
+        if (mq.matches === !!frame.firstChild) return;
+        if (!mq.matches) {
+          frame.replaceChildren();
+          return;
+        }
+        var f = document.createElement("iframe");
+        f.className = "cs-deck__iframe";
+        f.src = frame.dataset.embed;
+        f.title = "Form Taking — Figma Slides";
+        f.allow = "clipboard-write; fullscreen";
+        f.allowFullscreen = true;
+        frame.appendChild(f);
+      }
+      // Runs on rotate and resize too, so a phone turned landscape gets the
+      // deck and a desktop window dragged narrow drops it again.
+      sync();
+      mq.addEventListener("change", sync);
+      window.addEventListener("DOMContentLoaded", sync);
+    })();
+  </script>
 </CaseStudyLayout>

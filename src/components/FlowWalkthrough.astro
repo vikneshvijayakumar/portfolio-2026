@@ -1,0 +1,733 @@
+---
+/**
+ * Old/New interactive walkthrough: one phone frame, a segmented toggle, and an
+ * autoplaying step engine that drives a tap dot to each screen's CTA.
+ *
+ * Tap targets are percentages of the frame, not pixels, so the frame can scale
+ * with the viewport without the dot drifting off the button.
+ */
+export interface Step {
+  img: string;
+  /** Tap point as a fraction of the frame, e.g. { x: 0.5, y: 0.91 }. */
+  tap?: { x: number; y: number };
+  /** Caption shown beside the frame while this step is up. */
+  note?: string;
+  /** What the note points at, if not the tap point. Same fraction units. */
+  noteAt?: { x: number; y: number };
+  /** ms to hold before advancing when there is no tap to play. */
+  hold?: number;
+  /** Taller than a phone screen: show it whole and let the reader scroll it. */
+  tall?: boolean;
+}
+
+interface Props {
+  id: string;
+  oldLabel?: string;
+  newLabel?: string;
+  oldSteps: Step[];
+  newSteps: Step[];
+}
+
+const {
+  id,
+  oldLabel = "Old UI",
+  newLabel = "New UI",
+  oldSteps,
+  newSteps,
+} = Astro.props;
+---
+
+<div
+  class="fw cs-stage"
+  id={id}
+  data-old={JSON.stringify(oldSteps)}
+  data-new={JSON.stringify(newSteps)}
+>
+  <div class="fw__bar">
+    <div class="fw__toggle" role="tablist" aria-label="Compare old and new">
+      <button class="fw__tab" role="tab" data-side="old" aria-selected="false">
+        {oldLabel}
+      </button>
+      <button class="fw__tab" role="tab" data-side="new" aria-selected="true">
+        {newLabel}
+      </button>
+    </div>
+
+    <div class="fw__controls">
+      <span class="fw__count"><b data-idx>1</b> / <span data-total></span></span
+      >
+      <button class="fw__ctrl" data-prev aria-label="Previous step">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"><path d="M15 18l-6-6 6-6"></path></svg
+        >
+      </button>
+      <button class="fw__ctrl fw__ctrl--play" data-play aria-label="Play">
+        <svg
+          class="fw__icon fw__icon--play"
+          viewBox="0 0 24 24"
+          fill="currentColor"><path d="M8 5v14l11-7z"></path></svg
+        >
+        <svg
+          class="fw__icon fw__icon--pause"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          ><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg
+        >
+      </button>
+      <button class="fw__ctrl" data-next aria-label="Next step">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg
+        >
+      </button>
+    </div>
+  </div>
+
+  <div class="fw__stage" data-stage>
+    <div class="fw__frame cs-phone" data-frame>
+      <img
+        class="fw__screen"
+        data-screen
+        src={newSteps[0].img}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+      <span class="fw__dot" data-dot></span>
+      <span class="fw__ripple" data-ripple></span>
+    </div>
+    <div class="fw__anno" data-anno aria-live="polite">
+      <p class="fw__note" data-note></p>
+      <span class="fw__lead"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Surface and device come from .cs-stage / .cs-phone in study-aistylist.css,
+     shared with the frame strip. Only sizing and behaviour live here. */
+  .fw {
+    --fw-dissolve: 400ms;
+  }
+
+  /* ── Top bar: no surface of its own, just the two groups floating at the
+     top edge — sides on the left, transport on the right. ── */
+  .fw__bar {
+    /* Ink for the stage, not the case study's own body colour — the stage
+       carries its own light/dark pair. See .cs-overlay--asx. */
+    --fw-ink: var(--asx-ink, #2b266d);
+    --fw-ink-soft: color-mix(in srgb, var(--fw-ink) 62%, var(--asx-fade, #fff));
+    --fw-hairline: color-mix(in srgb, var(--fw-ink) 20%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+  }
+
+  /* ── Old / New segmented toggle ── */
+  .fw__toggle {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .fw__tab {
+    font-family: var(--cs-font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--fw-ink-soft);
+    padding: 8px 20px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .fw__tab[aria-selected="true"] {
+    background: var(--cs-accent);
+    color: #fff;
+  }
+
+  /* ── Stage: the frame is centred and stays centred. The annotation is taken
+     out of flow and anchored to the point on the screen it describes, so a
+     caption appearing never shifts the phone. ── */
+  .fw__stage {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 8px 16px 32px;
+  }
+
+  /* Sized off the viewport, not a fixed width: a full-height phone is taller
+     than the case-study scroll band, and the frame has to sit centred in view
+     with the toggle above and the controls below it. */
+  .fw__frame {
+    flex: none;
+    height: min(520px, 52vh);
+    cursor: pointer;
+  }
+
+  .fw__screen {
+    transition: opacity var(--fw-dissolve) ease;
+  }
+
+  .fw__screen[data-out] {
+    opacity: 0;
+  }
+
+  /* Tap dot: parked at the CTA it is about to press. */
+  .fw__dot,
+  .fw__ripple {
+    position: absolute;
+    border-radius: 50%;
+    translate: -50% -50%;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* The two axes run on different durations and different curves, so the dot
+     travels a shallow arc instead of a ruler-straight line, and settles on one
+     axis slightly before the other — closer to how a hand actually arrives.
+     JS sets the durations from the distance; a flick across the screen and a
+     nudge to the next field should not take the same time. */
+  .fw__dot {
+    width: 32px;
+    height: 32px;
+    background: color-mix(in srgb, var(--cs-accent) 40%, transparent);
+    border: 2px solid rgb(255 255 255 / 0.9);
+    transition:
+      left var(--fw-mx, 900ms) cubic-bezier(0.4, 0.02, 0.2, 1),
+      top var(--fw-my, 780ms) cubic-bezier(0.36, 0.1, 0.24, 1),
+      opacity 0.2s ease,
+      scale 0.12s ease-out;
+  }
+
+  /* Contact: the ring dips as it presses, then comes back. */
+  .fw__dot[data-press] {
+    scale: 0.82;
+  }
+
+  .fw__ripple {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--cs-accent);
+  }
+
+  .fw__ripple[data-pulse] {
+    animation: fw-ripple 0.45s cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+
+  @keyframes fw-ripple {
+    from {
+      opacity: 1;
+      scale: 0.2;
+    }
+    to {
+      opacity: 0;
+      scale: 2.2;
+    }
+  }
+
+  /* Anchored annotation: JS sets --fw-x / --fw-y (the point on the screen) and
+     --fw-lead (how far the line has to travel to reach it). The wrapper's right
+     edge lands exactly on that point. */
+  .fw__anno {
+    position: absolute;
+    right: var(--fw-x, 50%);
+    top: var(--fw-y, 50%);
+    translate: -16px -50%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.4s ease,
+      translate 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .fw__anno[data-show] {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+
+  /* Mirrored: anchored by its left edge, arrow pointing back at the screen. */
+  .fw__anno[data-side-right] {
+    right: auto;
+    left: var(--fw-x, 50%);
+    flex-direction: row-reverse;
+    translate: 16px -50%;
+  }
+
+  .fw__anno[data-side-right][data-show] {
+    translate: 0 -50%;
+  }
+
+  .fw__anno[data-side-right] .fw__note {
+    text-align: left;
+  }
+
+  .fw__anno[data-side-right] .fw__lead::after {
+    left: auto;
+    right: -8px;
+    border-right: 0;
+    border-left: 8px solid var(--cs-accent);
+  }
+
+  .fw__note {
+    width: var(--fw-note-w, 240px);
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: right;
+    /* Ink for the stage, not the case-study body colour. */
+    color: var(--asx-ink, #2b266d);
+    text-wrap: balance;
+  }
+
+  /* The leader: a dashed line that leaves the point on the screen and ends in a
+     ring against the text, so the marker never sits over the screenshot. */
+  .fw__lead {
+    position: relative;
+    flex: none;
+    width: var(--fw-lead, 72px);
+    height: 2px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--cs-accent) 0 4px,
+      transparent 4px 8px
+    );
+  }
+
+  /* Arrowhead at the text end of the line. */
+  .fw__lead::after {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 8px solid var(--cs-accent);
+    translate: 0 -50%;
+  }
+
+  /* ── Controls ── */
+  .fw__controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fw__ctrl {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: none;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--fw-ink-soft);
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .fw__ctrl svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .fw__ctrl:hover {
+    color: var(--fw-ink);
+    background: color-mix(in srgb, var(--cs-accent) 16%, transparent);
+  }
+
+  .fw__ctrl--play {
+    background: var(--cs-accent);
+    color: #fff;
+  }
+
+  .fw__ctrl--play:hover {
+    background: var(--cs-accent);
+    color: #fff;
+  }
+
+  /* Both icons live in the same grid cell; the button's state picks one. The
+     `hidden` attribute is not honoured on SVG elements, which left the button
+     empty mid-playback. */
+  .fw__icon--pause,
+  .fw__ctrl--play[data-playing] .fw__icon--play {
+    display: none;
+  }
+
+  .fw__ctrl--play[data-playing] .fw__icon--pause {
+    display: block;
+  }
+
+  .fw__count {
+    font-family: var(--cs-font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--fw-ink-soft);
+    padding: 0 8px;
+  }
+
+  .fw__count b {
+    color: var(--fw-ink);
+    font-weight: 500;
+  }
+
+  /* Below the breakpoint there is no room beside the frame for a leader, so the
+     note drops under it. `position: static` also neutralises the inline
+     right/top JS sets for the anchored layout. */
+  @media (max-width: 900px) {
+    .fw__stage {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Narrow enough that the bar's two groups no longer fit side by side at
+       their desktop sizes: tighten them and let them wrap as a last resort,
+       rather than letting the labels break mid-phrase. */
+    .fw__bar {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+    }
+
+    .fw__tab {
+      padding: 8px 12px;
+    }
+
+    /* Keeps the transport against the right edge when it wraps to its own row. */
+    .fw__controls {
+      margin-left: auto;
+    }
+
+    .fw__tab,
+    .fw__count {
+      white-space: nowrap;
+    }
+
+    /* Height-capped here too — a full-width phone pushes the note off screen. */
+    .fw__frame {
+      height: min(440px, 52vh);
+      width: auto;
+    }
+
+    /* In flow here, so its space is reserved: without a min-height the card
+       grows and shrinks as annotated steps come and go. */
+    .fw__anno {
+      position: static;
+      translate: 0 8px;
+      min-height: 80px;
+    }
+
+    .fw__anno[data-show] {
+      translate: 0 0;
+    }
+
+    .fw__note {
+      width: min(320px, 80vw);
+      text-align: center;
+    }
+
+    .fw__lead {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fw__dot,
+    .fw__screen,
+    .fw__anno {
+      transition-duration: 1ms;
+    }
+  }
+</style>
+
+<script>
+  type Pt = { x: number; y: number };
+  type Step = {
+    img: string;
+    tap?: Pt;
+    note?: string;
+    noteAt?: Pt;
+    hold?: number;
+    tall?: boolean;
+  };
+
+  /** Playback timings, per the walkthrough spec. */
+  const MOVE_MIN = 460; // cursor travel, a nudge to the next control
+  const MOVE_MAX = 1200; // cursor travel, corner to corner
+  const PRESS = 130; // dip on contact, before the ripple
+  const TAP_HOLD = 600; // pause on the button after the tap ripple
+  const DISSOLVE = 400; // cross-dissolve between screens
+  const SETTLE = 700; // beat after a screen lands before the cursor sets off
+  const READ = 3200; // rest on the button while an annotation is read
+  const PAD = 16; // .fw__stage horizontal padding
+
+  function initWalkthrough(root: HTMLElement) {
+    const q = <T extends HTMLElement>(sel: string) =>
+      root.querySelector(sel) as T;
+
+    const sets: Record<string, Step[]> = {
+      old: JSON.parse(root.dataset.old || "[]"),
+      new: JSON.parse(root.dataset.new || "[]"),
+    };
+
+    const screen = q<HTMLImageElement>("[data-screen]");
+    const frame = q("[data-frame]");
+    const dot = q("[data-dot]");
+    const ripple = q("[data-ripple]");
+    const note = q("[data-note]");
+    const anno = q("[data-anno]");
+    const stage = q("[data-stage]");
+    const idxOut = q("[data-idx]");
+    const totalOut = q("[data-total]");
+    const playBtn = q("[data-play]");
+
+    let side: "old" | "new" = "new";
+    let i = 0;
+    let playing = false;
+    let busy = false;
+    let anchor: Pt | null = null;
+    // Set once the reader drives it themselves — a manual step or a deliberate
+    // pause. Until then the walkthrough plays whenever it is on screen.
+    let handControl = false;
+    // Where the cursor is now, so the next move knows how far it has to travel.
+    let dotAt: Pt = { x: 0.5, y: 0.5 };
+    const timers: number[] = [];
+    // The dissolve swap is kept out of `timers`: clear() cancels playback, and
+    // cancelling the swap too left the previous screen on show under the new
+    // step number whenever a pause or a scroll landed inside the dissolve.
+    let swapTimer = 0;
+
+    const steps = () => sets[side];
+    const after = (ms: number, fn: () => void) =>
+      timers.push(window.setTimeout(fn, ms));
+    const clear = () => {
+      timers.splice(0).forEach(clearTimeout);
+      busy = false;
+    };
+
+    /**
+     * Warm the neighbouring screens rather than every screen up front: the
+     * section costs one image on first paint instead of the whole flow. Both
+     * neighbours, not just the next one — Prev is a step like any other, and a
+     * cold image leaves the frame empty for as long as it takes to decode.
+     */
+    function preloadNeighbours() {
+      const list = steps();
+      const n = list.length;
+      [(i + 1) % n, (i - 1 + n) % n].forEach((k) => {
+        new Image().src = list[k].img;
+      });
+    }
+
+    /**
+     * Anchor the annotation to the point on the screen it describes: its right
+     * edge, and the ring on the end of the leader, land on that exact pixel.
+     * Measured off the frame rather than assumed, so it survives a resize.
+     */
+    function placeNote(at: Pt) {
+      const w = frame.offsetWidth;
+      const px = frame.offsetLeft + at.x * w;
+      // A point on the right half is annotated from the right, so the line
+      // always leaves by the nearer edge instead of crossing the screen.
+      const right = at.x > 0.5;
+      // The line leaves the frame's near edge and runs back to the point.
+      const lead = (right ? w - at.x * w : at.x * w) + 24;
+      const room = (right ? stage.offsetWidth - px : px) - lead - 12 - PAD;
+
+      anno.toggleAttribute("data-side-right", right);
+      anno.style.setProperty(
+        "--fw-x",
+        `${right ? px : stage.offsetWidth - px}px`,
+      );
+      anno.style.setProperty("--fw-lead", `${lead}px`);
+      // Whatever room is left between the stage edge and the line is the note's
+      // to use. Measured rather than fixed: the card is only as wide as the
+      // section column, and a fixed 240px note overflows a narrow one.
+      anno.style.setProperty(
+        "--fw-note-w",
+        `${Math.max(140, Math.min(240, room))}px`,
+      );
+      // Width first, then measure: the note is centred on the point, and a tall
+      // note anchored near the top or bottom of the screen would otherwise hang
+      // out of the stage and print over the toggle and the transport.
+      const half = anno.offsetHeight / 2;
+      const y = frame.offsetTop + at.y * frame.offsetHeight;
+      anno.style.setProperty(
+        "--fw-y",
+        `${Math.min(Math.max(y, half), stage.offsetHeight - half)}px`,
+      );
+    }
+
+    function render() {
+      const step = steps()[i];
+      idxOut.textContent = String(i + 1);
+      totalOut.textContent = String(steps().length);
+      preloadNeighbours();
+
+      anno.removeAttribute("data-show");
+
+      screen.setAttribute("data-out", "");
+      clearTimeout(swapTimer);
+      swapTimer = window.setTimeout(() => {
+        screen.src = step.img;
+        screen.removeAttribute("data-out");
+
+        // A scrolling frame is shown whole rather than cropped to the top; the
+        // reader scrolls it themselves. Always back to the top on arrival, so
+        // the tap point is where the step says it is.
+        frame.classList.toggle("cs-phone--scroll", !!step.tall);
+        frame.scrollTop = 0;
+
+        // No CTA on this screen means no cursor on it either.
+        if (!step.tap) dot.style.opacity = "0";
+
+        anchor = (step.note && (step.noteAt ?? step.tap)) || null;
+        if (anchor) {
+          note.textContent = step.note!;
+          placeNote(anchor);
+          anno.setAttribute("data-show", "");
+        }
+        // The cursor sets off straight away even on an annotated screen; the
+        // reading time is spent resting on the button, not before the move.
+        if (playing) after(SETTLE, advance);
+      }, DISSOLVE);
+    }
+
+    /** Walk the cursor to the CTA, tap it, then dissolve to the next screen. */
+    function advance() {
+      if (busy) return;
+      busy = true;
+      const step = steps()[i];
+      const next = () => {
+        busy = false;
+        i = (i + 1) % steps().length;
+        render();
+      };
+
+      // A screen with nothing to press just holds, then moves on.
+      if (!step.tap) {
+        after(step.hold ?? 1000, next);
+        return;
+      }
+
+      // Travel time from how far there is to go, not a fixed beat.
+      const w = frame.offsetWidth;
+      const h = frame.offsetHeight;
+      // `|| 1` because a frame that has not been laid out yet measures zero,
+      // and 0/0 would put NaN into the duration.
+      const diag = Math.hypot(w, h) || 1;
+      const dist = Math.hypot(
+        (step.tap.x - dotAt.x) * w,
+        (step.tap.y - dotAt.y) * h,
+      );
+      const move = MOVE_MIN + (MOVE_MAX - MOVE_MIN) * Math.min(1, dist / diag);
+      dot.style.setProperty("--fw-mx", `${Math.round(move)}ms`);
+      dot.style.setProperty("--fw-my", `${Math.round(move * 0.86)}ms`);
+
+      dotAt = step.tap;
+      dot.style.opacity = "1";
+      dot.style.left = `${dotAt.x * 100}%`;
+      dot.style.top = `${dotAt.y * 100}%`;
+
+      // Arrive, then wait on the button for as long as the note needs reading,
+      // and only then press.
+      after(move + (step.note ? READ : 0), () => {
+        dot.setAttribute("data-press", "");
+        ripple.style.left = dot.style.left;
+        ripple.style.top = dot.style.top;
+        ripple.removeAttribute("data-pulse");
+        void ripple.offsetWidth;
+        ripple.setAttribute("data-pulse", "");
+        after(PRESS, () => dot.removeAttribute("data-press"));
+        after(TAP_HOLD, next);
+      });
+    }
+
+    /**
+     * @param start Kick the chain off from the current screen. False when the
+     *              caller is about to render() instead — render() continues the
+     *              chain itself, and clear() here would kill its dissolve.
+     */
+    function setPlaying(on: boolean, start = true) {
+      playing = on;
+      playBtn.toggleAttribute("data-playing", on);
+      playBtn.setAttribute("aria-label", on ? "Pause" : "Play");
+      clear();
+      if (on && start) advance();
+    }
+
+    /** Stepping by hand hands control over: playback stays off until asked. */
+    function go(delta: number) {
+      handControl = true;
+      setPlaying(false);
+      i = (i + delta + steps().length) % steps().length;
+      render();
+    }
+
+    root.querySelectorAll<HTMLElement>("[data-side]").forEach((tab) =>
+      tab.addEventListener("click", () => {
+        side = tab.dataset.side as "old" | "new";
+        root
+          .querySelectorAll("[data-side]")
+          .forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+        i = 0;
+        // Switching sides is not stepping through by hand — the other flow
+        // starts playing from the top, unless playback was paused on purpose.
+        setPlaying(!handControl, false);
+        render();
+      }),
+    );
+
+    q("[data-prev]").addEventListener("click", () => go(-1));
+    q("[data-next]").addEventListener("click", () => go(1));
+    playBtn.addEventListener("click", () => {
+      handControl = playing;
+      setPlaying(!playing);
+    });
+    frame.addEventListener("click", () => {
+      if (playing || busy) return;
+      handControl = true;
+      advance();
+    });
+
+    window.addEventListener("resize", () => anchor && placeNote(anchor));
+
+    // Autoplay once the frame is on screen; stop when it leaves so the
+    // walkthrough is never running behind the reader's back. Leaving the
+    // viewport is not a manual pause, so scrolling back resumes it — unless
+    // the reader has taken control themselves.
+    new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          if (!playing && !handControl) setPlaying(true);
+        } else if (playing) {
+          setPlaying(false);
+        }
+      },
+      { threshold: 0.4 },
+    ).observe(frame);
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>(".fw").forEach(initWalkthrough);
+</script>

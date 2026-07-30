@@ -8,39 +8,11 @@
 // present; remove the guard once every study is static.
 
 import { goHome } from "./landing-return";
+import { initReveals, CASE_STUDY_TARGETS } from "./reveal";
 
 // Every study's Back control. Keyed on class, not aria-label, so an unrelated
 // "Back to top" link can never be mistaken for "leave this study".
-const BACK_SEL = ".obv3-back, .ps-back, .ft-back, .as-back";
-
-function splitWords(el: HTMLElement) {
-  let i = 0;
-  const walk = (node: Node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const words = (node.textContent || "").split(/(\s+)/);
-      const frag = document.createDocumentFragment();
-      words.forEach((w) => {
-        if (!w) return;
-        if (/^\s+$/.test(w)) {
-          frag.appendChild(document.createTextNode(" "));
-          return;
-        }
-        const mask = document.createElement("span");
-        mask.className = "w-mask";
-        const inner = document.createElement("span");
-        inner.className = "w-in";
-        inner.style.setProperty("--i", String(i++));
-        inner.textContent = w;
-        mask.appendChild(inner);
-        frag.appendChild(mask);
-      });
-      node.parentNode?.replaceChild(frag, node);
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      [...node.childNodes].forEach(walk);
-    }
-  };
-  [...el.childNodes].forEach(walk);
-}
+const BACK_SEL = ".cs-back";
 
 function initFx() {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -48,12 +20,8 @@ function initFx() {
 
   // Scroll progress bar, driven by the study's own scroll container and
   // mounted directly below the topbar.
-  const scroller =
-    document.querySelector<HTMLElement>(".obv3-scroll, .ps-scroll") ??
-    document.querySelector<HTMLElement>(".ft-overlay, .as-overlay");
-  const topbar = document.querySelector<HTMLElement>(
-    ".obv3-topbar, .ps-topbar, .ft-topbar, .as-topbar",
-  );
+  const scroller = document.querySelector<HTMLElement>(".cs-scroll");
+  const topbar = document.querySelector<HTMLElement>(".cs-topbar");
   if (scroller && topbar) {
     const bar = document.createElement("div");
     bar.className = "csfx-progress";
@@ -71,100 +39,10 @@ function initFx() {
     update();
   }
 
-  if (!reduced) {
-    // Word cascade on section + footer headings
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          e.target.classList.add("in");
-          io.unobserve(e.target);
-        });
-      },
-      { threshold: 0.3 },
-    );
-    document
-      .querySelectorAll<HTMLElement>(
-        "h2.obv3-heading, h2.ps-heading, h2.case-footer__title",
-      )
-      .forEach((h) => {
-        splitWords(h);
-        h.classList.add("csfx-words");
-        io.observe(h);
-      });
-
-    // Staggered reveal for card grids / lists
-    const gio = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          e.target.classList.add("in");
-          gio.unobserve(e.target);
-        });
-      },
-      { threshold: 0.15 },
-    );
-    document
-      .querySelectorAll<HTMLElement>(
-        [
-          ".obv3-principles-cards",
-          ".obv3-flow-container",
-          ".obv3-datamodel-grid",
-          ".obv3-feature__helps-list",
-          ".ps-audit-grid",
-          ".ps-outcomes-grid",
-        ].join(", "),
-      )
-      .forEach((grid) => {
-        [...grid.children].forEach((c, i) => {
-          (c as HTMLElement).style.transitionDelay = `${i * 90}ms`;
-        });
-        grid.classList.add("csfx-stagger");
-        gio.observe(grid);
-      });
-
-    // Body content — revealed individually as each enters.
-    const rio = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          e.target.classList.add("in");
-          rio.unobserve(e.target);
-        });
-      },
-      { threshold: 0, rootMargin: "0px 0px -8% 0px" },
-    );
-    document
-      .querySelectorAll<HTMLElement>(
-        [
-          ".obv3-body",
-          ".obv3-blockquote",
-          ".obv3-subheading",
-          ".obv3-section__number",
-          ".obv3-feature-card",
-          ".obv3-impact-stat",
-          ".ps-body",
-          ".ps-section__number",
-          ".ps-audit-card",
-          ".ps-outcome-card",
-          ".ps-redesign-card__text",
-          ".cd-stat",
-          ".case-footer__sub",
-        ].join(", "),
-      )
-      .forEach((el) => {
-        // Inside a stagger container the parent's reveal already animates this
-        // element, so it must not get its own rise — but it still needs `in`,
-        // or the layout's pre-hide CSS (which keys off :not(.in)) leaves it
-        // invisible forever. Nested .ps-body inside .ps-audit-card hit this.
-        if (el.closest(".csfx-stagger")) {
-          el.classList.add("in");
-          return;
-        }
-        el.classList.add("csfx-rise");
-        rio.observe(el);
-      });
-  }
+  // Scroll reveals. Shared with the landing page — same distances, timings and
+  // trigger line — with the study's inner scroll box as the observer root,
+  // since that, not the window, is what actually scrolls here.
+  if (!reduced) initReveals({ root: scroller, targets: CASE_STUDY_TARGETS });
 
   // Magnetic pull on back buttons and footer CTA
   if (fine && !reduced) {
@@ -203,7 +81,7 @@ function initFx() {
   // is open, in which case its own handler closes it first.
   window.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (document.querySelector(".cd-lightbox.is-open")) return;
+    if (document.querySelector(".cs-lightbox.is-open")) return;
     goHome();
   });
 }
@@ -212,19 +90,17 @@ function initFx() {
 // thin band near the top of the scroll viewport. Challenge/Approach roll up to
 // the Overview nav item, mirroring the original.
 function initScrollSpy() {
-  const nav = document.querySelector<HTMLElement>(".ps-sidenav, .obv3-sidenav");
-  const scroll = document.querySelector<HTMLElement>(".ps-scroll, .obv3-scroll");
+  const nav = document.querySelector<HTMLElement>(".cs-sidenav");
+  const scroll = document.querySelector<HTMLElement>(".cs-scroll");
   if (!nav || !scroll) return;
 
   const sections = [
-    ...scroll.querySelectorAll<HTMLElement>(
-      ".ps-hero[id], .ps-section[id], .obv3-hero[id], .obv3-section[id]",
-    ),
+    ...scroll.querySelectorAll<HTMLElement>(".cs-hero[id], .cs-section[id]"),
   ];
   // Clinical groups Challenge/Approach under the Overview nav item; every other
   // section maps to its own nav link.
   const navId = (id: string) =>
-    id === "cd-challenge" || id === "cd-approach" ? "cd-overview" : id;
+    id === "cs-challenge" || id === "cs-approach" ? "cs-overview" : id;
   const state = new Map<string, boolean>();
 
   const io = new IntersectionObserver(
@@ -264,8 +140,8 @@ function initScrollSpy() {
 // and back so playback never restarts — its original class is saved and restored
 // so it fits its home slot again on close.
 function initLightbox() {
-  const box = document.querySelector<HTMLElement>(".cd-lightbox");
-  const content = box?.querySelector<HTMLElement>(".cd-lightbox__content");
+  const box = document.querySelector<HTMLElement>(".cs-lightbox");
+  const content = box?.querySelector<HTMLElement>(".cs-lightbox__content");
   if (!box || !content) return;
 
   let videoHome: HTMLElement | null = null;
@@ -273,8 +149,8 @@ function initLightbox() {
   let videoWasMuted = true;
 
   // Zoom/pan state for the current image (videos keep their native controls).
-  const zoomBar = box.querySelector<HTMLElement>(".cd-lightbox__zoom");
-  const zoomLabel = box.querySelector<HTMLElement>(".cd-lightbox__zoom-level");
+  const zoomBar = box.querySelector<HTMLElement>(".cs-lightbox__zoom");
+  const zoomLabel = box.querySelector<HTMLElement>(".cs-lightbox__zoom-level");
   const MIN_ZOOM = 1;
   const MAX_ZOOM = 5;
   let zoomImg: HTMLImageElement | null = null;
@@ -310,9 +186,9 @@ function initLightbox() {
   };
 
   // Gallery/carousel state — a lone image is just a one-item gallery.
-  const prevBtn = box.querySelector<HTMLElement>(".cd-lightbox__prev");
-  const nextBtn = box.querySelector<HTMLElement>(".cd-lightbox__next");
-  const counter = box.querySelector<HTMLElement>(".cd-lightbox__counter");
+  const prevBtn = box.querySelector<HTMLElement>(".cs-lightbox__prev");
+  const nextBtn = box.querySelector<HTMLElement>(".cs-lightbox__next");
+  const counter = box.querySelector<HTMLElement>(".cs-lightbox__counter");
   let galleryImages: HTMLImageElement[] = [];
   let galleryIndex = 0;
   let onGalleryChange: ((i: number) => void) | null = null;
@@ -328,7 +204,7 @@ function initLightbox() {
     box.classList.add("is-open");
     box.setAttribute("aria-hidden", "false");
     // Direct focus into the dialog for keyboard/AT users.
-    box.querySelector<HTMLElement>(".cd-lightbox__close")?.focus();
+    box.querySelector<HTMLElement>(".cs-lightbox__close")?.focus();
   };
   const close = () => {
     const vid = content.querySelector("video");
@@ -365,11 +241,11 @@ function initLightbox() {
       vid.src = vid.dataset.src;
       vid.load();
     }
-    vid.className = "cd-lightbox__img";
+    vid.className = "cs-lightbox__img";
     vid.controls = true;
     vid.muted = false;
     const slot = document.createElement("div");
-    slot.className = "cd-lightbox__video-slot";
+    slot.className = "cs-lightbox__video-slot";
     slot.appendChild(vid);
     content.appendChild(slot);
     zoomBar?.setAttribute("hidden", "");
@@ -387,11 +263,11 @@ function initLightbox() {
     const src = galleryImages[galleryIndex];
     content.innerHTML = "";
     const full = document.createElement("img");
-    full.className = "cd-lightbox__img";
+    full.className = "cs-lightbox__img";
     full.src = src.src;
     full.alt = src.alt;
     full.draggable = false; // else the browser's native image-drag hijacks panning
-    if (dir !== 0) full.style.animation = `cd-lb-slide-${dir < 0 ? "prev" : "next"} 0.3s ease`;
+    if (dir !== 0) full.style.animation = `cs-lb-slide-${dir < 0 ? "prev" : "next"} 0.3s ease`;
     content.appendChild(full);
     zoomImg = full;
     scale = 1;
@@ -533,9 +409,9 @@ function initLightbox() {
   });
 
   // Clinical image/video maximize buttons.
-  document.querySelectorAll<HTMLElement>(".cd-media-maximize").forEach((btn) => {
+  document.querySelectorAll<HTMLElement>(".cs-media-maximize").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const media = btn.closest(".cd-media");
+      const media = btn.closest(".cs-media");
       if (!media) return;
       if (btn.dataset.lightbox === "video") openVideo(media.querySelector("video"));
       else openImage(media.querySelector("img"));
@@ -544,11 +420,11 @@ function initLightbox() {
 
   // Output Builder feature-video expand buttons open the same lightbox.
   document
-    .querySelectorAll<HTMLElement>(".obv3-feature__fullscreen")
+    .querySelectorAll<HTMLElement>(".cs-feature__fullscreen")
     .forEach((btn) => {
       btn.addEventListener("click", () =>
         openVideo(
-          btn.closest(".obv3-feature__media-frame")?.querySelector("video"),
+          btn.closest(".cs-feature__media-frame")?.querySelector("video"),
         ),
       );
     });
@@ -566,7 +442,20 @@ function initLightbox() {
       if (!img) return;
       const flow = btn.closest("[data-flow-carousel]");
       const exp = btn.closest("[data-exploration-carousel]");
-      if (flow) {
+      // AI Stylist's web journey: a scroll-snap row, so the slide showing is the
+      // one the scroll is parked on and mirroring back means scrolling to it.
+      const snap = btn.closest("[data-asx-carousel]");
+      if (snap) {
+        const row = snap.querySelector<HTMLElement>(".asx-carousel");
+        const slides = [...(row?.children ?? [])] as HTMLElement[];
+        const step = slides[1].offsetLeft - slides[0].offsetLeft;
+        const at = Math.round((row?.scrollLeft ?? 0) / step);
+        openImages(
+          slides.filter((s): s is HTMLImageElement => s instanceof HTMLImageElement),
+          at,
+          (i) => row?.scrollTo({ left: i * step }),
+        );
+      } else if (flow) {
         const imgs = [...flow.querySelectorAll<HTMLImageElement>("img")];
         const tabs = [...flow.querySelectorAll<HTMLButtonElement>("[data-flow-tab]")];
         openImages(imgs, Math.max(0, imgs.indexOf(img)), (i) => tabs[i]?.click());
@@ -614,7 +503,7 @@ function initLightbox() {
     { passive: true },
   );
 
-  box.querySelector(".cd-lightbox__close")?.addEventListener("click", close);
+  box.querySelector(".cs-lightbox__close")?.addEventListener("click", close);
   box.addEventListener("click", (e) => {
     if (e.target === box) close();
   });

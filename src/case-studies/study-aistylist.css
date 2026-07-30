@@ -1,0 +1,599 @@
+/* ==========================================================================
+   AI Stylist Case Study — additions on top of study-base.css, which
+   supplies the .cs-overlay token scope, the section grid and the shared
+   heading/body/card styles. Sections alternate --overview / --challenge.
+   Rules: 4px grid · no letter-spacing · min 12px type
+   ========================================================================== */
+
+/* The sidenav is fixed at left:32px and runs ~110px wide, and this study has
+   fifteen entries — enough to span the whole hero. Inset the content past it at
+   the widths where the nav is shown. */
+@media (min-width: 1201px) {.cs-overlay--asx .cs-hero,
+.cs-overlay--asx .cs-section {
+    padding-left: 200px;
+  }
+}
+
+/* ==========================================================================
+   Screen showcases — shared by every walkthrough and frame strip on this
+   study, so a phone looks the same wherever it appears. Components own their
+   sizing and behaviour; these own the surface and the device.
+   ========================================================================== */
+
+/* The stage, the bezel and the labels printed on them are chrome around the
+   screenshots, so they theme with the site — one pair here, read by .cs-stage
+   and .cs-phone below and by the scoped styles of the tab, sheet and
+   walkthrough components (custom properties inherit through Astro's scoping).
+   The screenshots themselves are light exports and stay as shot;--asx-fade is
+   the colour the components mix their ink toward, which has to be the stage, not white, or "soft" reads as brighter than the text it sits under. */
+.cs-overlay--asx {
+  --asx-stage:
+    radial-gradient(60% 55% at 78% 84%, #ebe2fb 0%, transparent 70%),
+    radial-gradient(46% 46% at 55% 45%, #edeaf9 0%, transparent 70%),
+    radial-gradient(56% 60% at 12% 28%, #f1eefc 0%, transparent 70%),
+    radial-gradient(40% 40% at 86% 8%, #fdfcff 0%, transparent 70%),
+    #faf9fe;
+  --asx-bezel: #ffffff;
+  --asx-ink: #2b266d;
+  --asx-fade: #ffffff;
+}
+
+:root[data-theme="ink"] .cs-overlay--asx {
+  --asx-stage:
+    radial-gradient(60% 55% at 78% 84%, #232b4c 0%, transparent 70%),
+    radial-gradient(46% 46% at 55% 45%, #1f2745 0%, transparent 70%),
+    radial-gradient(56% 60% at 12% 28%, #232c50 0%, transparent 70%),
+    radial-gradient(40% 40% at 86% 8%, #2a3055 0%, transparent 70%),
+    #161d33;
+  /* The bezel has to stay off the stage or the device loses its outline. */
+  --asx-bezel: #2c3559;
+  --asx-ink: #d5dbf2;
+  --asx-fade: #161d33;
+}/* The card the screens sit on: one continuous lavender mesh, written as
+   gradient stops rather than a raster — no request, sharp at any size, and it
+   reflows with the card. Container treatment matches .cs-flow-container. */
+.cs-stage {
+  margin: 40px 0;
+  border: 1px solid var(--cs-line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--asx-stage);
+}/* The device. Radius and bezel are variables because the same frame appears
+   at half the size in a strip of four, where 28px of corner reads as a blob. */
+.cs-phone {
+  --cs-phone-radius: 28px;
+  --cs-phone-bezel: 6px;
+  --cs-phone-ring: 8px;
+  position: relative;
+  aspect-ratio: 750 / 1624;
+  border-radius: var(--cs-phone-radius);
+  overflow: hidden;
+  background: var(--cs-bg2);
+  box-shadow:
+    0 0 0 var(--cs-phone-bezel) var(--asx-bezel),
+    0 0 0 var(--cs-phone-ring) color-mix(in srgb, var(--cs-accent) 24%, transparent),
+    0 20px 48px rgb(30 22 68 / 0.16);
+}
+
+.cs-phone > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Some screens are scrolling frames — 1157px and up against a normal 812 —
+   and cropping them to the top throws away the part that makes the point. The
+   reader scrolls these themselves;nothing moves on its own. `contain` stops
+   the gesture chaining into the case study behind it once the screen bottoms
+   out, and the screen being cut mid-content is the hint that there is more. */
+.cs-phone--scroll {
+  /* Page colour rather than the frame's placeholder dark: in a sequence the
+     screens are not all the same length, and below a short one you would
+     otherwise scroll into the bezel. */
+  background: #f7f5fd;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* No visible scrollbar: a classic one takes a gutter out of the content box
+     and squeezes the screen inside its own bezel, and this platform has no
+     overlay scrollbar to fall back on. The screen keeps the full width of the
+     frame; that it is cut mid-content is the cue that there is more. */
+  scrollbar-width: none;
+}
+
+.cs-phone--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.cs-phone--scroll > img {
+  height: auto;
+}/* ── Screens with nothing to compare and nothing to step through: a row of
+   figures on the shared stage, each captioned. Sia and Retention are what I
+   designed rather than what I changed, so there is no old side to show. ── */
+/* Flex rather than grid: these rows mix a phone with a web panel three times
+   its width, and fixed tracks cannot seat both on one line. */
+.asx-figures {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 32px;
+  padding: 32px 16px;
+}
+
+.asx-figure {
+  flex: 0 1 auto;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.asx-figure .cs-phone {
+  --cs-phone-radius: 20px;
+  --cs-phone-bezel: 5px;
+  --cs-phone-ring: 6px;
+  width: min(220px, 100%);
+}
+
+/* The same 4:3 window the comparison tabs use, so a section of phones on the
+   stage is the same size and shape as a section that compares them. Only the
+   rows of phones: the web panel is three times their width and has its own
+   ratio. Height-led, and against the container's inline size rather than the
+   parent's height, which would depend on the phone in turn. */
+@media (min-width: 901px) {
+  .asx-figures:has(.cs-phone) {
+    aspect-ratio: 4 / 3;
+    container-type: inline-size;
+    align-items: center;
+    align-content: center;
+    padding: 24px 40px;
+  }/* The caption and its gap, plus enough left over that the screens do not run
+     into the corners of the card. Note that `cqw` is the container's content
+     box, so the row's own side padding is already out of this figure. */
+  .asx-figures:has(.cs-phone) .cs-phone {
+    width: auto;
+    height: calc(75cqw - 108px);
+  }
+}
+
+/* Two screens with the captions between them, one above the other, each led back
+   to its own screen by the same dashed leader the walkthrough uses. Like the
+   comparison tabs, `display: contents` drops the figures so their screens and
+   captions become items of this grid. */
+@media (min-width: 901px) {
+  .asx-figures--split {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: 1fr 1fr;
+    align-items: center;
+    column-gap: 48px;
+    row-gap: 16px;
+  }
+
+  .asx-figures--split .asx-figure {
+    display: contents;
+  }/* No caption under the screen now, so the screen can have that height. */
+  .asx-figures--split:has(.cs-phone) .cs-phone {
+    height: calc(75cqw - 68px);
+  }
+
+  .asx-figures--split .asx-figure:first-child .cs-phone {
+    grid-area: 1 / 1 / 3 / 2;
+  }
+
+  .asx-figures--split .asx-figure:last-child .cs-phone {
+    grid-area: 1 / 3 / 3 / 4;
+  }
+
+  .asx-figures--split .asx-figure__cap {
+    position: relative;
+    max-width: 288px;
+  }
+
+  .asx-figures--split .asx-figure:first-child .asx-figure__cap {
+    grid-area: 1 / 2 / 2 / 3;
+    align-self: end;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .asx-figures--split .asx-figure:last-child .asx-figure__cap {
+    grid-area: 2 / 2 / 3 / 3;
+    align-self: start;
+    justify-self: end;
+    text-align: right;
+  }/* The leader: dashed line across the gap, arrowhead at the text end so the
+     marker never sits over the screenshot. */
+  .asx-figures--split .asx-figure__cap::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    width: 48px;
+    height: 2px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--cs-accent) 0 4px,
+      transparent 4px 8px
+    );
+  }
+
+  /* Centred on the line: the head is 10px tall against the line's 2px. */
+  .asx-figures--split .asx-figure__cap::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }.asx-figures--split .asx-figure:first-child .asx-figure__cap::before,
+.asx-figures--split .asx-figure:first-child .asx-figure__cap::after {
+    right: 100%;
+  }
+
+  .asx-figures--split .asx-figure:first-child .asx-figure__cap::after {
+    border-left: 8px solid var(--cs-accent);
+  }.asx-figures--split .asx-figure:last-child .asx-figure__cap::before,
+.asx-figures--split .asx-figure:last-child .asx-figure__cap::after {
+    left: 100%;
+  }
+
+  .asx-figures--split .asx-figure:last-child .asx-figure__cap::after {
+    border-right: 8px solid var(--cs-accent);
+  }/* The glow is what its caption is about, so the leader leaves the screen at
+     the badge's height rather than at the caption's first line. The badge sits
+     at 90.3% of the screen (see .asx-figure__glow), and the screen is
+     `75cqw - 68px` tall and centred in the window, which puts the badge
+     `7.3cqw + 33px` up from the bottom of the row — so the caption is pushed
+     down to meet it and the leader runs off its last line instead of its
+     first. Retune all three together if the window's arithmetic changes. */
+  .asx-figures--split .asx-figure:has(.asx-figure__glow) .asx-figure__cap {
+    align-self: end;
+    margin-bottom: calc(7.3cqw + 24px);
+  }
+
+  .asx-figures--split
+    .asx-figure:has(.asx-figure__glow)
+    .asx-figure__cap::before {
+    top: auto;
+    bottom: 8px;
+  }
+
+  .asx-figures--split
+    .asx-figure:has(.asx-figure__glow)
+    .asx-figure__cap::after {
+    top: auto;
+    bottom: 4px;
+  }
+}/* A panel that sits over the screen it belongs to, where it actually appears.
+   Scoped through .asx-figure to outrank `.cs-phone > img`, which would
+   otherwise stretch it over the whole frame and crop it. */
+.asx-figure .asx-figure__over {
+  position: absolute;
+  inset: auto 0 0;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  /* Sia's sheet is exported with an 8px radius on a 384px frame — 2%, which at
+     the size a phone is shown here reads as square. Clipped back to the same
+     proportion the other sheet exports use (58px on 750px). The bottom corners
+     are the phone's own, which it clips itself. */
+  border-radius: 16px 16px 0 0;
+}/* Sia's badge is already drawn into the landing screen, so this only has to
+   mark it: a colourful amoeba bleeding out from behind it, in the badge's own
+   violet to pink, sampled off the export.
+   Position measured off the export — the badge's centre is (50.7%,
+90.0%) and it
+   is 13.5% of the frame across, which is this box's width before it is scaled
+   up. So the badge is a 38% radius of the scaled box: see the mask. */
+.asx-figure__glow {
+  position: absolute;
+  left: 50.7%;
+  top: 90%;
+  width: 13.5%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  scale: 2.6;
+  filter: blur(8px) saturate(1.6);
+  /* Three lobes of different sizes, off centre, so the silhouette is lopsided
+     rather than a ring. Each fades to nothing on its own, so there is no clipped
+     edge anywhere — the shape ends where the light runs out. */
+  background:
+    radial-gradient(46% 50% at 30% 28%, #a762e5, transparent 100%),
+    radial-gradient(38% 34% at 74% 42%, #d05688, transparent 100%),
+    radial-gradient(34% 42% at 50% 76%, #ba5cc0, transparent 100%);
+  /* A ring, so the light sits around the badge instead of over it: a hole out to
+     the badge's edge, then light, then nothing by the edge of the box.
+     `closest-side` is what makes that last part true — the default sizing puts
+     100% at the corners, so the box's own straight edges stay lit and the whole
+     thing reads as a rotating square. Repainting the badge on top from the same
+     export was the old way, and it collapsed the icon. */
+  mask-image: radial-gradient(
+    circle closest-side,
+    transparent 0 38%,
+    #000 54% 72%,
+    transparent 100%
+  );
+  animation:
+    asx-glow-breathe 7s ease-in-out infinite,
+    asx-glow-spin 9s linear infinite;
+}
+
+/* ponytail: breathing instead of a border-radius morph — the morph clipped the
+   lobes and gave the blob a hard edge. */
+@keyframes asx-glow-breathe {0%,
+100% {
+    scale: 2.2;
+  }
+  50% {
+    scale: 2.6;
+  }
+}
+
+@keyframes asx-glow-spin {
+  to {
+    rotate: 360deg;
+  }
+}/* A dim behind the sheet while it is open, fading with it. */
+.asx-figure__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(20 14 48 / 0.45);
+  opacity: 0;
+  pointer-events: none;
+  animation: asx-scrim 7s ease-in-out infinite;
+}
+
+@keyframes asx-scrim {0%,
+8% {
+    opacity: 0;
+  }18%,
+84% {
+    opacity: 1;
+  }94%,
+100% {
+    opacity: 0;
+  }
+}
+
+/* She opens by herself rather than being tapped open. */
+.asx-figure .asx-figure__over--auto {
+  animation: asx-open 7s ease-in-out infinite;
+}
+
+@keyframes asx-open {0%,
+8% {
+    opacity: 0;
+    translate: 0 14%;
+  }18%,
+84% {
+    opacity: 1;
+    translate: 0 0;
+  }94%,
+100% {
+    opacity: 0;
+    translate: 0 14%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {.asx-figure__glow,
+.asx-figure__scrim,
+.asx-figure .asx-figure__over--auto {
+    animation: none;
+  }
+}
+
+.asx-figure__cap {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--asx-ink);
+  text-align: center;
+  text-wrap: balance;
+  max-width: 280px;
+}/* A web panel: wider than a phone but nowhere near a full page, so it sits
+   beside the phone at close to its exported size rather than blown up. */
+.asx-figure--panel {
+  /* Basis kept well under the column width: at 320 the phone, the gap and this
+     came to one pixel more than the stage, and it wrapped to its own line. */
+  flex: 1 1 260px;
+  max-width: 440px;
+}
+
+/* Full page web shots are landscape and want the whole stage to themselves. */
+.asx-figure--wide {
+  flex: 1 1 100%;
+  max-width: none;
+}.asx-figure--panel img,
+.asx-figure--wide img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 20px 48px rgb(30 22 68 / 0.16);
+}.asx-figure--panel .asx-figure__cap,
+.asx-figure--wide .asx-figure__cap {
+  max-width: none;
+}/* The arrows sit beside the screens rather than over them, so this row is
+   [prev][screens][next] and only the maximize button stays an overlay. */
+.asx-carousel-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.asx-carousel-wrap .asx-carousel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Back into the flow: the shared control centres itself over a frame. */
+.asx-carousel-wrap .cs-carousel-control {
+  position: static;
+  flex: 0 0 auto;
+  transform: none;
+}
+
+.asx-carousel-wrap .cs-carousel-control:hover {
+  transform: scale(1.05);
+}
+
+.asx-carousel-wrap .cs-carousel-control:active {
+  transform: scale(0.95);
+}/* Clear of the arrow column, so it lands on the screen's own top right. */
+.asx-carousel-wrap .cs-media-maximize {
+  right: 64px;
+}/* ponytail: scroll-snap row for the slides themselves — the browser does the
+   swiping and the snapping, the script only nudges it on. */
+.asx-carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: 12px;
+}
+
+.asx-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.asx-carousel img {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+/* ── Eyebrow above a section heading: the stage of the journey it belongs to ── */
+.asx-eyebrow {
+  font-family: var(--cs-font-mono);
+  font-size: 12px;
+  color: var(--cs-accent);
+  margin-bottom: 12px;
+}/* The problem / what-changed blocks run to two paragraphs each, and the shared
+   .cs-redesign-card__text rule zeroes their margins. */
+.cs-redesign-card__text p + p {
+  margin-top: 12px;
+}
+
+.cs-outcome-card__icon {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Bullet list matching case-study body typography ── */
+.cs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0 24px;
+  padding-left: 24px;
+}
+
+.cs-list li {
+  color: var(--text-soft);
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.cs-list li strong {
+  color: var(--text);
+}
+
+/* ── 2x2 Grid Bullet List ── */
+.cs-list--2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 32px;
+  margin: 24px 0 32px;
+}
+
+@media (max-width: 900px) {
+  .cs-list--2x2 {
+    grid-template-columns: 1fr;
+  }
+}/* ── The brief / goal blockquote ── */
+blockquote.asx-goal,
+.asx-goal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--font-title);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
+  margin: 32px 0 0;
+  padding: 24px 32px;
+  border-left: 4px solid var(--cs-accent);
+  background: color-mix(in srgb, var(--cs-accent) 6%, transparent);
+  border-radius: 0 16px 16px 0;
+  box-sizing: border-box;
+}
+
+blockquote.asx-goal .asx-eyebrow {
+  margin-bottom: 0;
+}/* Heading leading is 1.15 for every study — see study-base.css. *//* ── Move block labels ("The problem",
+"What I changed and why") to top of content ── */
+.cs-overlay .cs-redesign-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* ── Counted changes: old → new figure beside what it counts ── */
+.asx-metrics {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--cs-line);
+  margin-top: 32px;
+}
+
+.asx-metric {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 32px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--cs-line);
+  align-items: baseline;
+}
+
+.asx-metric__fig {
+  font-family: var(--font-title);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--cs-accent);
+  white-space: nowrap;
+}
+
+.asx-metric__old {
+  color: var(--text-soft);
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.asx-metric__what {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+
+@media (max-width: 1200px) {
+  .asx-goal {
+    font-size: 24px;
+  }
+
+  .asx-metric {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

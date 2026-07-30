@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "motion/react";
 import { MODIFIER_KEY } from "../utils/constants";
 
-export default function Legend({ isOpen, modifierKey = MODIFIER_KEY }: { isOpen: boolean; modifierKey?: string }) {
+export default function Legend({ isOpen }: { isOpen: boolean }) {
+  const modifierKey = MODIFIER_KEY;
   return (
     <div className="legend-wrapper">
       <AnimatePresence>

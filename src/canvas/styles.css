@@ -507,9 +507,9 @@ a,
 
 /* ── Shared case study footer ── */
 .case-footer,
-.ps-overlay .case-footer,
-.obv3-overlay .case-footer,
-.ft-overlay .case-footer,
+.cs-overlay .case-footer,
+.cs-overlay .case-footer,
+.cs-overlay .case-footer,
 .as-overlay .case-footer {
   position: relative;
   padding: 120px 24px;
@@ -519,9 +519,9 @@ a,
 }
 
 .case-footer__inner,
-.ps-overlay .case-footer__inner,
-.obv3-overlay .case-footer__inner,
-.ft-overlay .case-footer__inner,
+.cs-overlay .case-footer__inner,
+.cs-overlay .case-footer__inner,
+.cs-overlay .case-footer__inner,
 .as-overlay .case-footer__inner {
   max-width: 720px;
   margin: 0 auto;
@@ -534,9 +534,9 @@ a,
 }
 
 .case-footer__title,
-.ps-overlay .case-footer__title,
-.obv3-overlay .case-footer__title,
-.ft-overlay .case-footer__title,
+.cs-overlay .case-footer__title,
+.cs-overlay .case-footer__title,
+.cs-overlay .case-footer__title,
 .as-overlay .case-footer__title {
   font-family: var(--font-title);
   font-size: 56px;
@@ -547,9 +547,9 @@ a,
 }
 
 .case-footer__sub,
-.ps-overlay .case-footer__sub,
-.obv3-overlay .case-footer__sub,
-.ft-overlay .case-footer__sub,
+.cs-overlay .case-footer__sub,
+.cs-overlay .case-footer__sub,
+.cs-overlay .case-footer__sub,
 .as-overlay .case-footer__sub {
   font-size: 20px;
   color: var(--text-soft);
@@ -558,9 +558,9 @@ a,
   line-height: 1.5;
 }
 
-.ps-overlay .case-footer .download-button,
-.obv3-overlay .case-footer .download-button,
-.ft-overlay .case-footer .download-button,
+.cs-overlay .case-footer .download-button,
+.cs-overlay .case-footer .download-button,
+.cs-overlay .case-footer .download-button,
 .as-overlay .case-footer .download-button,
 .case-footer .download-button {
   padding: 0 32px !important;
@@ -580,20 +580,20 @@ a,
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@media (max-width: 960px) {
+@media (max-width: 900px) {
 
   .case-footer,
-  .ps-overlay .case-footer,
-  .obv3-overlay .case-footer,
-  .ft-overlay .case-footer,
+  .cs-overlay .case-footer,
+  .cs-overlay .case-footer,
+  .cs-overlay .case-footer,
   .as-overlay .case-footer {
     padding: 40px 16px;
   }
 
   .case-footer__title,
-  .ps-overlay .case-footer__title,
-  .obv3-overlay .case-footer__title,
-  .ft-overlay .case-footer__title,
+  .cs-overlay .case-footer__title,
+  .cs-overlay .case-footer__title,
+  .cs-overlay .case-footer__title,
   .as-overlay .case-footer__title {
     font-size: 32px;
   }
@@ -1470,7 +1470,7 @@ a,
 
 /* At mobile the canvas right panel holds only the theme toggle, so it
    collapses to a square. The scrolling landing keeps its own actions. */
-@media (max-width: 720px) {
+@media (max-width: 640px) {
   .toolbar__panel--right {
     aspect-ratio: 1 / 1;
     justify-content: center;
@@ -1511,7 +1511,7 @@ a,
   box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.12);
 }
 
-@media (max-width: 1360px) {
+@media (max-width: 1200px) {
   .social-strip--footer {
     gap: 8px;
     padding: 8px 12px;
@@ -1525,7 +1525,7 @@ a,
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .social-strip--footer span {
     display: none;
   }
@@ -1892,7 +1892,7 @@ a,
   pointer-events: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .legend-wrapper {
     display: none;
   }
@@ -1984,7 +1984,7 @@ a,
   justify-content: center;
 }
 
-@media (max-width: 1024px),
+@media (max-width: 1200px),
 (hover: none),
 (pointer: coarse) {
   .legend-trigger-wrapper {

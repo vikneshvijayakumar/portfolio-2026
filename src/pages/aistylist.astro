@@ -1,0 +1,1204 @@
+---
+import CaseStudyLayout from "../layouts/CaseStudyLayout.astro";
+import CaseStudyFooter from "../components/CaseStudyFooter.astro";
+import FlowWalkthrough from "../components/FlowWalkthrough.astro";
+import CompareTabs from "../components/CompareTabs.astro";
+import { previousSvg, nextSvg, fullscreenSvg } from "../case-studies/shared";
+import SheetCompare from "../components/SheetCompare.astro";
+import "../case-studies/study-aistylist.css";
+
+const FACTS = [
+  { label: "Role", value: "Lead Product Designer" },
+  { label: "Type", value: "Product redesign" },
+  { label: "Timeline", value: "8 weeks" },
+  { label: "Platform", value: "iOS, Android, Responsive Web" },
+  {
+    label: "Skills",
+    value:
+      "UX audit, information architecture, user flows, high fidelity UI, handoff",
+  },
+];
+
+const CRITERIA = [
+  {
+    title: "Time to first recommendation",
+    body: "Median time from first open to the first personalized look. The primary activation metric, and the one I made every structural decision against.",
+  },
+  {
+    title: "Funnel step conversion",
+    body: "Completion rate for each step of onboarding, sign in and the style assessment, instrumented individually so drop off could be pinned to a screen.",
+  },
+  {
+    title: "Paywall view to trial start",
+    body: "Conversion at the new plan screen, with the old placement kept as the baseline. The test of whether moving the subscription earlier was right.",
+  },
+  {
+    title: "Feature reach and repeat sessions",
+    body: "Share of activated users touching wardrobe, saved looks and the attire switch, read against day seven and day thirty return rate.",
+  },
+];
+
+// Activation walkthrough. Tap points are fractions of the frame: every primary
+// CTA sits centred at 91% down, except the Google button on Create Account.
+const S = "/assets/aistylist/";
+const CTA = { x: 0.5, y: 0.91 };
+
+// The old path to the same place: nine screens, two of them pure data entry.
+const ACTIVATION_OLD = [
+  { img: `${S}old_01_splash.webp`, hold: 1400 },
+  { img: `${S}old_02_onboarding.webp`, tap: { x: 0.459, y: 0.916 } },
+  {
+    img: `${S}old_03_login.webp`,
+    tap: { x: 0.725, y: 0.899 },
+    note: "Social sign in sits under the form, so most people type an email and password anyway.",
+    noteAt: { x: 0.28, y: 0.83 },
+  },
+  {
+    img: `${S}old_04_signup_empty.webp`,
+    tap: { x: 0.5, y: 0.365 },
+    note: "Registration first: three fields and a checkbox before the app has said what it does.",
+    noteAt: { x: 0.05, y: 0.45 },
+  },
+  { img: `${S}old_05_signup_filled.webp`, tap: { x: 0.5, y: 0.664 } },
+  {
+    img: `${S}old_06_verification.webp`,
+    tap: { x: 0.5, y: 0.552 },
+    note: "Then an email round trip, still before the app has shown a single recommendation.",
+    noteAt: { x: 0.05, y: 0.436 },
+  },
+  { img: `${S}old_07_onboarding.webp`, tap: { x: 0.5, y: 0.916 } },
+  {
+    img: `${S}old_08_personal.webp`,
+    tap: { x: 0.508, y: 0.795 },
+    note: "Six more fields on a screen of their own, because sign up only ever captured an email.",
+    noteAt: { x: 0.05, y: 0.35 },
+  },
+  {
+    // Last screen of the flow: nothing to press, it just holds and restarts.
+    img: `${S}old_09_profile.webp`,
+    hold: 3600,
+    note: "And the assessment still does not start. It waits in a list as the only row that works, beside details just submitted, two empty wardrobes, and payment.",
+    noteAt: { x: 0.05, y: 0.533 },
+  },
+];
+
+const ACTIVATION_NEW = [
+  { img: `${S}01_splash.webp`, hold: 1400 },
+  { img: `${S}10_welcome.webp`, tap: CTA },
+  {
+    // One card stands in for the five: the point is that onboarding explains
+    // the app first, and that Skip is there for anyone who doesn't want it.
+    img: `${S}02_onboarding1.webp`,
+    tap: { x: 0.893, y: 0.095 },
+    // Just clear of the Skip label, so the leader does not run across it.
+    note: "Onboarding explains what the app does before asking for anything, and Skip is always there.",
+    noteAt: { x: 0.96, y: 0.095 },
+  },
+  {
+    img: `${S}07_create_account.webp`,
+    tap: { x: 0.5, y: 0.542 },
+    note: "Social sign in populates name and email, so no screen has to ask for them.",
+    noteAt: { x: 0.05, y: 0.542 },
+  },
+  {
+    // Last screen of the flow: nothing to press, it just holds and restarts.
+    img: `${S}11_style_profile_landing.webp`,
+    hold: 3600,
+    note: "Filled from the social sign in. A nickname and not a name, because what people put on social media often is not their own.",
+    noteAt: { x: 0.22, y: 0.38 },
+  },
+];
+
+// Plan outfit, old against new. The old path runs through six screens with no
+// sense of progress; the new one is a checklist that states it.
+const PLAN_OLD = [
+  {
+    img: `${S}pl_old_1_wardrobe.webp`,
+    tap: { x: 0.5, y: 0.705 },
+    note: "The old landing page is an empty wardrobe with a search field, so planning an outfit starts by working out where it starts.",
+    noteAt: { x: 0.06, y: 0.28 },
+  },
+  { img: `${S}pl_old_2_category.webp`, tap: { x: 0.5, y: 0.438 } },
+  {
+    img: `${S}pl_old_4_tops.webp`,
+    tap: { x: 0.913, y: 0.15 },
+    note: "A flat grid of everything, with no way to tell a suggestion from a filter result.",
+    noteAt: { x: 0.06, y: 0.3 },
+  },
+  {
+    img: `${S}pl_old_3_filters.webp`,
+    tap: { x: 0.72, y: 0.951 },
+    note: "Six filter dimensions to work through before a single garment is chosen.",
+    noteAt: { x: 0.06, y: 0.37 },
+  },
+  // The same grid again: applying the filters returns you to where you started,
+  // which is the repetition the redesign removes.
+  { img: `${S}pl_old_4_tops.webp`, tap: { x: 0.26, y: 0.297 } },
+  {
+    // Last screen of the flow: nothing to press, it just holds and restarts.
+    img: `${S}pl_old_6_combination.webp`,
+    hold: 3600,
+    note: "Six screens in, and nothing has said how far along you are or when this ends.",
+    noteAt: { x: 0.06, y: 0.32 },
+  },
+];
+
+const PLAN_NEW = [
+  {
+    img: `${S}ret_dashboard.webp`,
+    tap: { x: 0.5, y: 0.283 },
+    note: "The new landing page is a personalized dashboard: recommended and saved outfits, the weather, and one primary action. Planning an outfit starts from it.",
+    noteAt: { x: 0.94, y: 0.18 },
+  },
+  { img: `${S}pl_new_1_settype.webp`, tap: { x: 0.5, y: 0.935 } },
+  {
+    img: `${S}pl_new_2_empty.webp`,
+    tall: true,
+    tap: { x: 0.5, y: 0.378 },
+    note: "One checklist. Every piece of the outfit, and everything still missing, on one screen.",
+    noteAt: { x: 0.94, y: 0.2 },
+  },
+  {
+    img: `${S}pl_new_3_tops.webp`,
+    tap: { x: 0.27, y: 0.496 },
+    note: "The filters are gone. The grid is for choosing, not for tuning.",
+    noteAt: { x: 0.94, y: 0.22 },
+  },
+  {
+    img: `${S}pl_new_4_half.webp`,
+    tall: true,
+    tap: { x: 0.5, y: 0.66 },
+    note: "Forty percent, stated. The end of the flow is visible from the start of it.",
+    noteAt: { x: 0.86, y: 0.2 },
+  },
+  {
+    // Last screen of the flow: nothing to press, it just holds and restarts.
+    img: `${S}pl_new_5_complete.webp`,
+    tall: true,
+    hold: 3600,
+    note: "Completion is a state the flow actually reaches, and says so.",
+    noteAt: { x: 0.9, y: 0.2 },
+  },
+];
+
+// Payment, old against new. One comparison, so the tab bar hides itself.
+const PAYMENT_TABS = [
+  {
+    label: "Payment",
+    old: {
+      // The same screen twice: confirming the outfit is what raises the sheet,
+      // so the loop plays that rather than showing the result on its own.
+      img: `${S}pl_old_6_combination.webp`,
+      swap: `${S}pay_old_sheet.webp`,
+      tap: { x: 0.735, y: 0.931 },
+      // Off the sheet, over the dimmed outfit: tapping there is how it closes.
+      dismiss: { x: 0.5, y: 0.32 },
+      alt: "Confirming the chosen outfit raises the old subscription sheet over it",
+      note: "Nine screens into the outfit flow, confirming the outfit raises a sheet. Two prices for the same unnamed thing, and nothing yet to want it for.",
+    },
+    new: {
+      // The assessment result leads, because where the plans appear is the
+      // point: tapping through from the finished profile opens Premium, then
+      // Lite. All three are exported at the phone's own aspect, so nothing here
+      // scrolls or gets cropped.
+      img: `${S}as_new_04_complete.webp`,
+      swap: [`${S}pay_new_premium.webp`, `${S}pay_new_lite.webp`],
+      tap: { x: 0.5, y: 0.935 },
+      // Back, top left of the plan screen: the loop returns the way it came in.
+      dismiss: { x: 0.07, y: 0.09 },
+      alt: "The finished style profile, then the two named subscription plans",
+      note: "Straight after the assessment result, where the value has just been shown. Two named plans, priced against each other, with what each buys listed under them.",
+    },
+  },
+];
+
+// The three problem/solution sections, each its own stage of the journey.
+const FLOWS = [
+  {
+    id: "asx-activation",
+    num: "03",
+    nav: "Activation",
+    eyebrow: "Activation",
+    title: "Onboarding and sign in",
+    problem: [
+      "A new user was asked to register, verify, and then describe themselves before they even knew what the app was about or what they'd get from using it.",
+    ],
+    changed: [
+      "First explain what the app does and then have the user sign in with their social media account, which covers most of the registration details. Shorten the distance to first recommendation by collecting only the minimal info required for the styling engine.",
+    ],
+  },
+  {
+    id: "asx-conversion",
+    num: "05",
+    nav: "Conversion",
+    eyebrow: "Conversion",
+    title: "Payment flow",
+    problem: [
+      "Subscription was presented as an add-on feature after the assessment, which wasn't a great sales pitch.",
+    ],
+    changed: [
+      "Completing the assessment is a milestone in itself, and that's when the user is more likely to be willing to pay. This was a big bet, and I recommended we test it.",
+    ],
+  },
+  {
+    id: "asx-engagement",
+    num: "06",
+    nav: "Engagement",
+    eyebrow: "Engagement",
+    title: "Landing page and plan outfit",
+    problem: [
+      "When the app opened, I'd see an empty wardrobe, which didn't help me understand what the app did. When planning the outfit, there was no sense of how much you'd accomplished or what was left to do, and you had to answer questions that you already answered.",
+    ],
+    changed: [
+      "I changed this with a dashboard that gives you a clear place to start. There's recommended styled outfits that you can look through or use the prominently placed CTA for a fresh new start. I also added a checklist to outfit choosing part to show the status, what's missing and what's coming up. I also removed the extra filters as they accomplished",
+    ],
+  },
+];
+
+// The four assessment decisions, old against new. Anchors are fractions of the
+// frame: the old note points in from the left, the new note in from the right.
+const ASSESSMENT_TABS = [
+  {
+    label: "Route",
+    old: {
+      img: `${S}as_01_route.webp`,
+      alt: "Assessment route selection, with the AI assisted and manual paths given equal weight",
+      note: "Two routes given equal weight, so the first decision is about how to answer rather than answering.",
+    },
+    new: {
+      img: `${S}as_new_01_landing.webp`,
+      alt: "New skin tone landing, leading with the selfie and demoting manual entry to a link",
+      note: "One route leads. Entering details by hand is still there, one line down, for anyone who wants it.",
+    },
+  },
+  {
+    label: "Photo rules",
+    old: {
+      img: `${S}as_02_selfie_rules.webp`,
+      swap: `${S}as_02_body_rules.webp`,
+      alt: "Eight rules before the selfie, then five more before the full body photo",
+      note: "Eight rules before the selfie and five more before the full body shot, written like a passport photo checklist.",
+    },
+    new: {
+      img: `${S}as_new_02_selfie.webp`,
+      swap: `${S}as_new_02_body.webp`,
+      alt: "New selfie and body setup, each a short plainly worded list on a sheet over the camera",
+      note: "Still two screens. The wording turned into help rather than requirements, and it sits on the camera where the photo is taken.",
+    },
+  },
+  {
+    label: "Skin tone",
+    old: {
+      img: `${S}as_03_skintone.webp`,
+      overlay: `${S}as_03_popup.webp`,
+      tap: { x: 0.81, y: 0.327 },
+      alt: "Skin tone question, with each definition hidden behind its own info icon",
+      note: "Each definition sat behind its own info icon, one popup at a time, so choosing became a memory test.",
+    },
+    new: {
+      img: `${S}as_new_03_skintone.webp`,
+      alt: "New skin tone selection with every description visible beside its swatch",
+      note: "Every description visible at once, beside its swatch, so the choice becomes a comparison.",
+    },
+  },
+  {
+    label: "Result",
+    old: {
+      img: `${S}as_04_opening.webp`,
+      alt: "The assessment result, laid out as a filled in form in a different visual language",
+      note: "The result read as a submitted form, in a visual language belonging to no other screen in the app.",
+    },
+    new: {
+      img: `${S}as_new_04_complete.webp`,
+      alt: "New style profile complete screen, presenting the result as a profile",
+      note: "The same data presented as the beginning of something, in the language of the rest of the app.",
+    },
+  },
+];
+
+// The six documented parts, as the sheets themselves — every value drawn for
+// both themes on one sheet, so the split slider shows the pair at once.
+const SYSTEM_SHEETS = [
+  {
+    label: "Colour",
+    light: "/assets/aistylist/sys_1_colors_light.webp",
+    dark: "/assets/aistylist/sys_1_colors_dark.webp",
+    caption:
+      "A purple primary and secondary, four semantic states tuned to sit beside them, a six step grey ramp and two gradients.",
+  },
+  {
+    label: "Headings",
+    light: "/assets/aistylist/sys_2_headings_light.webp",
+    dark: "/assets/aistylist/sys_2_headings_dark.webp",
+    caption:
+      "Clash Display for headings at six sizes from 56 down to 20, each with its line height as a ratio rather than a pixel value.",
+  },
+  {
+    label: "Body",
+    light: "/assets/aistylist/sys_3_body_light.webp",
+    dark: "/assets/aistylist/sys_3_body_dark.webp",
+    caption:
+      "Fustat for body at eight sizes from 40 down to 12, in two weights.",
+  },
+  {
+    label: "Icons & spacing",
+    light: "/assets/aistylist/sys_4_icons_spacing_light.webp",
+    dark: "/assets/aistylist/sys_4_icons_spacing_dark.webp",
+    caption:
+      "Around thirty interface icons, plus five custom body shape icons drawn for this product, on a ten step spacing scale from 8 to 120.",
+  },
+  {
+    label: "Text fields",
+    light: "/assets/aistylist/sys_5_textfields_light.webp",
+    dark: "/assets/aistylist/sys_5_textfields_dark.webp",
+    caption:
+      "Five field configurations plus a text area, each with label, hint and status, and three input states.",
+  },
+  {
+    label: "Buttons",
+    light: "/assets/aistylist/sys_6_buttons_light.webp",
+    dark: "/assets/aistylist/sys_6_buttons_dark.webp",
+    caption:
+      "Three sizes, with padding and icon gap set against the label size so a developer scaling one does not have to ask.",
+  },
+  {
+    label: "Button variants",
+    light: "/assets/aistylist/sys_7_button_variants_light.webp",
+    dark: "/assets/aistylist/sys_7_button_variants_dark.webp",
+    caption:
+      "Twelve variants across text, icon with text and icon only, each drawn for default, hover, active and disable.",
+  },
+];
+
+// Counted off the Figma files, not measured off users — see the section intro.
+const METRICS = [
+  {
+    old: "28",
+    now: "17",
+    what: "Interactions from launch to the first result",
+    body: "Counted along the default email sign up and image based assessment. The new flow takes the default social sign up, adds six onboarding screens, and still gets there in 17. That's 40% lesser interations than before",
+  },
+  {
+    old: "14",
+    now: "4",
+    what: "Things the user has to supply before the result",
+    body: "Pieces of information collected before a result is shown, sign up included. The new path asks for four: an everyday vibe, a selfie, a full length photo, and consent to capture them.",
+  },
+  {
+    old: "9",
+    now: "1",
+    what: "Screens between the result and the price",
+    body: "The old app presented the subscription after 9 screens in the outfit flow. Now it comes right after the assessment.",
+  },
+  {
+    old: "6",
+    now: "0",
+    what: "Filters standing between the user and an outfit",
+    body: 'There were 6 filters between the user and the outfit. I replaced them with "in progress", "partial", and "complete" states. The old flow had no such indicators.',
+  },
+];
+
+const OUTCOMES = [
+  {
+    title: "Improved time to value",
+    body: "By reducing friction during setup, users receive meaningful recommendations faster and with less effort. Read on median time to first recommendation.",
+  },
+  {
+    title: "Better feature discoverability",
+    body: "Important functionality is accessible when the users need it, without needing to search. Read on the share of activated users reaching wardrobe, saved looks and the attire switch.",
+  },
+  {
+    title: "Improved monetization flow",
+    body: "Subscription plans are introduced earlier, right after users experience personalized value. Tested as paywall view to trial start, against the old placement.",
+  },
+  {
+    title: "Stronger personalization",
+    body: "The connection between assessment answers and how they affect recommendations is visible throughout the app. Read on repeat sessions at day seven and day thirty.",
+  },
+];
+
+const NAV_SECTIONS = [
+  { id: "asx-hero", label: "Intro" },
+  { id: "asx-overview", label: "Overview" },
+  { id: "asx-audit", label: "Audit" },
+  { id: "asx-activation", label: "Activation" },
+  { id: "asx-assessment", label: "Assessment" },
+  { id: "asx-conversion", label: "Conversion" },
+  { id: "asx-engagement", label: "Engagement" },
+  { id: "asx-assistant", label: "Sia" },
+  { id: "asx-retention", label: "Retention" },
+  { id: "asx-platform", label: "Platform" },
+  { id: "asx-handoff", label: "Handoff" },
+  { id: "asx-counted", label: "Outcomes" },
+  { id: "asx-outcomes", label: "What Next?" },
+  { id: "asx-reflection", label: "Reflection" },
+];
+---
+
+<CaseStudyLayout
+  title="AI Stylist Case Study | Viknesh Vijayakumar"
+  description="Redesigning a consumer AI styling app so users reach their first meaningful recommendation faster, across iOS, Android and responsive web."
+  ogImage="/assets/aistylist.webp"
+>
+  <div
+    class="cs-overlay cs-overlay--asx"
+    role="dialog"
+    aria-modal="true"
+    aria-label="AI Stylist case study"
+  >
+    <div class="cs-topbar">
+      <a class="cs-back" href="/" aria-label="Back to the portfolio">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>Back</span>
+      </a>
+      <div class="cs-topbar__title">
+        <span class="cs-topbar__eyebrow">Freelance · 2025</span>
+        <span class="cs-topbar__name">AI Stylist</span>
+      </div>
+    </div>
+
+    <nav class="cs-sidenav" aria-label="Sections">
+      {
+        NAV_SECTIONS.map((s) => (
+          <a href={`#${s.id}`} class={s.id === "asx-hero" ? "is-active" : ""}>
+            {s.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="cs-scroll">
+      <section id="asx-hero" class="cs-hero">
+        <div class="cs-hero__inner">
+          <div class="cs-hero__main">
+            <div class="cs-hero__lede">
+              <h1 class="cs-hero__title">
+                Getting an AI stylist app out of <em>its own way</em>.
+              </h1>
+              <p class="cs-hero__desc">
+                Recently, I worked on an AI powered fashion styling app that
+                reduces decision fatigue and builds personalized wardrobes
+                curated on the user's physical attributes. The recommendation
+                engine was their core value proposition. Users had to complete
+                several steps before they even knew what they would get.
+              </p>
+              <div class="cs-scroll-hint">Scroll to explore</div>
+            </div>
+            <div class="cs-hero__meta">
+              {
+                FACTS.map((f) => (
+                  <div class="cs-meta-item">
+                    <>
+                      <span class="cs-meta-label">{f.label}</span>
+                      <span class="cs-meta-val">{f.value}</span>
+                    </>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-overview" class="cs-section cs-section--challenge">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">01<span>Overview</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">
+                A consumer app plays by different rules
+              </h2>
+              <p class="cs-body">
+                Most of my experience is in enterprise SaaS and healthcare where
+                users are trained, and won't leave a workflow because a screen
+                annoyed them. But, for consumer apps, this is the opposite.
+                People download it on a whim and get rid of it after just one
+                minute if they're not satisfied. In enterprise I am reducing
+                error and cognitive load across a long session. Here I had to
+                shorten the distance to the first useful output, make the app
+                less overwhelming and get the user to open it again. Here's how
+                the app worked.
+              </p>
+            </div>
+            <div class="cs-outcomes-grid" data-reveal-stagger>
+              <div class="cs-outcome-card">
+                <div class="cs-outcome-card__icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    fill="none"
+                    viewBox="0 0 64 64"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="var(--cs-accent)"
+                      fill-rule="evenodd"
+                      d="M32 34.667a8.667 8.667 0 1 0 0-17.334 8.667 8.667 0 0 0 0 17.334Zm16.11 6.794.591.283A19.334 19.334 0 0 1 32 51.334a19.334 19.334 0 0 1-16.701-9.59l.592-.282a37.44 37.44 0 0 1 16.106-3.62c5.76 0 11.227 1.3 16.112 3.62Z"
+                      clip-rule="evenodd"></path>
+                    <path
+                      fill="var(--cs-accent)"
+                      opacity="0.3"
+                      fill-rule="evenodd"
+                      d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30 16.568 0 30-13.432 30-30a30.223 30.223 0 0 0-.6-5.997l-6.533 1.328A23.334 23.334 0 1 1 32 8.667a23.2 23.2 0 0 1 14.379 4.954l-3.712 3.712L45.333 20h12V8l-2.666-2.667L51.12 8.88A29.867 29.867 0 0 0 32 2Z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <h4>Create an Account</h4>
+                <p>
+                  Create an account using email and password or signup with a
+                  social media account.
+                </p>
+              </div>
+
+              <div class="cs-outcome-card">
+                <div class="cs-outcome-card__icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    fill="none"
+                    viewBox="0 0 64 64"
+                    aria-hidden="true"
+                  >
+                    <g clip-path="url(#cs-icon-roadmap-clip)">
+                      <path
+                        fill="var(--cs-accent)"
+                        opacity="0.3"
+                        fill-rule="evenodd"
+                        d="M4.571 4.571a4.571 4.571 0 1 0 0 9.143h44.572a5.715 5.715 0 0 1 0 11.429H16A16.002 16.002 0 0 0 1.218 47.266 16 16 0 0 0 16 57.143h34.286v4.571a2.286 2.286 0 0 0 3.904 1.614l9.143-9.143a2.286 2.286 0 0 0 0-3.232L54.19 41.81a2.286 2.286 0 0 0-3.904 1.618V48H16a6.857 6.857 0 0 1 0-13.714h33.143a14.857 14.857 0 1 0 0-29.715H4.57Z"
+                        clip-rule="evenodd"></path>
+                      <path
+                        fill="var(--cs-accent)"
+                        fill-rule="evenodd"
+                        d="M29.714 9.143a9.143 9.143 0 1 1-18.285 0 9.143 9.143 0 0 1 18.285 0Zm4.572 43.428a9.143 9.143 0 1 1-18.286 0 9.143 9.143 0 0 1 18.286 0Zm4.571-13.714a9.143 9.143 0 1 0 0-18.285 9.143 9.143 0 0 0 0 18.285Z"
+                        clip-rule="evenodd"></path>
+                    </g>
+                    <defs>
+                      <clipPath id="cs-icon-roadmap-clip">
+                        <path fill="#fff" d="M0 0h64v64H0z"></path>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <h4>Style Assessment</h4>
+                <p>
+                  Complete style assessment by providing body type and
+                  preference information
+                </p>
+              </div>
+
+              <div class="cs-outcome-card">
+                <div class="cs-outcome-card__icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    fill="none"
+                    viewBox="0 0 64 64"
+                    aria-hidden="true"
+                  >
+                    <g clip-path="url(#cs-icon-dress-clip)">
+                      <path
+                        fill="var(--cs-accent)"
+                        opacity="0.3"
+                        d="M58.06 40.76c-4.03-5.81-8.99-8.355-11.24-11.63-1.875-2.73-3.275-6.505-3.11-9.87.07-1.47 1.455-6.375 1.455-6.375s2.05 0 3.81-1.785c1.295-1.315 2.155-3.215 2.37-4.955.095-.785.345-1.86-.475-2.36-.525-.32-1.165-.495-1.74-.69-1.035-.355-2.05-.5-3.055-.985C44.915 1.545 43.81.91 42.5.77c-.74-.08-1.455-.05-2.115.325-.365.205-.355.275-.225.605.59 1.51-.89 3.085-2.095 3.62-1.13.505-2.965 1.01-6.065 1.01-3.1 0-4.935-.505-6.065-1.01-1.205-.535-2.685-2.11-2.095-3.62.13-.33.14-.4-.225-.605C22.955.72 22.24.69 21.5.77c-1.31.14-2.415.775-3.575 1.335-1.005.485-2.02.63-3.055.985-.575.195-1.215.375-1.74.69-.815.5-.57 1.575-.475 2.36.21 1.74 1.075 3.64 2.37 4.955 1.76 1.785 3.81 1.785 3.81 1.785s1.385 4.905 1.455 6.375c.165 3.365-1.235 7.14-3.11 9.87-2.245 3.275-7.205 5.82-11.24 11.63C3.105 44.835-.015 52.105.085 53.45c.105 1.345 1.38 1.7 2.48 2.01 1.42.4 2.305.96 3.435 1.925 1.375 1.17 3.01 1.905 4.765 2.295 1.78.395 3.54.12 5.305.71 2.16.72 4.06 2.04 6.275 2.615 3.205.82 7.625-.555 9.655-.53 2.03-.025 6.45 1.355 9.655.53 2.215-.57 4.115-1.89 6.275-2.615 1.77-.59 3.525-.31 5.305-.71 1.755-.39 3.39-1.12 4.765-2.295 1.13-.97 2.02-1.525 3.435-1.925 1.095-.31 2.375-.67 2.48-2.01.1-1.345-3.02-8.61-5.855-12.69"
+                      ></path>
+                      <path
+                        fill="var(--cs-accent)"
+                        d="M36.27 28.19c4.15-.526 6.949-1.733 8.606-2.69-.342-1.012-.623-1.675-.944-3.295-1.297.897-5.03 2.953-11.982 2.965-6.78-.012-10.5-1.968-11.877-2.89-.284 1.288-.561 2.222-.986 3.263 1.678.958 4.49 2.151 8.638 2.667-1.225 2.005-3.585 4.7-7.69 5.44 0 0-.36 2.65.9 3.445 1.255.795 1.54.785 2.335 1.585.8.8.93 1.58 3.51 2.03 0 0 3.85-3.2 5.215-9.7 1.365 6.5 5.215 9.7 5.215 9.7 2.58-.45 2.715-1.23 3.51-2.03.795-.795 1.08-.785 2.335-1.585 1.255-.795.9-3.445.9-3.445-4.105-.745-6.465-3.455-7.685-5.46Zm2.375 31.445c-1.67 0-2.775-.405-3.77-.765-.89-.325-1.655-.605-2.895-.62-1.205.01-1.975.295-2.86.62-1.14.415-2.43.885-4.555.735-2.58-.185-3.835-1.275-4.945-2.24-.605-.535-1.185-1.035-2.025-1.41-1.15-.515-1.64-.475-2.525-.4-.825.065-1.845.145-3.455-.15-2.39-.44-3.215-1.21-4.2-2.33-.41-.47-.83-.95-1.62-1.52C4.35 50.51 2.24 50.338.99 50.34c.115-.347.995-2.394 1.31-3.066 1.68.132 3.676.576 5.316 1.766 1.07.775 1.66 1.445 2.135 1.98.65.745.92 1.05 2.43 1.33 1.21.225 1.94.165 2.64.11 1.065-.09 2.17-.175 4.035.655 1.27.565 2.09 1.28 2.81 1.905.945.83 1.575 1.375 3.115 1.485 1.47.1 2.26-.19 3.275-.56 1.01-.37 2.155-.785 3.925-.805 1.805.02 2.95.435 3.96.805 1.01.37 1.81.66 3.27.56 1.545-.11 2.17-.655 3.115-1.485.72-.63 1.535-1.34 2.81-1.905 1.875-.83 2.97-.745 4.035-.655.705.06 1.43.115 2.64-.11 1.405-.26 1.675-.575 2.27-1.265.475-.555 1.13-1.31 2.365-2.1 1.555-.996 3.363-1.58 5.247-1.72.18.362 1.058 2.235 1.346 3.09-2.226-.12-3.89.59-4.923 1.25-.85.545-1.255 1.015-1.685 1.51-.925 1.075-1.76 1.865-4.06 2.29-1.615.3-2.635.215-3.455.15-.89-.075-1.375-.115-2.525.4-.84.375-1.42.875-2.025 1.41-1.11.965-2.36 2.06-4.945 2.24-.26.025-.525.03-.775.03Z"
+                      ></path>
+                    </g>
+                    <defs>
+                      <clipPath id="cs-icon-dress-clip">
+                        <path fill="#fff" d="M0 0h64v64H0z"></path>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <h4>Get Recommendations</h4>
+                <p>
+                  Receive wardrobe recommendations curated and personalized
+                  based on physical attributes.
+                </p>
+              </div>
+
+              <div class="cs-outcome-card">
+                <div class="cs-outcome-card__icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    fill="none"
+                    viewBox="0 0 64 64"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="var(--cs-accent)"
+                      d="M5.333 16h53.334v10.667l-1.865 1.118a9.334 9.334 0 0 1-9.604 0l-1.865-1.118-1.864 1.118a9.334 9.334 0 0 1-9.604 0L32 26.668l-1.865 1.118a9.334 9.334 0 0 1-9.604 0l-1.864-1.118-1.865 1.118a9.333 9.333 0 0 1-9.604 0l-1.865-1.118V16Zm33.334 26.667H25.333v16h13.334v-16Z"
+                    ></path>
+                    <path
+                      fill="var(--cs-accent)"
+                      opacity="0.3"
+                      d="M50.667 29.334a2.667 2.667 0 0 1 5.333 0v29.332a2.667 2.667 0 0 1-2.666 2.668H10.667A2.667 2.667 0 0 1 8 58.666v-28.68a2.667 2.667 0 0 1 5.334 0V56h37.333V29.334ZM8 15.764V5.333a2.667 2.667 0 0 1 2.667-2.667h42.667A2.667 2.667 0 0 1 56 5.333V16a2.666 2.666 0 0 1-5.333 0V8H13.334v7.763a2.667 2.667 0 0 1-5.334 0Z"
+                    ></path>
+                    <path
+                      fill="var(--cs-accent)"
+                      opacity="0.3"
+                      d="M38.666 40a2.667 2.667 0 0 1 2.667 2.667v16a2.667 2.667 0 0 1-2.667 2.666H25.333a2.667 2.667 0 0 1-2.667-2.666v-16A2.667 2.667 0 0 1 25.333 40h13.333ZM28 56h8V45.333h-8V56Zm30.666-42.667A2.667 2.667 0 0 1 61.333 16v10.667c0 .937-.491 1.804-1.295 2.286l-1.864 1.12a12.001 12.001 0 0 1-12.349 0l-.492-.297-.492.296a12.001 12.001 0 0 1-12.349 0L32 29.776l-.492.296a12 12 0 0 1-12.348 0l-.493-.296-.492.296a12 12 0 0 1-12.348 0l-1.865-1.119a2.667 2.667 0 0 1-1.295-2.286V16a2.667 2.667 0 0 1 2.667-2.667h53.333ZM8 25.157l.57.342a6.667 6.667 0 0 0 6.86 0l1.864-1.119a2.668 2.668 0 0 1 2.744 0l1.866 1.12a6.667 6.667 0 0 0 6.859 0l1.865-1.12.16-.089a2.668 2.668 0 0 1 2.584.089l1.865 1.12a6.667 6.667 0 0 0 6.86 0l1.864-1.12a2.667 2.667 0 0 1 2.744 0l1.865 1.12.2.114a6.667 6.667 0 0 0 6.66-.115l.57-.343v-6.489H8v6.49Z"
+                    ></path>
+                  </svg>
+                </div>
+                <h4>Virtual Try-on</h4>
+                <p>
+                  Create AI generated image of yourself with the selected
+                  wardrobe and shop directly with in the app.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-audit" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">02<span>The audit</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">
+                What I found before <br /> I changed anything
+              </h2>
+              <p class="cs-body">
+                I went through the full design as a new user and noted every
+                issue, the stage of the journey it damaged and its rank based on
+                it's likely impact on activation and conversion. I also worked
+                with the iOS and Android devs to make informed decisions based
+                on tech stack limitations. A high-level review of the app's
+                onboarding process and features compared to other similar apps
+                revealed these issues,
+              </p>
+              <ul class="cs-list">
+                <li>
+                  <strong>Delayed time to value.</strong> It took too long to get
+                  to the good stuff, the app asked for a lot of personal info before
+                  it showed you what you'd be getting.
+                </li>
+                <li>
+                  <strong>Hard to discover features.</strong> It was hard to figure
+                  out what features were available, the app didn't make it clear that
+                  you could choose between traditional Indian and Western-style clothes.
+                </li>
+                <li>
+                  <strong>Low transparency.</strong> People didn't know how the app
+                  made its recommendations or how their input affected the suggested
+                  outfits.
+                </li>
+              </ul>
+            </div>
+            <blockquote class="asx-goal">
+              <div class="asx-eyebrow">Goal</div>
+              <p>
+                Redesign the app to reduce cognitive load, improving feature
+                discoverability, and making personalization more transparent
+                throughout the app.
+              </p>
+            </blockquote>
+          </div>
+        </div>
+      </section>
+
+      <section id={FLOWS[0].id} class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">
+            {FLOWS[0].num}
+            <span>{FLOWS[0].nav}</span>
+          </div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">{FLOWS[0].title}</h2>
+            </div>
+            <div class="cs-audit-grid">
+              <div class="cs-redesign-card__text">
+                <div class="cs-redesign-card__block-label">
+                  <span class="cs-redesign-card__dot cs-redesign-card__dot--old"
+                  ></span>
+                  The problem
+                </div>
+                <div>
+                  {FLOWS[0].problem.map((p) => <p>{p}</p>)}
+                </div>
+              </div>
+              <div class="cs-redesign-card__text">
+                <div class="cs-redesign-card__block-label">
+                  <span class="cs-redesign-card__dot cs-redesign-card__dot--new"
+                  ></span>
+                  What I changed and why
+                </div>
+                <div>
+                  {FLOWS[0].changed.map((p) => <p>{p}</p>)}
+                </div>
+              </div>
+            </div>
+            <FlowWalkthrough
+              id="asx-activation-walkthrough"
+              oldSteps={ACTIVATION_OLD}
+              newSteps={ACTIVATION_NEW}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-assessment" class="cs-section cs-section--challenge">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">04<span>Assessment</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">Four decisions inside the assessment</h2>
+              <p class="cs-body">
+                The assessment asks for your skin tone, face and body type, all
+                of which affect the recommendations. But if the answers are
+                incorrect, the app will still give bad advice and you'll never
+                know why. So, I worked on four key parts of this section.
+              </p>
+            </div>
+
+            <CompareTabs id="asx-assessment-tabs" tabs={ASSESSMENT_TABS} />
+          </div>
+        </div>
+      </section>
+
+      {
+        FLOWS.slice(1).map((f, i) => (
+          <section
+            id={f.id}
+            class={`cs-section cs-section--${i % 2 === 0 ? "overview" : "challenge"}`}
+          >
+            <div class="cs-section__inner">
+              <div class="cs-section__number">
+                {f.num}
+                <span>{f.nav}</span>
+              </div>
+              <div>
+                <div class="cs-heading-body-group">
+                  <h2 class="cs-heading">{f.title}</h2>
+                </div>
+                <div class="cs-audit-grid">
+                  <div class="cs-redesign-card__text">
+                    <div class="cs-redesign-card__block-label">
+                      <span class="cs-redesign-card__dot cs-redesign-card__dot--old" />
+                      The problem
+                    </div>
+                    <div>
+                      {f.problem.map((p) => (
+                        <p>{p}</p>
+                      ))}
+                    </div>
+                  </div>
+                  <div class="cs-redesign-card__text">
+                    <div class="cs-redesign-card__block-label">
+                      <span class="cs-redesign-card__dot cs-redesign-card__dot--new" />
+                      What I changed and why
+                    </div>
+                    <div>
+                      {f.changed.map((p) => (
+                        <p>{p}</p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {f.id === "asx-engagement" ? (
+                  <FlowWalkthrough
+                    id="asx-engagement-walkthrough"
+                    oldSteps={PLAN_OLD}
+                    newSteps={PLAN_NEW}
+                  />
+                ) : (
+                  <CompareTabs id="asx-payment-tabs" tabs={PAYMENT_TABS} />
+                )}
+              </div>
+            </div>
+          </section>
+        ))
+      }
+
+      <section id="asx-assistant" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">07<span>Sia</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">Sia</h2>
+              <p class="cs-body">
+                The client wanted an in app assistant. I defined and designed
+                how it should behave when nobody was talking to it.
+              </p>
+              <p class="cs-body">
+                Newer AI assistants interrupt the flow and sit open all the
+                time. I think AI should be a silent spectator but should help
+                when I'm stuck. So Sia stays closed, with a badge that glows
+                when she has something to offer. She appears on her own when
+                someone is stuck or spending too long on a single screen, like
+                good old Clippy from old MS Word but more helpful and less
+                annoying. How long before she appears was the tricky part. No,
+                not based on a timer, it quickly becomes boring within 2
+                sessions. So the trigger is hesitation and not elapsed time.
+              </p>
+            </div>
+
+            <div class="cs-stage">
+              {
+                /* Two screens: captions meet in the middle, each led back to its
+                  own screen — see .asx-figures--split. */
+              }
+              <div class="asx-figures asx-figures--split">
+                <figure class="asx-figure">
+                  <div class="cs-phone">
+                    <img
+                      src={`${S}pay_new_premium.webp`}
+                      alt="The plan screen, with Sia opening by herself over it"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span class="asx-figure__scrim"></span>
+                    <img
+                      class="asx-figure__over asx-figure__over--auto"
+                      src={`${S}sia_panel.webp`}
+                      alt="Sia offering a one line comparison of the two plans"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <figcaption class="asx-figure__cap">
+                    At plan selection she opens on her own, where the decision
+                    is hardest and the drop off is worst, and says one sentence
+                    about the difference.
+                  </figcaption>
+                </figure>
+
+                <figure class="asx-figure">
+                  <div class="cs-phone">
+                    <img
+                      src={`${S}ret_dashboard.webp`}
+                      alt="The landing page, with Sia's badge glowing in the tab bar"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span class="asx-figure__glow"></span>
+                  </div>
+                  <figcaption class="asx-figure__cap">
+                    Most of the time she is a closed badge. It glows when she
+                    has something worth saying, and stays quiet when she does
+                    not.
+                  </figcaption>
+                </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-retention" class="cs-section cs-section--challenge">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">08<span>Retention</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">Lookbook</h2>
+              <p class="cs-body">
+                The lookbook is where the user gets to see what the AI has
+                created for them. There was nothing but a placeholder for me to
+                start with. After doing some research and discussion with the
+                client, I suggested a simple lookbook page with an upsell card
+                for StyleLite members and options for personalized and occasion
+                looks for StylePremium. Since the user will already be looking
+                at their own generated outfit, they'll understand what the
+                upgrade will give them.
+              </p>
+            </div>
+
+            <div class="cs-stage">
+              <div class="asx-figures">
+                {
+                  [
+                    {
+                      img: "lb_mannequin.webp",
+                      alt: "The mannequin lookbook a StyleLite member sees, with the upgrade card below it",
+                    },
+                    {
+                      img: "lb_personalized.webp",
+                      alt: "The personalized lookbook, the outfit rendered on the user",
+                    },
+                    {
+                      img: "lb_occasion.webp",
+                      alt: "An occasion look, styled for a romantic evening",
+                    },
+                  ].map((s) => (
+                    <figure class="asx-figure">
+                      <div class="cs-phone cs-phone--scroll">
+                        <img
+                          src={`${S}${s.img}`}
+                          alt={s.alt}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    </figure>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-platform" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">09<span>Platform</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">Web experience and dark mode</h2>
+              <p class="cs-body">
+                Originally, the app only had a mobile version. We needed a way
+                for the users to access it on web without installing an app. I
+                adapted the mobile designs with a better optimized layout for
+                bigger screens, while keeping the core of the app the same. I
+                also added a dark mode, but had to be careful with the images
+                and accessories that might not work well in the dark. I create a
+                total of 108 screens split across both themes, covering account,
+                style assessment, payment, the outfit flow, lookbooks and
+                settings.
+              </p>
+              <p class="cs-body">
+                I made sure the overall experience, color scheme, and usability
+                remained the same as the rest of the app. It follows the system
+                theme by default and keeps a manual override in profile.
+              </p>
+            </div>
+            <div class="cs-stage">
+              <div class="asx-figures">
+                <figure class="asx-figure asx-figure--wide">
+                  <div class="asx-carousel-wrap" data-asx-carousel>
+                    <button
+                      type="button"
+                      class="cs-carousel-control cs-carousel-control--prev"
+                      aria-label="Show previous web screen"
+                      title="Previous screen"
+                      data-asx-previous
+                      set:html={previousSvg}
+                    />
+                    <div class="asx-carousel">
+                      {
+                        [
+                          "The style profile on web: the steps down the left, the questions in the space a browser gives",
+                          "The skin tone photo step, the requirements beside the camera rather than ahead of it",
+                          "Skin tone selection, every description visible next to its swatch",
+                          "The two plans side by side, with what each includes listed under them",
+                          "The personalized lookbook, the look and everything about it on one screen",
+                        ].map((alt, i) => (
+                          <img
+                            src={`${S}web_${i + 1}.webp`}
+                            alt={alt}
+                            loading={i === 0 ? "eager" : "lazy"}
+                            decoding="async"
+                            data-lightbox-trigger
+                            style="cursor: pointer;"
+                          />
+                        ))
+                      }
+                    </div>
+                    <button
+                      type="button"
+                      class="cs-carousel-control cs-carousel-control--next"
+                      aria-label="Show next web screen"
+                      title="Next screen"
+                      data-asx-next
+                      set:html={nextSvg}
+                    />
+                    <button
+                      type="button"
+                      class="cs-media-maximize"
+                      aria-label="Maximize image"
+                      title="Maximize image"
+                      data-lightbox-trigger
+                      set:html={fullscreenSvg}
+                    />
+                  </div>
+                </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-handoff" class="cs-section cs-section--challenge">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">10<span>Handoff</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">Rules written as ratios</h2>
+              <p class="cs-body">
+                For the handoff to the developers, I created a style guide with
+                six sections: colour, typography, iconography, spacing, text
+                fields and buttons. I wrote the guidelines in terms of ratios,
+                so that if a developer needs to scale a component, they don't
+                have to ask.
+              </p>
+            </div>
+            <SheetCompare id="asx-system-sheets" sheets={SYSTEM_SHEETS} />
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-counted" class="cs-section cs-section--overview">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">11<span>Counted</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">What changed, counted from the files</h2>
+              <p class="cs-body">
+                Every number below can be checked against the Figma files. None
+                of them is a behavioural result.
+              </p>
+            </div>
+            <div class="asx-metrics">
+              {
+                METRICS.map((m) => (
+                  <div class="asx-metric">
+                    <span class="asx-metric__fig">
+                      <span class="asx-metric__old">{m.old}</span> → {m.now}
+                    </span>
+                    <div>
+                      <span class="asx-metric__what">{m.what}</span>
+                      <p class="cs-body">{m.body}</p>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-outcomes" class="cs-section cs-section--outcomes">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">12<span>Handover</span></div>
+          <div>
+            <div class="cs-heading-body-group">
+              <h2 class="cs-heading">What I recommended they do next</h2>
+              <p class="cs-body">
+                Since the client owned the analytics and I did not have access
+                to post launch data, so I could not tell them whether any of
+                this worked. But I told them what to measure: how long it takes
+                from when someone first opens the app until they get my first
+                suggestion, and also how long it takes to complete each part of
+                the on-boarding and the assessment. I wanted to know where
+                people are leaving the process, is it at a specific screen, or
+                somewhere in the middle of the overall flow? And then there's
+                the conversion rate at the screen where you choose a new plan,
+                because essentially, this is the main part of the project.
+              </p>
+              <p class="cs-body">
+                I mentioned this at the time, not after the fact. We should also
+                conduct user testing on the new on-boarding process with people
+                who aren't connected to each other.
+              </p>
+            </div>
+            <div class="cs-outcomes-grid">
+              {
+                OUTCOMES.map((o) => (
+                  <div class="cs-outcome-card">
+                    <>
+                      <h4>{o.title}</h4>
+                      <p>{o.body}</p>
+                    </>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="asx-reflection" class="cs-section cs-section--reflection">
+        <div class="cs-section__inner">
+          <div class="cs-section__number">13<span>Reflection</span></div>
+          <div>
+            <div class="cs-body-group">
+              <p class="cs-body">
+                This redesign wasn’t about adding any new features. Most of the
+                platform's best features were already there. It was about making
+                it easier for users to discover those features, understand them,
+                and make it easier to use them. This particular project came the
+                closest to my wish of doing a consumer UX project. Even then I
+                couldn’t conduct the study due to the time bound nature of the
+                project, user data access and the fact that the analytics were
+                sitting on the client's end. Still, I did whatever I could based
+                on the constraint and made sure which part of my report was an
+                evidence and which one was subjective judgment.
+              </p>
+
+              <p class="cs-body">
+                What I would have changed about the project was its closure. I
+                proposed a measurement plan but was unable to see any numbers.
+                Whether bringing up the payments feature earlier in the
+                onboarding process was good or bad, I cannot be sure yet. This
+                left me incomplete and frustrated. In the future I will make
+                sure that there is a provision to access the post-launch
+                data. In my next project, I want something that will give me the
+                chance to actually use the UX methods I've learned.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <CaseStudyFooter
+        title="Let's build something together"
+        sub="Have questions about this case study or looking to collaborate on consumer AI products, activation funnels and mobile personalization?"
+      />
+    </div>
+  </div>
+
+  <script>
+    import { autoCarousel } from "../scripts/auto-carousel";
+
+    // Scroll position is the state — no active index to keep in sync, and the
+    // browser already does the swiping, so autoplay only has to nudge it on.
+    document
+      .querySelectorAll<HTMLElement>("[data-asx-carousel]")
+      .forEach((wrap) => {
+        const row = wrap.querySelector<HTMLElement>(".asx-carousel");
+        if (!row) return;
+        const advance = (delta: number) => {
+          const slides = [...row.children] as HTMLElement[];
+          // Pitch off the slides themselves, so the row's gap is in it.
+          const step = slides[1].offsetLeft - slides[0].offsetLeft;
+          const at = Math.round(row.scrollLeft / step) + delta;
+          row.scrollTo({
+            left: ((at + slides.length) % slides.length) * step,
+            behavior: "smooth",
+          });
+        };
+
+        const start = autoCarousel(wrap, advance, { swipe: false });
+
+        wrap
+          .querySelector("[data-asx-previous]")
+          ?.addEventListener("click", () => {
+            advance(-1);
+            start();
+          });
+        wrap.querySelector("[data-asx-next]")?.addEventListener("click", () => {
+          advance(1);
+          start();
+        });
+      });
+  </script>
+</CaseStudyLayout>

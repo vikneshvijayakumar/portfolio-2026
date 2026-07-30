@@ -1,12 +1,14 @@
 ---
 // Landing page — imported from Claude Design (index.dc.html), Ledger layout, indigo accent.
 import Layout from "../layouts/Layout.astro";
+import "../styles/reveal.css";
 import GalleryCard from "../components/GalleryCard.astro";
 import AskAI from "../components/AskAI.astro";
 import "../styles/header.css";
 import "../styles/glow.css";
 import "../styles/made-with.css";
 import { buildAiBadgeMarkup } from "../lib/ai-badge";
+import { FORM_TAKING_DECK } from "../case-studies/shared";
 
 const aiBadgeMarkup = buildAiBadgeMarkup("home");
 const EMAIL = "hello@viknesh.me";
@@ -41,9 +43,9 @@ const base = [
     link: "/clinical-documentation",
   },
   {
-    tag: "case-study / ai-stylist",
+    tag: "case-study / aistylist",
     title: "Getting an AI stylist app out of its own way",
-    meta: "Freelance · Faster first recommendation · 2025",
+    meta: "Freelance · 40% fewer interactions · 2025",
     img: "/assets/aistylist.webp",
     imgW: 1200,
     imgH: 961,
@@ -51,7 +53,7 @@ const base = [
     tint: "rgba(220,240,230,.5)",
     featured: false,
     draft: false,
-    link: "/ai-stylist",
+    link: "/aistylist",
   },
   {
     tag: "case-study / form-taking",
@@ -65,6 +67,7 @@ const base = [
     featured: false,
     draft: false,
     link: "/form-taking",
+    mobileLink: FORM_TAKING_DECK,
   },
   {
     tag: "draft / snapintake",
@@ -103,6 +106,8 @@ const caseStudies = base.map((cs, i) => ({
   tagColor: cs.featured ? "var(--ac)" : "var(--muted)",
   titleColor: cs.draft ? "var(--muted)" : "var(--text)",
   hasLink: !!cs.link,
+  // Only Form Taking carries one; the rest of the cards stay as they are.
+  mobileLink: "mobileLink" in cs ? cs.mobileLink : undefined,
 }));
 
 // Off-the-record gallery — ported from Fignam-Codex DribbbleCards
@@ -246,7 +251,22 @@ const personSchema = {
   ogImage="/assets/profile.webp"
   pageClass="home-page"
 >
-  <script type="application/ld+json" is:inline set:html={JSON.stringify(personSchema)} />
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(personSchema)}
+  />
+
+  {
+    /* FOUC guard, same shape as CaseStudyLayout. The reveal script is a deferred
+      module, so anything it hides is hidden *after* first paint — content flashed
+      in, snapped out, then animated. The hidden state therefore lives in the
+      server HTML instead. Gated on the class (JS present) so no-JS crawlers keep
+      visible content, and on no-preference because reveals are motion. */
+  }
+  <script is:inline>
+    document.documentElement.classList.add("reveal-armed");
+  </script>
 
   <style is:global>
     @keyframes pulseDot {
@@ -307,18 +327,7 @@ const personSchema = {
       animation: fxUp 0.9s var(--ease-out-quart) forwards;
       animation-delay: var(--d, 0s);
     }
-    /* Masked word reveal (hero h1 + section headings) */
-    .w-mask {
-      display: inline-block;
-      overflow: hidden;
-      vertical-align: bottom;
-      padding-bottom: 0.12em;
-      margin-bottom: -0.12em;
-    }
-    .w-in {
-      display: inline-block;
-      transform: translateY(115%);
-    }
+    /* Word-mask primitives + scroll-reveal states: styles/reveal.css */
     .hero-ready [data-rsp="hero-line"] .w-in {
       animation: wordUp 0.9s var(--ease-out-quart) forwards;
       animation-delay: calc(var(--i) * 70ms);
@@ -340,14 +349,6 @@ const personSchema = {
     }
     .hero-l2 .corner:nth-of-type(3) {
       animation-delay: 1.24s;
-    }
-    /* Heading word cascade on scroll */
-    [data-reveal="words"] .w-in {
-      transition: transform 0.85s var(--ease-out-quart);
-      transition-delay: calc(var(--i) * 80ms);
-    }
-    [data-reveal="words"].in .w-in {
-      transform: none;
     }
     /* ── Hero dot-grid spotlight ── */
     #top::after {
@@ -455,6 +456,17 @@ const personSchema = {
     .copied-indicator.is-visible {
       opacity: 1;
       transform: translateY(-50%) scale(1);
+    }
+    /* On a phone the email row already fills the line, so parking the pill past
+       its right edge pushes it off-screen — the confirmation you just asked for
+       is the one thing you can't see. Anchor it inside the row instead; it
+       overlaps the tail of the address for the moment it's up. */
+    @media (max-width: 640px) {
+      .copied-indicator {
+        left: auto;
+        right: 0;
+        margin-left: 0;
+      }
     }
     .email-copy-icon {
       width: 0.38em;
@@ -642,7 +654,7 @@ const personSchema = {
     /* The right panel runs out of room before the nav does — shed the
        decorative pill and the resume CTA first (hero and footer both have
        the resume link). */
-    @media (max-width: 1100px) {
+    @media (max-width: 1200px) {
       [data-rsp="pill"],
       [data-rsp="resume"] {
         display: none !important;
@@ -650,7 +662,7 @@ const personSchema = {
     }
     /* Mobile + tablet: the floating name badge and the location line are
        chrome the header already covers. */
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
       [data-rsp="hero-eyebrow"],
       [data-rsp="hero-loc"] {
         display: none !important;
@@ -770,6 +782,15 @@ const personSchema = {
         flex-wrap: nowrap !important;
         gap: 8px !important;
       }
+      /* The resume button (199px) plus three 47px icons needs ~397px of
+         viewport. Below that the nowrap above pushed the last icon past the
+         right edge, where body's overflow-x:hidden clipped it with nothing to
+         scroll — so let this one row wrap again at the narrow end. */
+      @media (max-width: 640px) {
+        [data-rsp="foot-links"] {
+          flex-wrap: wrap !important;
+        }
+      }
       .social-label {
         display: none;
       }
@@ -794,6 +815,12 @@ const personSchema = {
       [data-rsp="hero-h1"] {
         font-size: clamp(40px, 10.5vw, 124px) !important;
       }
+    }
+
+    .btn-primary:hover {
+      background: var(--btn-hover) !important;
+      color: var(--btn-text) !important;
+      transform: translateY(-1px);
     }
   </style>
 
@@ -1002,762 +1029,776 @@ const personSchema = {
   </nav>
 
   <main>
-  <!-- ══ HERO ══ -->
-  <section
-    id="top"
-    style="position:relative;display:flex;align-items:center;min-height:100vh;box-sizing:border-box;background:var(--bg);background-image:radial-gradient(var(--dot) 1.3px,transparent 1.3px);background-size:26px 26px;padding:96px var(--pad) 64px"
-  >
-    <div id="heroInner" style="position:relative;z-index:2">
-      <div
-        class="fx"
-        data-rsp="hero-eyebrow"
-        style="display:inline-flex;align-items:center;gap:8px;margin-bottom:36px"
-      >
+    <!-- ══ HERO ══ -->
+    <section
+      id="top"
+      style="position:relative;display:flex;align-items:center;min-height:100vh;box-sizing:border-box;background:var(--bg);background-image:radial-gradient(var(--dot) 1.3px,transparent 1.3px);background-size:26px 26px;padding:96px var(--pad) 64px"
+    >
+      <div id="heroInner" style="position:relative;z-index:2">
         <div
-          style="display:inline-flex;align-items:center;gap:8px;animation:floatCursor 2.6s ease-in-out infinite"
+          class="fx"
+          data-rsp="hero-eyebrow"
+          style="display:inline-flex;align-items:center;gap:8px;margin-bottom:36px"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="var(--ac)"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            style="display:block;height:20px;width:auto"
-            ><path
-              d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"
-            ></path></svg
+          <div
+            style="display:inline-flex;align-items:center;gap:8px;animation:floatCursor 2.6s ease-in-out infinite"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="var(--ac)"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              style="display:block;height:20px;width:auto"
+              ><path
+                d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"
+              ></path></svg
+            >
+            <span
+              style="padding:4px 12px;border-radius:999px;background:color-mix(in srgb, var(--ac) 12%, var(--bg));border:1px solid color-mix(in srgb, var(--ac) 25%, var(--bg));color:var(--ac);font-size:12px;font-weight:600;white-space:nowrap"
+              >Viknesh Vijayakumar · Lead Product Designer</span
+            >
+          </div>
+        </div>
+        <h1
+          data-rsp="hero-h1"
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(44px,3vw + 8px,96px);line-height:1.02;letter-spacing: 0;text-wrap:balance"
+        >
+          <div>
+            <span data-rsp="hero-line" data-split-words
+              >I make complex B2B software feel</span
+            >
+          </div><span class="hero-l2"
+            ><span
+              style="position:relative;display:inline-block;font-style:italic;color:var(--ac);border:1.5px solid var(--ac);padding:0 16px;margin:0 4px"
+              ><span
+                class="corner"
+                style="position:absolute;top:-4.5px;right:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
+              ></span><span
+                class="corner"
+                style="position:absolute;bottom:-4.5px;left:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
+              ></span><span
+                class="corner"
+                style="position:absolute;bottom:-4.5px;right:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
+              ></span>refreshingly</span
+            > simple.</span
+          >
+        </h1>
+
+        <p
+          class="fx"
+          style="--d:.6s;font-size:16px;line-height: 1.6;margin:32px 0 0;max-width:64ch"
+        >
+          I work across early stage and enterprise. I ideate, design, and work
+          closely with engineering to get it shipped.&nbsp;12 years in, 8 of
+          them in healthcare AI. I like the messy middle. Complex workflows,
+          unclear requirements, an AI feature nobody has made usable yet. That
+          is the work I want.
+        </p>
+
+        <div
+          class="fx"
+          style="--d:.75s;display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-top:32px"
+        >
+          <a
+            href={RESUME}
+            target="_blank"
+            rel="noopener"
+            class="btn-primary"
+            style="display:inline-flex;align-items:center;gap:8px;padding:16px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
+            >Download Resume<span style="font-size:16px">↗</span></a
+          >
+          <button
+            data-copy-email
+            style="border:none;background:none;padding:0;cursor:pointer;font-family:var(--font),sans-serif;font-size:16px;font-weight:600;color:var(--text);border-bottom:1.5px solid var(--text)"
+            >Copy Email</button
           >
           <span
-            style="padding:4px 12px;border-radius:999px;background:color-mix(in srgb, var(--ac) 12%, var(--bg));border:1px solid color-mix(in srgb, var(--ac) 25%, var(--bg));color:var(--ac);font-size:12px;font-weight:600;white-space:nowrap"
-            >Viknesh Vijayakumar · Lead Product Designer</span
+            data-rsp="hero-loc"
+            style="font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
+            >Chennai, India · Available Remotely</span
           >
         </div>
+        <div class="fx ask-ai-slot" style="--d:1s">
+          <AskAI />
+        </div>
       </div>
-      <h1
-        data-rsp="hero-h1"
-        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(44px,3vw + 8px,96px);line-height:1.02;letter-spacing: 0;text-wrap:balance"
-      >
-        <div>
-          <span data-rsp="hero-line" data-split-words
-            >I make complex B2B software feel</span
-          >
-        </div><span class="hero-l2"
-          ><span
-            style="position:relative;display:inline-block;font-style:italic;color:var(--ac);border:1.5px solid var(--ac);padding:0 16px;margin:0 4px"
-            ><span
-              class="corner"
-              style="position:absolute;top:-4.5px;right:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
-            ></span><span
-              class="corner"
-              style="position:absolute;bottom:-4.5px;left:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
-            ></span><span
-              class="corner"
-              style="position:absolute;bottom:-4.5px;right:-4.5px;width:7px;height:7px;background:var(--bg);border:1.5px solid var(--ac)"
-            ></span>refreshingly</span
-          > simple.</span
-        >
-      </h1>
+    </section>
 
-      <p
-        class="fx"
-        style="--d:.6s;font-size:16px;line-height: 1.6;margin:32px 0 0;max-width:64ch"
+    <!-- ══ TICKER ══ -->
+    <div
+      class="ticker"
+      style="background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden"
+    >
+      <div
+        class="ticker-track"
+        style="display:flex;width:max-content;animation:tickerX 44s linear infinite"
       >
-        I work across early stage and enterprise. I ideate, design, and work
-        closely with engineering to get it shipped.&nbsp;12 years in, 8 of them
-        in healthcare AI. I like the messy middle. Complex workflows, unclear
-        requirements, an AI feature nobody has made usable yet. That is the work
-        I want.
-      </p>
+        {
+          [0, 1].map(() => (
+            <div style="display:flex;align-items:center;gap:40px;padding:20px 16px;font-family:var(--font-title),Georgia,serif;font-size:clamp(28px,1.2vw + 12px,48px);line-height:1;white-space:nowrap">
+              {tickerWork.map((t, i) => (
+                <>
+                  {i % 2 === 0 ? (
+                    <span style="color:var(--text)">{t}</span>
+                  ) : (
+                    <span style="font-style:italic;color:transparent;-webkit-text-stroke:1.2px var(--ac)">
+                      {t}
+                    </span>
+                  )}
+                  <span style="width:11px;height:11px;background:var(--ac);transform:rotate(45deg);flex:none" />
+                </>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- ══ WORK — stacking case studies (Ledger) ══ -->
+    <section
+      id="work"
+      style="position:relative;padding:0 var(--pad) 120px;background:var(--bg2)"
+    >
+      <!-- Sticky heading: the gap above it is padding, so it pins as one block. -->
+      <div
+        id="work-pinned"
+        style="position:sticky;top:0;padding:clamp(56px,8vh,96px) 0 32px;pointer-events:none"
+      >
+        <h2
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(40px,2.2vw + 8px,72px);letter-spacing: 0;line-height:1;pointer-events:auto;padding-bottom:20px"
+          data-reveal="words"
+          data-split-words
+        >
+          Selected Works
+        </h2>
+      </div>
+
+      <!-- Cards flow one below the other; each is sticky, so they stack while scrolling -->
+      <div id="work-cards" style="display:flex;flex-direction:column;gap:48px">
+        {
+          caseStudies.map((cs, i) => (
+            <article
+              data-rsp="case"
+              data-card-index={i}
+              style={`position:sticky;top:${cs.top};z-index:${cs.z};display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,1.25fr);align-items:center;gap:40px;box-sizing:border-box;background:var(--bg);border:${cs.border};border-radius:16px;overflow:hidden;padding:32px 36px;box-shadow:0 16px 36px -18px rgba(15,21,36,.28)`}
+            >
+              <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:20px">
+                <div
+                  style={`display:flex;align-items:center;gap:8px;font-family:var(--font),sans-serif;font-size:12px;color:${cs.tagColor}`}
+                >
+                  {cs.tag}
+                </div>
+                <h3
+                  style={`margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(28px,1.2vw + 8px,44px);line-height:1.06;letter-spacing: 0;color:${cs.titleColor}`}
+                >
+                  {cs.title}
+                </h3>
+                <p style="margin:0;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)">
+                  {cs.meta}
+                </p>
+                {cs.hasLink && (
+                  <a
+                    href={cs.link}
+                    data-mobile-href={cs.mobileLink}
+                    aria-label={`View case study: ${cs.title}`}
+                    class="btn-primary"
+                    style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:12px 20px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
+                  >
+                    View Case Study{" "}
+                    <span style="font-size:16px" aria-hidden="true">
+                      ↗
+                    </span>
+                  </a>
+                )}
+                {cs.draft && (
+                  <span style="display:inline-block;padding:8px 12px;background:#FFE767;color:#5C4A00;font-size:12px;font-weight:700;transform:rotate(-2deg);box-shadow:0 4px 12px rgba(15,21,36,.14);white-space:nowrap">
+                    Coming soon ✎
+                  </span>
+                )}
+              </div>
+              <div
+                style={`position:relative;--tint:${cs.tint};background:color-mix(in srgb, var(--tint) var(--tint-mix), transparent);border:1px solid var(--line);border-radius:8px;padding:12px;transform:rotate(1.2deg);box-shadow:0 14px 34px rgba(var(--shadow-rgb),.12)`}
+              >
+                <img
+                  src={cs.img}
+                  alt={cs.alt}
+                  width={cs.imgW}
+                  height={cs.imgH}
+                  loading="lazy"
+                  decoding="async"
+                  style="display:block;width:100%;height:auto;max-height:44vh;object-fit:cover;object-position:top center;border-radius:4px"
+                />
+              </div>
+              {cs.hasLink && (
+                <a
+                  href={cs.link}
+                  data-mobile-href={cs.mobileLink}
+                  aria-label={`View case study: ${cs.title}`}
+                  tabindex="-1"
+                  style="position:absolute;inset:0;z-index:1"
+                />
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- ══ EXPERIENCE ══ -->
+    <section
+      id="experience"
+      style="background:var(--bg);padding:96px var(--pad)"
+    >
+      <div
+        data-rsp="xp-head"
+        style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:48px"
+        data-reveal="up"
+      >
+        <h2
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(40px,2.2vw + 8px,72px);letter-spacing: 0;line-height:1"
+          data-reveal="words"
+          data-split-words
+        >
+          Experience
+        </h2>
+        <div
+          style="font-family:var(--font-title),Georgia,serif;font-style:italic;font-size:clamp(32px,1.8vw + 8px,64px);line-height:1;color:transparent;-webkit-text-stroke:1.2px var(--ac);white-space:nowrap"
+        >
+          12+ years
+        </div>
+      </div>
 
       <div
-        class="fx"
-        style="--d:.75s;display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-top:32px"
+        data-rsp="xp"
+        data-reveal-stagger
+        style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;padding:40px 0"
+      >
+        <div
+          style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+        >
+          Aug 2023 — Jan 2026
+        </div>
+        <div>
+          <h3
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
+          >
+            Product Designer
+          </h3>
+          <div
+            style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
+          >
+            Empyra
+          </div>
+        </div>
+        <p
+          style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+        >
+          Redesigned the platform for .NET to React migration using MUI.
+          Reworked the core admin flows, enforced WCAG 2.2 accessibility, built
+          and maintained Figma design systems.
+        </p>
+      </div>
+
+      <div
+        data-rsp="xp"
+        data-reveal-stagger
+        style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:40px 0"
+      >
+        <div
+          style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+        >
+          Feb 2026 — Present<br />
+          Apr 2023 — Jul 2023
+        </div>
+        <div>
+          <h3
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
+          >
+            Independent Product Designer
+          </h3>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+            <span style="font-size:16px;font-weight:500;color:var(--muted)"
+              >Upwork</span
+            >
+          </div>
+        </div>
+        <p
+          style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+        >
+          Designed 0 to 1 product designs for clients across operations, AI and
+          B2B. Reached top-rated status with a 100% job success score within
+          three months.
+        </p>
+      </div>
+
+      <div
+        data-rsp="xp"
+        data-reveal-stagger
+        style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:40px 0"
+      >
+        <div
+          style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+        >
+          Mar 2015 — Jul 2023
+        </div>
+        <div>
+          <h3
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
+          >
+            Founding / Lead Product Designer
+          </h3>
+          <div
+            style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
+          >
+            AmbientOne (formerly Auxo Labs)
+          </div>
+        </div>
+        <p
+          style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+        >
+          Founding designer. I designed every version, from the first prototype
+          to the final documentation platform. Sole designer for multiple client
+          projects. Led 7 designers. Introduced design practices that shaped how
+          the team builds.
+        </p>
+      </div>
+
+      <div
+        data-rsp="xp"
+        data-reveal-stagger
+        style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:40px 0"
+      >
+        <div
+          style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
+        >
+          2014 — 2015
+        </div>
+        <div>
+          <h3
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
+          >
+            UI / Graphic Designer
+          </h3>
+          <div
+            style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
+          >
+            Spiceblue
+          </div>
+        </div>
+        <p
+          style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
+        >
+          Implemented Material Design. Designed a leave management workflow for
+          Kissflow, a low-code workflow platform. Designed logos and marketing
+          materials.
+        </p>
+      </div>
+    </section>
+
+    <!-- ══ SKILLS TICKER ══ -->
+    <div
+      class="ticker"
+      style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden"
+    >
+      <div
+        class="ticker-track ticker-track--reverse"
+        style="display:flex;width:max-content;animation:tickerX 48s linear infinite"
+      >
+        {
+          [0, 1].map(() => (
+            <div style="display:flex;align-items:center;gap:40px;padding:20px 16px;font-family:var(--font-title),Georgia,serif;font-size:clamp(28px,1.2vw + 12px,48px);line-height:1;white-space:nowrap">
+              {tickerSkills.map((t, i) => (
+                <>
+                  {i % 2 === 0 ? (
+                    <span style="color:var(--text)">{t}</span>
+                  ) : (
+                    <span style="font-style:italic;color:transparent;-webkit-text-stroke:1.2px var(--ac)">
+                      {t}
+                    </span>
+                  )}
+                  <span style="width:11px;height:11px;background:var(--ac);transform:rotate(45deg);flex:none" />
+                </>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- ══ GALLERY ══ -->
+    <section
+      id="gallery"
+      style="position:relative;padding:96px var(--pad) 56px;background:var(--bg)"
+    >
+      <div data-rsp="gallery-head" style="margin-bottom:48px" data-reveal="up">
+        <h2
+          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(40px,2.2vw + 8px,72px);letter-spacing: 0;line-height:1"
+          data-reveal="words"
+          data-split-words
+        >
+          Off the record
+        </h2>
+        <p
+          style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted)"
+        >
+          Concepts, side quests, and shipped fragments.
+        </p>
+      </div>
+      <div
+        id="galleryGrid"
+        data-reveal-stagger="3"
+        style="columns:3 300px;column-gap:32px"
+      >
+        <GalleryCard {...galleryItems[1]} />
+        <GalleryCard {...galleryItems[0]} />
+        <div
+          style="break-inside:avoid;margin:0 0 32px;background:var(--invert-bg);color:var(--invert-text);border-radius:8px;padding:36px 28px;transform:rotate(.8deg);box-shadow:0 12px 30px rgba(15,21,36,.16)"
+        >
+          <p
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:24px;line-height: 1.5"
+          >
+            "A pretty interface can't save a broken process."
+          </p>
+        </div>
+        <a
+          href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB"
+          target="_blank"
+          rel="noopener"
+          class="badge-link"
+          style="break-inside:avoid;margin:0 0 32px;display:flex;justify-content:center;padding:20px 0"
+        >
+          <img
+            src="/assets/google-ux.webp"
+            alt="Google UX Design Certificate"
+            width="488"
+            height="412"
+            loading="lazy"
+            decoding="async"
+            style="display:block;width:56%;max-width:180px;height:auto;transform:rotate(-3deg);filter:drop-shadow(0 10px 18px rgba(15,21,36,.18))"
+          />
+          <span class="custom-tooltip">See Certificate</span>
+        </a>
+        <GalleryCard {...galleryItems[3]} />
+        <GalleryCard {...galleryItems[2]} />
+        <GalleryCard {...galleryItems[5]} />
+        <a
+          href="https://www.upwork.com/freelancers/~0124077c8ba1055975"
+          target="_blank"
+          rel="noopener"
+          class="badge-link"
+          style="break-inside:avoid;margin:0 0 32px;display:flex;justify-content:center;padding:20px 0"
+        >
+          <img
+            src="/assets/upwork-top-rated.svg"
+            alt="Upwork Top Rated badge"
+            width="152"
+            height="153"
+            loading="lazy"
+            decoding="async"
+            style="display:block;width:54%;max-width:170px;height:auto;transform:rotate(2.5deg);filter:drop-shadow(0 10px 18px rgba(15,21,36,.18))"
+          />
+          <span class="custom-tooltip">View Profile</span>
+        </a>
+        <div
+          style="break-inside:avoid;margin:0 0 32px;background:var(--btn-bg);color:var(--btn-text);border-radius:8px;padding:36px 28px;transform:rotate(-.7deg);box-shadow:0 12px 30px rgba(var(--primary-rgb),.28)"
+        >
+          <p
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:24px;line-height: 1.5"
+          >
+            "I write HTML and CSS, so I spec what can actually be built."
+          </p>
+        </div>
+        <div
+          style="break-inside:avoid;margin:0 0 32px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:36px 28px;transform:rotate(1deg);box-shadow:0 12px 30px rgba(15,21,36,.1)"
+        >
+          <p
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:24px;line-height: 1.5;color:var(--text)"
+          >
+            "Accessibility is the baseline, built in from the start, not audited
+            at the end."
+          </p>
+        </div>
+        <GalleryCard {...galleryItems[4]} />
+        <GalleryCard {...galleryItems[6]} />
+      </div>
+      <div
+        style="position:relative;margin-top:-120px;padding-top:148px;text-align:center;background:linear-gradient(to bottom,transparent,var(--bg) 62%)"
       >
         <a
-          href={RESUME}
+          href="https://dribbble.com/vikneshvijayakumar"
           target="_blank"
           rel="noopener"
           class="btn-primary"
           style="display:inline-flex;align-items:center;gap:8px;padding:16px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
-          >Download Resume<span style="font-size:16px">↗</span></a
-        >
-        <button
-          data-copy-email
-          style="border:none;background:none;padding:0;cursor:pointer;font-family:var(--font),sans-serif;font-size:16px;font-weight:600;color:var(--text);border-bottom:1.5px solid var(--text)"
-          >Copy Email</button
-        >
-        <span
-          data-rsp="hero-loc"
-          style="font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
-          >Chennai, India · Available Remotely</span
+          >See more on Dribbble <span style="font-size:16px">↗</span></a
         >
       </div>
-      <div class="fx ask-ai-slot" style="--d:1s">
-        <AskAI />
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ══ TICKER ══ -->
-  <div
-    class="ticker"
-    style="background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden"
-  >
+    <!-- ══ LIGHTBOX (same chrome as case-study pages) ══ -->
     <div
-      class="ticker-track"
-      style="display:flex;width:max-content;animation:tickerX 44s linear infinite"
+      id="lightbox"
+      style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;background:rgba(0,0,0,.9);padding:40px;cursor:zoom-out;opacity:0;transition:opacity .2s ease"
     >
-      {
-        [0, 1].map(() => (
-          <div style="display:flex;align-items:center;gap:40px;padding:20px 16px;font-family:var(--font-title),Georgia,serif;font-size:clamp(28px,1.2vw + 12px,48px);line-height:1;white-space:nowrap">
-            {tickerWork.map((t, i) => (
-              <>
-                {i % 2 === 0 ? (
-                  <span style="color:var(--text)">{t}</span>
-                ) : (
-                  <span style="font-style:italic;color:transparent;-webkit-text-stroke:1.2px var(--ac)">
-                    {t}
-                  </span>
-                )}
-                <span style="width:11px;height:11px;background:var(--ac);transform:rotate(45deg);flex:none" />
-              </>
-            ))}
-          </div>
-        ))
-      }
-    </div>
-  </div>
-
-  <!-- ══ WORK — stacking case studies (Ledger) ══ -->
-  <section
-    id="work"
-    style="position:relative;padding:0 var(--pad) 120px;background:var(--bg2)"
-  >
-    <!-- Sticky heading: the gap above it is padding, so it pins as one block. -->
-    <div
-      id="work-pinned"
-      style="position:sticky;top:0;padding:clamp(56px,8vh,96px) 0 32px;pointer-events:none"
-    >
-      <h2
-        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(40px,2.2vw + 8px,72px);letter-spacing: 0;line-height:1;pointer-events:auto;padding-bottom:20px"
-        data-reveal="words"
-        data-split-words
+      <img
+        id="lightboxImg"
+        src=""
+        alt=""
+        style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 24px 80px rgba(0,0,0,.5);cursor:default"
+      />
+      <button
+        id="lightboxClose"
+        aria-label="Close"
+        title="Close"
+        style="position:absolute;top:24px;right:24px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer"
       >
-        Selected Works
-      </h2>
-    </div>
-
-    <!-- Cards flow one below the other; each is sticky, so they stack while scrolling -->
-    <div id="work-cards" style="display:flex;flex-direction:column;gap:48px">
-      {
-        caseStudies.map((cs, i) => (
-          <article
-            data-rsp="case"
-            data-card-index={i}
-            style={`position:sticky;top:${cs.top};z-index:${cs.z};display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,1.25fr);align-items:center;gap:40px;box-sizing:border-box;background:var(--bg);border:${cs.border};border-radius:16px;overflow:hidden;padding:32px 36px;box-shadow:0 16px 36px -18px rgba(15,21,36,.28)`}
-          >
-            <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:20px">
-              <div
-                style={`display:flex;align-items:center;gap:8px;font-family:var(--font),sans-serif;font-size:12px;color:${cs.tagColor}`}
-              >
-                {cs.tag}
-              </div>
-              <h3
-                style={`margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(28px,1.2vw + 8px,44px);line-height:1.06;letter-spacing: 0;color:${cs.titleColor}`}
-              >
-                {cs.title}
-              </h3>
-              <p style="margin:0;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)">
-                {cs.meta}
-              </p>
-              {cs.hasLink && (
-                <a
-                  href={cs.link}
-                  aria-label={`View case study: ${cs.title}`}
-                  class="btn-primary"
-                  style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:12px 20px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
-                >
-                  View Case Study <span style="font-size:16px" aria-hidden="true">↗</span>
-                </a>
-              )}
-              {cs.draft && (
-                <span style="display:inline-block;padding:8px 12px;background:#FFE767;color:#5C4A00;font-size:12px;font-weight:700;transform:rotate(-2deg);box-shadow:0 4px 12px rgba(15,21,36,.14);white-space:nowrap">
-                  Coming soon ✎
-                </span>
-              )}
-            </div>
-            <div
-              style={`position:relative;--tint:${cs.tint};background:color-mix(in srgb, var(--tint) var(--tint-mix), transparent);border:1px solid var(--line);border-radius:8px;padding:12px;transform:rotate(1.2deg);box-shadow:0 14px 34px rgba(var(--shadow-rgb),.12)`}
-            >
-              <img
-                src={cs.img}
-                alt={cs.alt}
-                width={cs.imgW}
-                height={cs.imgH}
-                loading="lazy"
-                decoding="async"
-                style="display:block;width:100%;height:auto;max-height:44vh;object-fit:cover;object-position:top center;border-radius:4px"
-              />
-            </div>
-            {cs.hasLink && (
-              <a
-                href={cs.link}
-                aria-label={`View case study: ${cs.title}`}
-                tabindex="-1"
-                style="position:absolute;inset:0;z-index:1"
-              />
-            )}
-          </article>
-        ))
-      }
-    </div>
-  </section>
-
-  <!-- ══ EXPERIENCE ══ -->
-  <section
-    id="experience"
-    style="background:var(--bg);padding:96px var(--pad)"
-  >
-    <div
-      data-rsp="xp-head"
-      style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:48px"
-      data-reveal="up"
-    >
-      <h2
-        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(40px,2.2vw + 8px,72px);letter-spacing: 0;line-height:1"
-        data-reveal="words"
-        data-split-words
-      >
-        Experience
-      </h2>
-      <div
-        style="font-family:var(--font-title),Georgia,serif;font-style:italic;font-size:clamp(32px,1.8vw + 8px,64px);line-height:1;color:transparent;-webkit-text-stroke:1.2px var(--ac);white-space:nowrap"
-      >
-        12+ years
-      </div>
-    </div>
-
-    <div
-      data-rsp="xp"
-      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;padding:40px 0"
-    >
-      <div
-        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
-      >
-        Aug 2023 — Jan 2026
-      </div>
-      <div>
-        <h3
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
-        >
-          Product Designer
-        </h3>
-        <div
-          style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
-        >
-          Empyra
-        </div>
-      </div>
-      <p
-        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
-      >
-        Redesigned the platform for .NET to React migration using MUI. Reworked
-        the core admin flows, enforced WCAG 2.2 accessibility, built and
-        maintained Figma design systems.
-      </p>
-    </div>
-
-    <div
-      data-rsp="xp"
-      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:40px 0"
-    >
-      <div
-        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
-      >
-        Feb 2026 — Present<br />
-        Apr 2023 — Jul 2023
-      </div>
-      <div>
-        <h3
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
-        >
-          Independent Product Designer
-        </h3>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
-          <span style="font-size:16px;font-weight:500;color:var(--muted)"
-            >Upwork</span
-          >
-        </div>
-      </div>
-      <p
-        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
-      >
-        Designed 0 to 1 product designs for clients across operations, AI and
-        B2B. Reached top-rated status with a 100% job success score within three
-        months.
-      </p>
-    </div>
-
-    <div
-      data-rsp="xp"
-      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:40px 0"
-    >
-      <div
-        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
-      >
-        Mar 2015 — Jul 2023
-      </div>
-      <div>
-        <h3
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
-        >
-          Founding / Lead Product Designer
-        </h3>
-        <div
-          style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
-        >
-          AmbientOne (formerly Auxo Labs)
-        </div>
-      </div>
-      <p
-        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
-      >
-        Founding designer. I designed every version, from the first prototype to
-        the final documentation platform. Sole designer for multiple client
-        projects. Led 7 designers. Introduced design practices that shaped how
-        the team builds.
-      </p>
-    </div>
-
-    <div
-      data-rsp="xp"
-      style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1.1fr) minmax(0,1.3fr);gap:20px 48px;align-items:baseline;border-top:1px solid var(--line);padding:40px 0"
-    >
-      <div
-        style="font-family:var(--font),sans-serif;font-size:12px;color:var(--ac)"
-      >
-        2014 — 2015
-      </div>
-      <div>
-        <h3
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5"
-        >
-          UI / Graphic Designer
-        </h3>
-        <div
-          style="margin-top:8px;font-size:16px;font-weight:500;color:var(--muted)"
-        >
-          Spiceblue
-        </div>
-      </div>
-      <p
-        style="margin:0;font-size:16px;line-height: 1.6;color:var(--text-body)"
-      >
-        Implemented Material Design. Designed a leave management workflow for
-        Kissflow, a low-code workflow platform. Designed logos and marketing
-        materials.
-      </p>
-    </div>
-  </section>
-
-  <!-- ══ SKILLS TICKER ══ -->
-  <div
-    class="ticker"
-    style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden"
-  >
-    <div
-      class="ticker-track ticker-track--reverse"
-      style="display:flex;width:max-content;animation:tickerX 48s linear infinite"
-    >
-      {
-        [0, 1].map(() => (
-          <div style="display:flex;align-items:center;gap:40px;padding:20px 16px;font-family:var(--font-title),Georgia,serif;font-size:clamp(28px,1.2vw + 12px,48px);line-height:1;white-space:nowrap">
-            {tickerSkills.map((t, i) => (
-              <>
-                {i % 2 === 0 ? (
-                  <span style="color:var(--text)">{t}</span>
-                ) : (
-                  <span style="font-style:italic;color:transparent;-webkit-text-stroke:1.2px var(--ac)">
-                    {t}
-                  </span>
-                )}
-                <span style="width:11px;height:11px;background:var(--ac);transform:rotate(45deg);flex:none" />
-              </>
-            ))}
-          </div>
-        ))
-      }
-    </div>
-  </div>
-
-  <!-- ══ GALLERY ══ -->
-  <section
-    id="gallery"
-    style="position:relative;padding:96px var(--pad) 56px;background:var(--bg)"
-  >
-    <div data-rsp="gallery-head" style="margin-bottom:48px" data-reveal="up">
-      <h2
-        style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(40px,2.2vw + 8px,72px);letter-spacing: 0;line-height:1"
-        data-reveal="words"
-        data-split-words
-      >
-        Off the record
-      </h2>
-      <p
-        style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted)"
-      >
-        Concepts, side quests, and shipped fragments.
-      </p>
-    </div>
-    <div id="galleryGrid" style="columns:3 300px;column-gap:32px">
-      <GalleryCard {...galleryItems[1]} />
-      <GalleryCard {...galleryItems[0]} />
-      <div
-        style="break-inside:avoid;margin:0 0 32px;background:var(--invert-bg);color:var(--invert-text);border-radius:8px;padding:36px 28px;transform:rotate(.8deg);box-shadow:0 12px 30px rgba(15,21,36,.16)"
-      >
-        <p
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:24px;line-height: 1.5"
-        >
-          "A pretty interface can't save a broken process."
-        </p>
-      </div>
-      <a
-        href="https://coursera.org/verify/professional-cert/7QG5LZC7FDAB"
-        target="_blank"
-        rel="noopener"
-        class="badge-link"
-        style="break-inside:avoid;margin:0 0 32px;display:flex;justify-content:center;padding:20px 0"
-      >
-        <img
-          src="/assets/google-ux.webp"
-          alt="Google UX Design Certificate"
-          width="488"
-          height="412"
-          loading="lazy"
-          decoding="async"
-          style="display:block;width:56%;max-width:180px;height:auto;transform:rotate(-3deg);filter:drop-shadow(0 10px 18px rgba(15,21,36,.18))"
-        />
-        <span class="custom-tooltip">See Certificate</span>
-      </a>
-      <GalleryCard {...galleryItems[3]} />
-      <GalleryCard {...galleryItems[2]} />
-      <GalleryCard {...galleryItems[5]} />
-      <a
-        href="https://www.upwork.com/freelancers/~0124077c8ba1055975"
-        target="_blank"
-        rel="noopener"
-        class="badge-link"
-        style="break-inside:avoid;margin:0 0 32px;display:flex;justify-content:center;padding:20px 0"
-      >
-        <img
-          src="/assets/upwork-top-rated.svg"
-          alt="Upwork Top Rated badge"
-          width="152"
-          height="153"
-          loading="lazy"
-          decoding="async"
-          style="display:block;width:54%;max-width:170px;height:auto;transform:rotate(2.5deg);filter:drop-shadow(0 10px 18px rgba(15,21,36,.18))"
-        />
-        <span class="custom-tooltip">View Profile</span>
-      </a>
-      <div
-        style="break-inside:avoid;margin:0 0 32px;background:var(--btn-bg);color:var(--btn-text);border-radius:8px;padding:36px 28px;transform:rotate(-.7deg);box-shadow:0 12px 30px rgba(var(--primary-rgb),.28)"
-      >
-        <p
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:24px;line-height: 1.5"
-        >
-          "I write HTML and CSS, so I spec what can actually be built."
-        </p>
-      </div>
-      <div
-        style="break-inside:avoid;margin:0 0 32px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:36px 28px;transform:rotate(1deg);box-shadow:0 12px 30px rgba(15,21,36,.1)"
-      >
-        <p
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:24px;line-height: 1.5;color:var(--text)"
-        >
-          "Accessibility is the baseline, built in from the start, not audited
-          at the end."
-        </p>
-      </div>
-      <GalleryCard {...galleryItems[4]} />
-      <GalleryCard {...galleryItems[6]} />
-    </div>
-    <div
-      style="position:relative;margin-top:-120px;padding-top:148px;text-align:center;background:linear-gradient(to bottom,transparent,var(--bg) 62%)"
-    >
-      <a
-        href="https://dribbble.com/vikneshvijayakumar"
-        target="_blank"
-        rel="noopener"
-        class="btn-primary"
-        style="display:inline-flex;align-items:center;gap:8px;padding:16px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
-        >See more on Dribbble <span style="font-size:16px">↗</span></a
-      >
-    </div>
-  </section>
-
-  <!-- ══ LIGHTBOX (same chrome as case-study pages) ══ -->
-  <div
-    id="lightbox"
-    style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;background:rgba(0,0,0,.9);padding:40px;cursor:zoom-out;opacity:0;transition:opacity .2s ease"
-  >
-    <img
-      id="lightboxImg"
-      src=""
-      alt=""
-      style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 24px 80px rgba(0,0,0,.5);cursor:default"
-    />
-    <button
-      id="lightboxClose"
-      aria-label="Close"
-      title="Close"
-      style="position:absolute;top:24px;right:24px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer"
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg
-      >
-    </button>
-  </div>
-
-  <!-- ══ ABOUT ══ -->
-  <section
-    id="about"
-    style="padding:96px var(--pad);background:var(--bg);border-top:1px solid var(--line)"
-  >
-    <div
-      data-rsp="about"
-      style="display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:64px;align-items:center"
-    >
-      <div
-        data-parallax="frame"
-        style="position:relative;will-change:transform"
-      >
-        <div
-          style="position:relative;background:var(--surface-strong);border:1px solid var(--line);padding:16px 16px 56px;box-shadow:0 26px 60px rgba(15,21,36,.16)"
-        >
-          <div style="overflow:hidden">
-            <img
-              data-parallax="img"
-              src="/assets/profile.webp"
-              alt="Viknesh Vijayakumar"
-              width="800"
-              height="800"
-              loading="lazy"
-              decoding="async"
-              style="display:block;width:100%;height:auto;will-change:transform"
-            />
-          </div>
-          <div
-            style="position:absolute;left:16px;bottom:18px;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
-          >
-            viknesh — off the clock · kerala, jul 2025
-          </div>
-          <div
-            style="position:absolute;top:-11px;left:-26px;width:104px;height:28px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%);transform:rotate(-42deg)"
-          >
-          </div>
-          <div
-            style="position:absolute;top:-11px;right:-26px;width:104px;height:28px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%);transform:rotate(42deg)"
-          >
-          </div>
-        </div>
-      </div>
-      <div data-reveal="up">
-        <h2
-          style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5;letter-spacing:0"
-        >
-          I came for the renders, <br /><span
-            style="font-style:italic;color:var(--ac)">stayed for the grid</span
-          >
-        </h2>
-        <p
-          style="margin:24px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
-        >
-          I studied Visual Communication and started looking for jobs in VFX and
-          3D modeling. Then I took a job at a design agency as a backup and
-          rightly on time, Material design was introduced. I read the complete
-          spec and started applying it to my designs. Ended up teaching the team
-          about it.
-        </p>
-        <p
-          style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
-        >
-          This pulled me into product design. At Auxo Labs, now AmbientOne, I
-          started as a founding designer, to leading seven people by the end.
-          For 8 years, I worked across the entire healthcare AI platform, with
-          HITL workflows at a time when ChatGPT was just a lab experiment.
-        </p>
-        <p
-          style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
-        >
-          Then, COVID happened. I took freelancing. The design team from Empyra
-          found me in the middle of their .NET to React migration. I took on
-          admin workflows, and streamlined them, one module at a time.
-        </p>
-        <p
-          style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
-        >
-          I build with AI tools now. Prototyping ideas in code, and trying out
-          new design workflows that did not exist two years ago. Execution, that
-          took most of my time, gets offloaded, so I finally have time for the
-          small design decisions that always got overlooked.
-        </p>
-        <p
-          style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
-        >
-          Outside work, you'll probably find me photographing my son at angles
-          he did not agree to, caring for the plants that somehow survive all my
-          experiments, or getting lost in YouTube rabbit holes about design,
-          tech engineering and history.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══ CONTACT ══ -->
-  <section
-    id="contact"
-    style="background:var(--invert-bg);color:var(--invert-text);padding:96px var(--pad) 40px"
-  >
-    <p
-      style="margin:0;font-size:16px;font-weight:600;color:color-mix(in srgb, var(--ac) 35%, var(--invert-text))"
-    >
-      Building something complex? Let's talk.
-    </p>
-    <div
-      data-rsp="mail-row"
-      style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:16px 24px;margin-top:24px;"
-      data-reveal="up"
-    >
-      <a
-        href="mailto:hello@viknesh.me"
-        class="email-link"
-        style="display:inline-flex;align-items:center;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(36px,3vw + 8px,96px);line-height:1;letter-spacing: 0;color:var(--invert-text);cursor:pointer;text-decoration:none;"
-        data-copy-email
-      >
-        hello@viknesh.me
         <svg
-          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="email-copy-icon"
+          stroke-width="2"
+          stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg
         >
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-          ></path>
-        </svg>
-      </a>
-      <span class="copied-indicator">Copied ✓</span>
-    </div>
-    <div
-      data-rsp="foot-row"
-      style="display:flex;justify-content:space-between;margin-top:40px"
-    >
-      <div
-        data-rsp="foot-links"
-        style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;"
-        data-reveal="up"
-        data-reveal-delay="140"
-      >
-        <a
-          href={RESUME}
-          target="_blank"
-          rel="noopener"
-          class="btn-primary"
-          style="padding:12px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-family:var(--font),sans-serif;font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(255,255,255,.22) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1);text-decoration:none"
-          >Download Resume <span style="font-size:16px">↗</span></a
-        >
-        <div
-          data-rsp="foot-socials"
-          style="display:flex;flex-wrap:wrap;align-items:center;gap:12px"
-        >
-          <a
-            class="social-link"
-            href="https://www.linkedin.com/in/vikneshvijayakumar/"
-            target="_blank"
-            rel="noopener"
-            aria-label="LinkedIn"
-            style="display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
-            ><span class="social-label"
-              >LinkedIn <span style="font-size:16px">↗</span></span
-            ><svg
-              class="social-icon"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-              ><path
-                d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z"
-              ></path></svg
-            ></a
-          >
-          <a
-            class="social-link"
-            href="https://dribbble.com/vikneshvijayakumar"
-            target="_blank"
-            rel="noopener"
-            aria-label="Dribbble"
-            style="display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
-            ><span class="social-label"
-              >Dribbble <span style="font-size:16px">↗</span></span
-            ><svg
-              class="social-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              aria-hidden="true"
-              ><circle cx="12" cy="12" r="10"></circle><path
-                d="M19.13 5.09C15.22 9.14 10 10.44 2.25 10.94M21.75 12.84c-6.62-1.41-12.14 1-16.38 6.32M8.56 2.75c4.37 6 6 9.42 8.03 17.72"
-              ></path></svg
-            ></a
-          >
-          <a
-            class="social-link"
-            href="https://wa.me/918148836036"
-            target="_blank"
-            rel="noopener"
-            aria-label="WhatsApp"
-            style="display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
-            ><span class="social-label"
-              >WhatsApp <span style="font-size:16px">↗</span></span
-            ><svg
-              class="social-icon"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-              ><path
-                d="M12.04 2a9.9 9.9 0 0 0-8.55 14.9L2 22l5.25-1.38a9.9 9.9 0 1 0 4.79-18.62Zm0 1.67a8.23 8.23 0 1 1-4.18 15.32l-.3-.18-3.12.82.83-3.04-.2-.31a8.23 8.23 0 0 1 6.97-12.61Zm-3.6 4.4c-.16 0-.43.06-.65.3-.22.25-.86.84-.86 2.05 0 1.2.88 2.37 1 2.53.12.16 1.7 2.71 4.2 3.7 2.08.82 2.5.66 2.95.62.45-.04 1.45-.6 1.66-1.17.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.47-.28-.24-.13-1.45-.72-1.67-.8-.23-.08-.39-.12-.55.12-.16.25-.63.8-.77.96-.14.16-.28.18-.53.06a6.7 6.7 0 0 1-1.97-1.21 7.4 7.4 0 0 1-1.36-1.7c-.14-.24-.02-.37.1-.5.12-.11.25-.28.37-.43.12-.14.16-.24.24-.4.08-.17.04-.31-.02-.44-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.5Z"
-              ></path></svg
-            ></a
-          >
-        </div>
-      </div>
-      <!-- Shared with the canvas landing (styles/made-with.css, lib/ai-badge.ts) -->
-      <div style="display:flex;justify-content:center;">
-        <div
-          class="made-with-card"
-          style="--surface-strong: #172039; --text: #f1f5f9; --shadow: none;"
-          set:html={aiBadgeMarkup}
-        />
-      </div>
+      </button>
     </div>
 
-    <div
-      style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-top:40px;padding-top:20px;border-top:1px solid var(--invert-line);font-family:var(--font),sans-serif;font-size:12px;color:var(--invert-soft)"
+    <!-- ══ ABOUT ══ -->
+    <section
+      id="about"
+      style="padding:96px var(--pad);background:var(--bg);border-top:1px solid var(--line)"
     >
-      <span>© 2026 Viknesh Vijayakumar</span>
-      <span>Available — Remote worldwide</span>
-    </div>
-  </section>
+      <div
+        data-rsp="about"
+        style="display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:64px;align-items:center"
+      >
+        <div
+          data-parallax="frame"
+          style="position:relative;will-change:transform"
+        >
+          <div
+            style="position:relative;background:var(--surface-strong);border:1px solid var(--line);padding:16px 16px 56px;box-shadow:0 26px 60px rgba(15,21,36,.16)"
+          >
+            <div style="overflow:hidden">
+              <img
+                data-parallax="img"
+                src="/assets/profile.webp"
+                alt="Viknesh Vijayakumar"
+                width="800"
+                height="800"
+                loading="lazy"
+                decoding="async"
+                style="display:block;width:100%;height:auto;will-change:transform"
+              />
+            </div>
+            <div
+              style="position:absolute;left:16px;bottom:18px;font-family:var(--font),sans-serif;font-size:12px;color:var(--muted)"
+            >
+              viknesh — off the clock · kerala, jul 2025
+            </div>
+            <div
+              style="position:absolute;top:-11px;left:-26px;width:104px;height:28px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%);transform:rotate(-42deg)"
+            >
+            </div>
+            <div
+              style="position:absolute;top:-11px;right:-26px;width:104px;height:28px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.08) 38%,rgba(255,255,255,.28) 82%,rgba(255,255,255,.1) 100%),rgba(228,222,200,.62);box-shadow:0 1px 2px rgba(15,21,36,.14),inset 0 0 8px rgba(120,110,80,.1);clip-path:polygon(1.5% 0,97% 3%,100% 16%,97.5% 30%,100% 50%,98% 68%,100% 86%,96.5% 100%,3% 97%,0 84%,2.5% 62%,0 46%,3% 26%,.5% 12%);transform:rotate(42deg)"
+            >
+            </div>
+          </div>
+        </div>
+        <div data-reveal="up">
+          <h2
+            style="margin:0;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(24px,0.8vw + 12px,36px);line-height: 1.5;letter-spacing:0"
+          >
+            I came for the renders, <br /><span
+              style="font-style:italic;color:var(--ac)"
+              >stayed for the grid</span
+            >
+          </h2>
+          <p
+            style="margin:24px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
+          >
+            I studied Visual Communication and started looking for jobs in VFX
+            and 3D modeling. Then I took a job at a design agency as a backup
+            and rightly on time, Material design was introduced. I read the
+            complete spec and started applying it to my designs. Ended up
+            teaching the team about it.
+          </p>
+          <p
+            style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
+          >
+            This pulled me into product design. At Auxo Labs, now AmbientOne, I
+            started as a founding designer, to leading seven people by the end.
+            For 8 years, I worked across the entire healthcare AI platform, with
+            HITL workflows at a time when ChatGPT was just a lab experiment.
+          </p>
+          <p
+            style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
+          >
+            Then, COVID happened. I took freelancing. The design team from
+            Empyra found me in the middle of their .NET to React migration. I
+            took on admin workflows, and streamlined them, one module at a time.
+          </p>
+          <p
+            style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
+          >
+            I build with AI tools now. Prototyping ideas in code, and trying out
+            new design workflows that did not exist two years ago. Execution,
+            that took most of my time, gets offloaded, so I finally have time
+            for the small design decisions that always got overlooked.
+          </p>
+          <p
+            style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
+          >
+            Outside work, you'll probably find me photographing my son at angles
+            he did not agree to, caring for the plants that somehow survive all
+            my experiments, or getting lost in YouTube rabbit holes about
+            design, tech engineering and history.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ CONTACT ══ -->
+    <section
+      id="contact"
+      style="background:var(--invert-bg);color:var(--invert-text);padding:96px var(--pad) 40px"
+    >
+      <p
+        style="margin:0;font-size:16px;font-weight:600;color:color-mix(in srgb, var(--ac) 35%, var(--invert-text))"
+      >
+        Building something complex? Let's talk.
+      </p>
+      <div
+        data-rsp="mail-row"
+        style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:16px 24px;margin-top:24px;"
+        data-reveal="up"
+      >
+        <a
+          href="mailto:hello@viknesh.me"
+          class="email-link"
+          style="display:inline-flex;align-items:center;font-family:var(--font-title),Georgia,serif;font-weight:400;font-size:clamp(36px,3vw + 8px,96px);line-height:1;letter-spacing: 0;color:var(--invert-text);cursor:pointer;text-decoration:none;"
+          data-copy-email
+        >
+          hello@viknesh.me
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="email-copy-icon"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+        </a>
+        <span class="copied-indicator">Copied ✓</span>
+      </div>
+      <div
+        data-rsp="foot-row"
+        style="display:flex;justify-content:space-between;margin-top:40px"
+      >
+        <div
+          data-rsp="foot-links"
+          style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;"
+          data-reveal="up"
+          data-reveal-delay="140"
+        >
+          <a
+            href={RESUME}
+            target="_blank"
+            rel="noopener"
+            class="btn-primary"
+            style="padding:12px 24px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-family:var(--font),sans-serif;font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(255,255,255,.22) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1);text-decoration:none"
+            >Download Resume <span style="font-size:16px">↗</span></a
+          >
+          <div
+            data-rsp="foot-socials"
+            style="display:flex;flex-wrap:wrap;align-items:center;gap:12px"
+          >
+            <a
+              class="social-link"
+              href="https://www.linkedin.com/in/vikneshvijayakumar/"
+              target="_blank"
+              rel="noopener"
+              aria-label="LinkedIn"
+              style="display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
+              ><span class="social-label"
+                >LinkedIn <span style="font-size:16px">↗</span></span
+              ><svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+                ><path
+                  d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z"
+                ></path></svg
+              ></a
+            >
+            <a
+              class="social-link"
+              href="https://dribbble.com/vikneshvijayakumar"
+              target="_blank"
+              rel="noopener"
+              aria-label="Dribbble"
+              style="display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
+              ><span class="social-label"
+                >Dribbble <span style="font-size:16px">↗</span></span
+              ><svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+                ><circle cx="12" cy="12" r="10"></circle><path
+                  d="M19.13 5.09C15.22 9.14 10 10.44 2.25 10.94M21.75 12.84c-6.62-1.41-12.14 1-16.38 6.32M8.56 2.75c4.37 6 6 9.42 8.03 17.72"
+                ></path></svg
+              ></a
+            >
+            <a
+              class="social-link"
+              href="https://wa.me/918148836036"
+              target="_blank"
+              rel="noopener"
+              aria-label="WhatsApp"
+              style="display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:var(--radius-lg);border:1.5px solid var(--invert-border);color:var(--invert-text);font-size:16px;font-weight:600;transition:background .2s,color .2s,border-color .2s"
+              ><span class="social-label"
+                >WhatsApp <span style="font-size:16px">↗</span></span
+              ><svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+                ><path
+                  d="M12.04 2a9.9 9.9 0 0 0-8.55 14.9L2 22l5.25-1.38a9.9 9.9 0 1 0 4.79-18.62Zm0 1.67a8.23 8.23 0 1 1-4.18 15.32l-.3-.18-3.12.82.83-3.04-.2-.31a8.23 8.23 0 0 1 6.97-12.61Zm-3.6 4.4c-.16 0-.43.06-.65.3-.22.25-.86.84-.86 2.05 0 1.2.88 2.37 1 2.53.12.16 1.7 2.71 4.2 3.7 2.08.82 2.5.66 2.95.62.45-.04 1.45-.6 1.66-1.17.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.47-.28-.24-.13-1.45-.72-1.67-.8-.23-.08-.39-.12-.55.12-.16.25-.63.8-.77.96-.14.16-.28.18-.53.06a6.7 6.7 0 0 1-1.97-1.21 7.4 7.4 0 0 1-1.36-1.7c-.14-.24-.02-.37.1-.5.12-.11.25-.28.37-.43.12-.14.16-.24.24-.4.08-.17.04-.31-.02-.44-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.5Z"
+                ></path></svg
+              ></a
+            >
+          </div>
+        </div>
+        <!-- Shared with the canvas landing (styles/made-with.css, lib/ai-badge.ts) -->
+        <div style="display:flex;justify-content:center;">
+          <div
+            class="made-with-card"
+            style="--surface-strong: #172039; --text: #f1f5f9; --shadow: none;"
+            set:html={aiBadgeMarkup}
+          />
+        </div>
+      </div>
+
+      <div
+        style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-top:40px;padding-top:20px;border-top:1px solid var(--invert-line);font-family:var(--font),sans-serif;font-size:12px;color:var(--invert-soft)"
+      >
+        <span>© 2026 Viknesh Vijayakumar</span>
+        <span>Available — Remote worldwide</span>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -1765,7 +1806,22 @@ const personSchema = {
     // position when one navigates back into it. Runs first so the restore lands
     // before the reveal/measure passes below.
     import { initLanding } from "../scripts/landing-return";
+    import { initReveals } from "../scripts/reveal";
+    import { DECK_ONLY_MQ } from "../case-studies/shared";
     initLanding();
+
+    // Cards that are really a slide deck point straight at it on phones rather
+    // than at a page that could only show a link. Both anchors on the card
+    // carry the attribute, so this covers the button and the full-card hit area.
+    if (window.matchMedia(DECK_ONLY_MQ).matches) {
+      document
+        .querySelectorAll<HTMLAnchorElement>("a[data-mobile-href]")
+        .forEach((a) => {
+          a.href = a.dataset.mobileHref!;
+          a.target = "_blank";
+          a.rel = "noopener";
+        });
+    }
 
     // Theme — same localStorage key as the canvas landing, so the choice
     // carries across both. Applied pre-paint by the inline script in <head>.
@@ -1793,25 +1849,9 @@ const personSchema = {
     ).matches;
     const finePointer = window.matchMedia("(pointer: fine)").matches;
 
-    // Split marked elements into masked word spans (hero h1 line + headings)
-    document
-      .querySelectorAll<HTMLElement>("[data-split-words]")
-      .forEach((el) => {
-        const words = (el.textContent || "").trim().split(/\s+/);
-        el.textContent = "";
-        words.forEach((w, i) => {
-          const mask = document.createElement("span");
-          mask.className = "w-mask";
-          const inner = document.createElement("span");
-          inner.className = "w-in";
-          inner.style.setProperty("--i", String(i));
-          inner.textContent = w;
-          mask.appendChild(inner);
-          el.appendChild(mask);
-          if (i < words.length - 1)
-            el.appendChild(document.createTextNode(" "));
-        });
-      });
+    // Scroll reveals — the shared engine, same language as the case studies.
+    // It also splits [data-split-words], which the hero cascade below needs.
+    initReveals();
     // Kick off the hero word cascade once split spans exist
     requestAnimationFrame(() => document.body.classList.add("hero-ready"));
 
@@ -2176,65 +2216,6 @@ const personSchema = {
       history.pushState(null, "", href);
     });
 
-    // Stagger experience-row children and gallery cards into the reveal system
-    document.querySelectorAll('[data-rsp="xp"]').forEach((row) => {
-      [...row.children].forEach((c, i) => {
-        c.setAttribute("data-reveal", "up");
-        c.setAttribute("data-reveal-delay", String(i * 130));
-      });
-    });
-    const galleryWrap = document.getElementById("galleryGrid");
-    if (galleryWrap) {
-      [...galleryWrap.children].forEach((c, i) => {
-        c.setAttribute("data-reveal", "up");
-        c.setAttribute("data-reveal-delay", String((i % 3) * 100));
-      });
-    }
-
-    // Scroll reveals ("words" cascades masked word spans; others fade/slide).
-    // Elements with their own transform (rotated polaroids, quote cards) keep
-    // it: the hidden state composes translateY in front, the reveal restores it.
-    const els = [...document.querySelectorAll<HTMLElement>("[data-reveal]")];
-    els.forEach((el) => {
-      if (el.getAttribute("data-reveal") === "words") return;
-      el.dataset.tf0 = el.style.transform || "";
-      el.style.opacity = "0";
-      if (el.getAttribute("data-reveal") !== "fade")
-        el.style.transform = "translateY(28px) " + el.dataset.tf0;
-      el.style.transition =
-        "opacity .75s cubic-bezier(.2,.6,.2,1), transform .75s cubic-bezier(.2,.6,.2,1)";
-      el.style.willChange = "opacity, transform";
-    });
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const el = entry.target as HTMLElement;
-          if (el.getAttribute("data-reveal") === "words") {
-            el.classList.add("in");
-          } else {
-            el.style.transitionDelay =
-              (el.getAttribute("data-reveal-delay") || "0") + "ms";
-            el.style.opacity = "1";
-            el.style.transform = el.dataset.tf0 || "";
-            // Hand transitions back to stylesheet rules (gal-card hover)
-            el.addEventListener(
-              "transitionend",
-              () => {
-                el.style.transition = "";
-                el.style.transitionDelay = "";
-                el.style.willChange = "";
-              },
-              { once: true },
-            );
-          }
-          io.unobserve(el);
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
-    );
-    els.forEach((el) => io.observe(el));
-
     // Equalize case-study card heights: a sticky card releases when its bottom
     // meets the container bottom, so unequal heights make taller cards scroll
     // away before the rest of the stack.
@@ -2412,6 +2393,11 @@ const personSchema = {
         const n = gal.clientWidth >= 940 ? 3 : gal.clientWidth >= 640 ? 2 : 1;
         if (gal.dataset.cols === String(n)) return;
         gal.dataset.cols = String(n);
+        // Past this point the direct children are column wrappers, not cards, so
+        // the marker's promise ("my children are the reveal units") no longer
+        // holds — leaving it would pre-hide the columns, which nothing reveals.
+        // The cards keep their own data-reveal and travel with it into a column.
+        gal.removeAttribute("data-reveal-stagger");
         gal.style.cssText = "display:flex;gap:32px;align-items:flex-start";
         gal.innerHTML = "";
         const cols = Array.from({ length: n }, () => {
@@ -2463,12 +2449,4 @@ const personSchema = {
       }).observe(frame);
     }
   </script>
-
-  <style is:global>
-    .btn-primary:hover {
-      background: var(--btn-hover) !important;
-      color: var(--btn-text) !important;
-      transform: translateY(-1px);
-    }
-  </style>
 </Layout>

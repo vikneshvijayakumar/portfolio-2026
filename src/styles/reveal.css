@@ -1,0 +1,79 @@
+/* One scroll-reveal language for the whole site — the landing page and every
+   case study. Before this, each surface had its own copy with its own
+   durations, distances and trigger points, which is why case-study body copy
+   animated on a different rhythm from the landing's.
+
+   Contract:
+     data-reveal="up"      element rises + fades in
+     data-reveal="fade"    element fades in, no movement
+     data-reveal="words"   heading cascades in word by word (needs data-split-words)
+     data-reveal-stagger   container: its children rise in one after another
+
+   The engine (scripts/reveal.ts) adds `in` when an element reaches the trigger
+   line. The hidden state must already be in the server HTML at first paint —
+   applying it from script means content flashes visible and snaps out — so it
+   is gated on `reveal-armed`, a class an inline script sets before paint.
+   Without JS nothing is hidden and the page reads normally. */
+
+:root {
+  --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --reveal-dur: 0.7s;
+  --reveal-words-dur: 0.85s;
+  --reveal-rise: 24px;
+  /* Per-item delay for staggered grids and for each word in a heading. */
+  --reveal-step: 80ms;
+}[data-reveal],
+[data-reveal-stagger] > * {
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    translate var(--reveal-dur) var(--reveal-ease);
+}
+
+@media (prefers-reduced-motion: no-preference) {/* `translate` rather than a translateY() inside `transform`: several targets
+     carry an inline transform (rotated cards) that a stylesheet transform
+     can't outrank. The individual property applies before `transform`, so both
+     survive — and leaving `transform` free keeps hover transitions working. */
+  .reveal-armed [data-reveal]:not([data-reveal="words"]):not(.in),
+.reveal-armed [data-reveal-stagger] > *:not(.in) {
+    opacity: 0;
+    translate: 0 var(--reveal-rise);
+  }
+
+  .reveal-armed [data-reveal="fade"]:not(.in) {
+    translate: none;
+  }
+}
+
+/* Masked word cascade. The mask clips each word while its inner span slides up
+   from below. No `reveal-armed` gate needed: without JS the spans never exist. */
+.w-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.w-in {
+  display: inline-block;
+  transform: translateY(115%);
+}
+
+[data-reveal="words"] .w-in {
+  transition: transform var(--reveal-words-dur) var(--reveal-ease);
+  transition-delay: calc(var(--i) * var(--reveal-step));
+}
+
+[data-reveal="words"].in .w-in {
+  transform: none;
+}/* A heading is hidden as a block only until its words exist — otherwise the
+   unsplit text paints, then splits, then animates. */
+.reveal-armed [data-reveal="words"]:not(.reveal-split) {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .w-in {
+    transform: none;
+  }
+}

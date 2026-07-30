@@ -4,24 +4,21 @@ import { projects, type Project } from "../content";
 import { CanvasImage } from "../CanvasImage";
 import dashboardImg from "../assets/dashboard.webp?url";
 import formBuilderImg from "../assets/form-builder.webp?url";
-import formTakingImg from "../../assets/form-taking.webp?url";
-import outputBuilderImg from "../../assets/output-builder.webp?url";
-import aiStylistImg from "../assets/aistylist.webp?url";
-import clinicalDocumentationImg from "../../assets/clinical-documentation.webp?url";
-import aiTranscriptionImg from "../../assets/ai-transcription.webp?url";
-import snapIntakeImg from "../../assets/snapintake.webp?url";
 import topArrowSvg from "../assets/top-right-arrow.svg?raw";
 import { getCardTransition } from "../utils/constants";
 
+// Canvas-only art is bundled (hashed); anything the landing page or an OG tag
+// also serves lives in public/assets and is referenced by its stable URL, so
+// the same bytes aren't stored twice.
 const projectImages: Record<string, string> = {
   "dashboard.webp": dashboardImg,
   "form-builder.webp": formBuilderImg,
-  "form-taking.webp": formTakingImg,
-  "output-builder.webp": outputBuilderImg,
-  "aistylist.webp": aiStylistImg,
-  "clinical-documentation.webp": clinicalDocumentationImg,
-  "ai-transcription.webp": aiTranscriptionImg,
-  "snapintake.webp": snapIntakeImg,
+  "form-taking.webp": "/assets/form-taking.webp",
+  "output-builder.webp": "/assets/output-builder.webp",
+  "aistylist.webp": "/assets/aistylist.webp",
+  "clinical-documentation.webp": "/assets/clinical-documentation.webp",
+  "ai-transcription.webp": "/assets/ai-transcription.webp",
+  "snapintake.webp": "/assets/snapintake.webp",
 };
 
 const ProjectCard = memo(function ProjectCard({

@@ -100,9 +100,9 @@
  * time JS updates --mouse-x / --mouse-y. Drop it entirely.
  */
 @media (hover: none),
-  (pointer: coarse),
-  (max-width: 900px),
-  (prefers-reduced-motion: reduce) {
+(pointer: coarse),
+(max-width: 900px),
+(prefers-reduced-motion: reduce) {
   .mouse-glow {
     display: none;
   }

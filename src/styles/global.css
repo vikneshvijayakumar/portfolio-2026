@@ -7,7 +7,6 @@
 
 /* ---------- Design Tokens ---------- */
 :root {
-  --ease-out-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-back-soft: cubic-bezier(0.32, 1.2, 0.5, 1);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
@@ -23,56 +22,19 @@
   --border: rgba(15, 21, 36, 0.14);
   --line: var(--border);
   --ac: #4338ca;
-  --accent-900: #1e1b4b;
-  --accent-800: #312e81;
-  --accent-700: #3730a3;
-  --accent-600: #4338ca;
-  --accent-500: #4f46e5;
-  --accent-400: #6366f1;
   --accent-300: #818cf8;
-  --accent-200: #a5b4fc;
-  --accent-100: #c7d2fe;
-  --accent-5: #eef2ff;
-  --accent-25: #f5f7ff;
   --accent: var(--ac);
   --accent-hover: #3730a3;
 
-  --neutral-950: #0f1524;
-  --neutral-900: #172039;
-  --neutral-850: #253149;
-  --neutral-800: #303b51;
-  --neutral-750: #3d4960;
-  --neutral-700: #4a566c;
-  --neutral-650: #58647a;
-  --neutral-600: #667287;
-  --neutral-550: #748097;
   --neutral-500: #8290a5;
-  --neutral-450: #909cb0;
-  --neutral-400: #9ea9bb;
-  --neutral-350: #acb5c5;
-  --neutral-300: #bac2d0;
-  --neutral-250: #c7ceda;
-  --neutral-200: #d3d9e3;
-  --neutral-150: #dfe4ec;
-  --neutral-100: #e9edf3;
-  --neutral-75: #eff2f6;
-  --neutral-50: #f4f6fa;
-  --neutral-25: #f8f9fc;
-  --neutral-0: #ffffff;
 
   --font: 'IBM Plex Sans Var', 'IBM Plex Sans', sans-serif;
   --font-body: var(--font);
   --font-title: 'IBM Plex Serif Var', 'IBM Plex Serif', Georgia, serif;
   --font-mono: var(--font);
   --pad: max(4vw, calc((100vw - 1360px) / 2));
-  --space-1: 4px;
-  --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-  --space-8: 64px;
   --canvas: var(--bg2);
   --canvas-grid: rgba(67, 56, 202, 0.12);
   --surface: rgba(255, 255, 255, 0.92);
@@ -83,13 +45,10 @@
   --shadow-sm: 0 4px 14px rgba(15, 21, 36, 0.08);
   --primary: var(--ac);
   --primary-dark: #3730a3;
-  --primary-soft: rgba(67, 56, 202, 0.1);
   --primary-rgb: 67, 56, 202;
   --lime: var(--ac);
   --lime-rgb: 67, 56, 202;
-  --blue: #6366f1;
   --coral: #d97706;
-  --violet: #7c3aed;
   --red: #dc2626;
   --yellow: #ca8a04;
   --green: #15803d;
@@ -105,7 +64,6 @@
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-2xl: 28px;
-  --radius-3xl: 40px;
   --logo-filter: none;
   --sidebar-width: 192px;
   --content-max: 1080px;
@@ -124,9 +82,7 @@
   --btn-bg: var(--ac);
   --btn-text: #ffffff;
   --btn-hover: #5348e0;
-}
-
-/* ---------- Ink (dark) theme ---------- */
+}/* ---------- Ink (dark) theme ---------- */
 /* Dark surfaces sit on the same navy family as the light theme's inverted
    footer (#0f1524), so crossing between them never shifts hue. */
 :root[data-theme="ink"] {
@@ -148,7 +104,6 @@
   --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.4);
   --primary: var(--ac);
   --primary-dark: #6366f1;
-  --primary-soft: rgba(129, 140, 248, 0.15);
   --primary-rgb: 129, 140, 248;
   --lime: #4f46e5;
   --lime-rgb: 79, 70, 229;
@@ -170,9 +125,7 @@
   --btn-bg: #4f46e5;
   --btn-text: #ffffff;
   --btn-hover: #6366f1;
-}
-
-/* ---------- Shiny Hover ---------- */
+}/* ---------- Shiny Hover ---------- */
 
 /* ---------- Reset ---------- */
 *,
@@ -322,7 +275,7 @@ blockquote {
 /* Arrow nudge */
 
 /* ---------- Sidebar Desktop (1296px+) ---------- */
-@media (min-width: 1296px) {
+@media (min-width: 1201px) {
 
   .content {
     margin-left: var(--sidebar-width);

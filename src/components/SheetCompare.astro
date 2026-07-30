@@ -1,0 +1,362 @@
+---
+/**
+ * Style-guide sheets, one tab each, light and dark on the same frame with a
+ * draggable split down the middle.
+ *
+ * Tabs are radio inputs read by :checked, so switching sheets needs no script —
+ * same pattern as CompareTabs. The split is a native range input laid over the
+ * frame: drag, touch and arrow keys all come free, and the only script is one
+ * delegated listener writing the value to a custom property.
+ */
+export interface Sheet {
+  label: string;
+  /** Both versions must be exported at the same size, or the split slides. */
+  light: string;
+  dark: string;
+  caption: string;
+}
+
+interface Props {
+  id: string;
+  sheets: Sheet[];
+}
+
+const { id, sheets } = Astro.props;
+---
+
+<div class="sc cs-stage">
+  {
+    sheets.map((s, i) => (
+      <input
+        class="sc__radio"
+        type="radio"
+        name={id}
+        id={`${id}-${i}`}
+        checked={i === 0}
+      />
+    ))
+  }
+
+  {/* Narrow screens get this instead of the list — see the media query. */}
+  <select class="sc__select" aria-label="Style guide sheets">
+    {
+      sheets.map((s, i) => (
+        <option value={`${id}-${i}`}>{`${String(i + 1).padStart(2, "0")}  ${s.label}`}</option>
+      ))
+    }
+  </select>
+
+  <div class="sc__bar" role="group" aria-label="Style guide sheets">
+    {
+      sheets.map((s, i) => (
+        <label class="sc__tab" for={`${id}-${i}`}>
+          <span class="sc__tab__n">{String(i + 1).padStart(2, "0")}</span>
+          {s.label}
+        </label>
+      ))
+    }
+  </div>
+
+  <div class="sc__panels">
+    {
+      sheets.map((s) => (
+        <div class="sc__panel">
+          <div class="sc__frame">
+            {/* The sheet's description is its alt text — nothing is printed
+                beside the frame, so the copy lives where a reader who can't see
+                the sheet will get it. */}
+            <img
+              src={s.light}
+              alt={`${s.label} sheet, light theme. ${s.caption}`}
+              decoding="async"
+            />
+            {/* Decorative: the light copy above already carries the content. */}
+            <img class="sc__dark" src={s.dark} alt="" decoding="async" />
+            <span class="sc__line" aria-hidden="true">
+              <span class="sc__grip" />
+            </span>
+            <input
+              class="sc__range"
+              type="range"
+              min="0"
+              max="100"
+              step="0.1"
+              value="50"
+              aria-label={`Reveal the dark theme of ${s.label}`}
+            />
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  // One listener for every slider on the page. The frame reads --sc-x.
+  document.addEventListener("input", (e) => {
+    const el = e.target as HTMLInputElement;
+    if (el.classList?.contains("sc__range")) {
+      el.parentElement?.style.setProperty("--sc-x", `${el.value}%`);
+    } else if (el.classList?.contains("sc__select")) {
+      // The dropdown drives the same radios the tab list does.
+      (document.getElementById(el.value) as HTMLInputElement).checked = true;
+    } else if (el.classList?.contains("sc__radio")) {
+      // And the tab list keeps the dropdown honest, in case the window is
+      // resized past the breakpoint after a tab was picked.
+      const sel = el.closest(".sc")?.querySelector<HTMLSelectElement>(".sc__select");
+      if (sel) sel.value = el.id;
+    }
+  });
+</script>
+
+<style>
+  /* Tab column beside the frame. The radios sit first in the DOM so :checked
+     can reach both, which the grid then places by name. */
+  .sc {
+    /* Ink for the stage this sits on, themed there — see .cs-overlay--asx. */
+    --sc-ink: var(--asx-ink, #2b266d);
+    --sc-ink-soft: color-mix(in srgb, var(--sc-ink) 62%, var(--asx-fade, #fff));
+    display: grid;
+    grid-template-columns: 176px 1fr;
+    grid-template-areas: "bar panels";
+    gap: 24px;
+    padding: 24px;
+  }
+
+  /* The tab state lives in these; everything else reads it with :checked. */
+  .sc__radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sc__select {
+    display: none;
+    grid-area: bar;
+    width: 100%;
+    font-family: var(--cs-font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--sc-ink);
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--sc-ink) 20%, transparent);
+    border-radius: 8px;
+    background: var(--asx-bezel, #fff);
+  }
+
+  .sc__bar {
+    grid-area: bar;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-self: start;
+    position: sticky;
+    top: 24px;
+  }
+
+  .sc__tab {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--cs-font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--sc-ink-soft);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .sc__tab__n {
+    opacity: 0.56;
+  }
+
+  .sc__tab:hover {
+    background: color-mix(in srgb, var(--sc-ink) 8%, transparent);
+  }
+
+  .sc__panels {
+    grid-area: panels;
+    min-width: 0;
+  }
+
+  .sc__panel {
+    display: none;
+  }
+
+  /* Seven radios, seven panels, in order. */
+  .sc__radio:nth-of-type(1):checked ~ .sc__panels > .sc__panel:nth-child(1),
+  .sc__radio:nth-of-type(2):checked ~ .sc__panels > .sc__panel:nth-child(2),
+  .sc__radio:nth-of-type(3):checked ~ .sc__panels > .sc__panel:nth-child(3),
+  .sc__radio:nth-of-type(4):checked ~ .sc__panels > .sc__panel:nth-child(4),
+  .sc__radio:nth-of-type(5):checked ~ .sc__panels > .sc__panel:nth-child(5),
+  .sc__radio:nth-of-type(6):checked ~ .sc__panels > .sc__panel:nth-child(6),
+  .sc__radio:nth-of-type(7):checked ~ .sc__panels > .sc__panel:nth-child(7) {
+    display: block;
+  }
+
+  .sc__radio:nth-of-type(1):checked ~ .sc__bar .sc__tab:nth-child(1),
+  .sc__radio:nth-of-type(2):checked ~ .sc__bar .sc__tab:nth-child(2),
+  .sc__radio:nth-of-type(3):checked ~ .sc__bar .sc__tab:nth-child(3),
+  .sc__radio:nth-of-type(4):checked ~ .sc__bar .sc__tab:nth-child(4),
+  .sc__radio:nth-of-type(5):checked ~ .sc__bar .sc__tab:nth-child(5),
+  .sc__radio:nth-of-type(6):checked ~ .sc__bar .sc__tab:nth-child(6),
+  .sc__radio:nth-of-type(7):checked ~ .sc__bar .sc__tab:nth-child(7) {
+    background: var(--cs-accent);
+    color: #fff;
+  }
+
+  /* ── The frame ── */
+  /* One 4:3 window for all seven sheets, so switching tabs never reflows the
+     section. The sheets are exported at seven different heights, so they are
+     contained inside it rather than filling it. */
+  .sc__frame {
+    --sc-x: 50%;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 8px;
+    overflow: hidden;
+    /* The sheets are narrower than 4:3, so each leaves a bar down both sides.
+       The frame carries the two sheet backgrounds, split on the same line, so
+       the bars read as part of the sheet rather than as a gap. */
+    background: linear-gradient(
+      to right,
+      #fff 0 var(--sc-x),
+      #262433 var(--sc-x) 100%
+    );
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--cs-accent) 20%, transparent),
+      0 20px 48px rgb(30 22 68 / 0.16);
+  }
+
+  .sc__frame img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Dark sits on top, clipped to the right of the split. */
+  .sc__dark {
+    clip-path: inset(0 0 0 var(--sc-x));
+  }
+
+  .sc__line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--sc-x);
+    width: 2px;
+    margin-left: -1px;
+    background: #fff;
+    pointer-events: none;
+  }
+
+  .sc__grip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgb(30 22 68 / 0.28);
+  }
+
+  /* The two chevrons on the grip, drawn rather than fetched. */
+  .sc__grip::before,
+  .sc__grip::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border: 2px solid var(--sc-ink);
+    border-width: 2px 2px 0 0;
+  }
+
+  .sc__grip::before {
+    left: 12px;
+    transform: translateY(-50%) rotate(-135deg);
+  }
+
+  .sc__grip::after {
+    right: 12px;
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  /* The handle: a full-bleed invisible range, so the whole frame is grabbable
+     and the thumb can reach both edges. */
+  .sc__range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+
+  .sc__range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 40px;
+    height: 100%;
+  }
+
+  .sc__range::-moz-range-thumb {
+    width: 40px;
+    height: 100%;
+    border: 0;
+  }
+
+  .sc__range:focus-visible ~ .sc__line {
+    background: var(--cs-accent);
+  }
+
+  .sc__range:focus-visible ~ .sc__line .sc__grip {
+    box-shadow:
+      0 0 0 3px var(--cs-accent),
+      0 4px 12px rgb(30 22 68 / 0.28);
+  }
+
+  @media (max-width: 640px) {
+    /* No room for a column beside the frame, and seven tabs in a row wrap into
+       a wall — so the list becomes a dropdown above the frame. */
+    .sc {
+      grid-template-columns: 1fr;
+      grid-template-areas: "bar" "panels";
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .sc__bar {
+      display: none;
+    }
+
+    .sc__select {
+      display: block;
+    }
+
+    .sc__grip {
+      width: 32px;
+      height: 32px;
+    }
+
+    .sc__grip::before {
+      left: 8px;
+    }
+
+    .sc__grip::after {
+      right: 8px;
+    }
+  }
+</style>

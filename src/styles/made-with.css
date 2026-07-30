@@ -84,9 +84,9 @@
  * low-power, swap to a static gradient.
  */
 @media (hover: none),
-  (pointer: coarse),
-  (max-width: 900px),
-  (prefers-reduced-motion: reduce) {
+(pointer: coarse),
+(max-width: 900px),
+(prefers-reduced-motion: reduce) {
   .made-with-card {
     animation: none;
   }

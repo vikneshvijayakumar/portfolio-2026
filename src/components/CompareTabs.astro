@@ -1,0 +1,689 @@
+---
+/**
+ * Old and New side by side, one decision per tab. Four columns on desktop —
+ * old note, old screen, new screen, new note — stacking to old-above-new on
+ * mobile.
+ *
+ * Tabs are radio inputs read by :checked, so the whole thing runs without
+ * script. A screen can also carry one of two loops: two screens trading
+ * places, or a popup opening from a control.
+ */
+export interface Screen {
+  img: string;
+  alt: string;
+  note: string;
+  /** Second screen, or a sequence of them, cross-fading on a loop. */
+  swap?: string | string[];
+  /** Taller than a phone screen: show it whole and let the reader scroll it. */
+  tall?: boolean;
+  /** Popup that opens from `tap` on a loop. Needs `tap`. */
+  overlay?: string;
+  /** Where the popup is opened from, as a fraction of the frame. */
+  tap?: { x: number; y: number };
+  /**
+   * A second tap that closes what the first opened — off a sheet, or Back on a
+   * screen it navigated to. Gives the cursor somewhere to travel to, and lands
+   * just before the loop returns to the first screen.
+   */
+  dismiss?: { x: number; y: number };
+}
+
+export interface Tab {
+  label: string;
+  old: Screen;
+  new: Screen;
+}
+
+interface Props {
+  id: string;
+  tabs: Tab[];
+}
+
+const { id, tabs } = Astro.props;
+---
+
+<div class="ct cs-stage">
+  {
+    tabs.map((t, i) => (
+      <input
+        class="ct__radio"
+        type="radio"
+        name={id}
+        id={`${id}-${i}`}
+        checked={i === 0}
+      />
+    ))
+  }
+
+  {
+    tabs.length > 1 && (
+      <div class="ct__bar" role="group" aria-label="Compare">
+        {tabs.map((t, i) => (
+          <label class="ct__tab" for={`${id}-${i}`}>
+            {t.label}
+          </label>
+        ))}
+      </div>
+    )
+  }
+
+  <div class="ct__panels">
+    {
+      tabs.map((t) => (
+        <div class="ct__panel">
+          {(["old", "new"] as const).map((which) => {
+            const s = t[which];
+            return (
+              <div class={`ct__side ct__side--${which}`}>
+                <p class="ct__note">
+                  <span class="ct__which">
+                    <span class={`cs-redesign-card__dot cs-redesign-card__dot--${which}`} />
+                    {which === "old" ? "Old UI" : "New UI"}
+                  </span>
+                  {s.note}
+                </p>
+                <div class={`ct__frame cs-phone${s.tall ? " cs-phone--scroll" : ""}`}>
+                  <img src={s.img} alt={s.alt} loading="lazy" decoding="async" />
+
+                  {s.swap &&
+                    (Array.isArray(s.swap) ? s.swap : [s.swap]).map((src, i, all) => (
+                      <img
+                        class={[
+                          "ct__swap",
+                          s.tap && all.length === 1 && "ct__swap--tapped",
+                          s.tap && all.length > 1 && (i === 0 ? "ct__swap--seq" : "ct__swap--seq-b"),
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        src={src}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ))}
+
+                  {s.overlay && s.tap && (
+                    <>
+                      <span class="ct__scrim" />
+                      <img
+                        class="ct__popup"
+                        src={s.overlay}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </>
+                  )}
+
+                  {s.tap && (
+                    <span
+                      class={`ct__dot${s.dismiss ? " ct__dot--two" : ""}${Array.isArray(s.swap) && !s.dismiss ? " ct__dot--seq" : ""}`}
+                      style={
+                        s.dismiss
+                          ? `--tx1:${s.tap.x * 100}%;--ty1:${s.tap.y * 100}%;--tx2:${s.dismiss.x * 100}%;--ty2:${s.dismiss.y * 100}%`
+                          : `left:${s.tap.x * 100}%;top:${s.tap.y * 100}%`
+                      }
+                    />
+                  )}
+
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .ct {
+    /* Ink for the stage this sits on, themed there — see .cs-overlay--asx. */
+    --ct-ink: var(--asx-ink, #2b266d);
+    --ct-ink-soft: color-mix(in srgb, var(--ct-ink) 62%, var(--asx-fade, #fff));
+    --ct-gap: 24px;
+  }
+
+  /* The tab state lives in these; everything else reads it with :checked. */
+  .ct__radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ct__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 12px 16px;
+  }
+
+  .ct__tab {
+    font-family: var(--cs-font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ct-ink-soft);
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .ct__tab:hover {
+    background: color-mix(in srgb, var(--ct-ink) 8%, transparent);
+  }
+
+  /* Focus lands on the input, which is invisible — put the ring on its tab. */
+  .ct__radio:focus-visible + .ct__radio + .ct__radio + .ct__radio ~ .ct__bar .ct__tab {
+    outline: revert;
+  }
+
+  .ct__panel {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    padding: 8px 16px 32px;
+  }
+
+  /* No tab bar above it, so the panel provides its own top padding. */
+  .ct__bar + .ct__panels .ct__panel {
+    padding-top: 8px;
+  }
+
+  .ct__radio + .ct__panels .ct__panel {
+    padding-top: 32px;
+  }
+
+  /* Four radios, four panels, in order. */
+  .ct__radio:nth-of-type(1):checked ~ .ct__panels > .ct__panel:nth-child(1),
+  .ct__radio:nth-of-type(2):checked ~ .ct__panels > .ct__panel:nth-child(2),
+  .ct__radio:nth-of-type(3):checked ~ .ct__panels > .ct__panel:nth-child(3),
+  .ct__radio:nth-of-type(4):checked ~ .ct__panels > .ct__panel:nth-child(4) {
+    display: grid;
+  }
+
+  .ct__radio:nth-of-type(1):checked ~ .ct__bar .ct__tab:nth-child(1),
+  .ct__radio:nth-of-type(2):checked ~ .ct__bar .ct__tab:nth-child(2),
+  .ct__radio:nth-of-type(3):checked ~ .ct__bar .ct__tab:nth-child(3),
+  .ct__radio:nth-of-type(4):checked ~ .ct__bar .ct__tab:nth-child(4) {
+    background: var(--cs-accent);
+    color: #fff;
+  }
+
+  /* ── One side: note beside its screen ── */
+  .ct__side {
+    display: flex;
+    align-items: center;
+    gap: var(--ct-gap);
+  }
+
+  .ct__side--old {
+    justify-content: flex-end;
+  }
+
+  /* Note first in the DOM; the new side puts it after its screen instead. */
+  .ct__side--new {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+
+  /* Same dot language as the problem / what-changed labels above, so a screen
+     is placed without reading the note. The device ring carries it too: the two
+     UIs share a palette, and side by side they read as one screen twice. */
+  .ct__which {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-family: var(--cs-font-mono);
+    color: var(--ct-ink-soft);
+    margin-bottom: 8px;
+  }
+
+  .ct__side--new .ct__which {
+    justify-content: flex-start;
+  }
+
+  .ct__side--old .ct__frame {
+    --cs-phone-ring: 5px;
+    box-shadow:
+      0 0 0 4px var(--asx-bezel, #fff),
+      0 0 0 5px color-mix(in srgb, var(--cs-red) 40%, transparent),
+      0 20px 48px rgb(30 22 68 / 0.16);
+  }
+
+  .ct__note {
+    flex: 1;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ct-ink);
+    text-align: right;
+    text-wrap: balance;
+  }
+
+  .ct__side--new .ct__note {
+    text-align: left;
+  }
+
+  .ct__frame {
+    --cs-phone-radius: 16px;
+    --cs-phone-bezel: 4px;
+    --cs-phone-ring: 5px;
+    flex: none;
+    width: 156px;
+  }
+
+  .ct__swap,
+  .ct__scrim {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* In a scrolling frame the screens are shown at their natural height, so the
+     swap has to be too — `inset: 0` would squash it to the visible box. Both
+     states of a screen must be exported to the same height, or scrolling past
+     the shorter one reveals the other underneath it. */
+  .cs-phone--scroll .ct__swap {
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ── Two screens trading places ── */
+  .ct__swap {
+    opacity: 0;
+    animation: ct-swap 8s infinite;
+  }
+
+  /* When the second screen is what the tap produces, it has to arrive on the
+     tap's timeline — the same 9s the dot and the popup run on — rather than
+     alternating on its own. */
+  .ct__swap--tapped {
+    animation: ct-reveal 9s infinite;
+  }
+
+  @keyframes ct-reveal {
+    0%,
+    20% {
+      opacity: 0;
+    }
+    26%,
+    84% {
+      opacity: 1;
+    }
+    90%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* A tap that opens a sequence rather than one screen: the first stays up for
+     the rest of the loop and the second fades in on top of it, so the tap leads
+     into both without the base screen flashing between them. */
+  .ct__swap--seq {
+    animation: ct-reveal-seq 9s infinite;
+  }
+
+  /* The control it pressed is on the first screen, so the cursor leaves once
+     that screen does rather than hovering over the ones it opened. */
+  .ct__dot.ct__dot--seq {
+    animation: ct-tap-seq 9s infinite;
+  }
+
+  @keyframes ct-tap-seq {
+    0%,
+    6% {
+      opacity: 0;
+      scale: 1;
+    }
+    12%,
+    16% {
+      opacity: 1;
+      scale: 1;
+    }
+    19% {
+      scale: 0.78;
+    }
+    23%,
+    28% {
+      opacity: 1;
+      scale: 1;
+    }
+    34%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .ct__swap--seq-b {
+    animation: ct-reveal-seq-b 9s infinite;
+  }
+
+  /* Both hold until 80%, so the Back press at 78% lands before the screens
+     change rather than during the change. */
+  @keyframes ct-reveal-seq {
+    0%,
+    22% {
+      opacity: 0;
+    }
+    28%,
+    80% {
+      opacity: 1;
+    }
+    86%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes ct-reveal-seq-b {
+    0%,
+    50% {
+      opacity: 0;
+    }
+    56%,
+    80% {
+      opacity: 1;
+    }
+    86%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Two taps in one loop, and the cursor never leaves: it ends the cycle at the
+     second point and begins the next one there, travelling back to the first.
+     Fading out and jumping back showed the seam every nine seconds. */
+  /* Doubled up so it outranks `.ct__dot`, which sets the single tap animation
+     and is declared further down. */
+  .ct__dot.ct__dot--two {
+    left: var(--tx1);
+    top: var(--ty1);
+    animation: ct-tap-two 9s infinite;
+  }
+
+  @keyframes ct-tap-two {
+    0% {
+      left: var(--tx2);
+      top: var(--ty2);
+      opacity: 1;
+      scale: 1;
+    }
+    14% {
+      left: var(--tx1);
+      top: var(--ty1);
+      scale: 1;
+    }
+    18% {
+      scale: 0.78;
+    }
+    22%,
+    50% {
+      left: var(--tx1);
+      top: var(--ty1);
+      scale: 1;
+    }
+    70%,
+    74% {
+      left: var(--tx2);
+      top: var(--ty2);
+      scale: 1;
+    }
+    78% {
+      scale: 0.78;
+    }
+    82%,
+    100% {
+      left: var(--tx2);
+      top: var(--ty2);
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  @keyframes ct-swap {
+    0%,
+    44% {
+      opacity: 0;
+    }
+    50%,
+    94% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* ── A popup opening from a control ── */
+  .ct__scrim {
+    background: rgb(20 14 48 / 0.45);
+    opacity: 0;
+    animation: ct-pop 9s infinite;
+  }
+
+  /* The popup is exported at the phone's own width, so it sits flush like the
+     sheet it is rather than being inset as a card. */
+  .ct__popup {
+    position: absolute;
+    inset: auto 0 0;
+    width: 100%;
+    height: auto;
+    opacity: 0;
+    animation: ct-pop 9s infinite;
+  }
+
+  @keyframes ct-pop {
+    0%,
+    22% {
+      opacity: 0;
+      translate: 0 8px;
+    }
+    28%,
+    76% {
+      opacity: 1;
+      translate: 0 0;
+    }
+    82%,
+    100% {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  /* The finger that opens it: already resting on the control, dips on contact. */
+  .ct__dot {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--cs-accent) 40%, transparent);
+    border: 2px solid rgb(255 255 255 / 0.9);
+    translate: -50% -50%;
+    opacity: 0;
+    animation: ct-tap 9s infinite;
+  }
+
+  @keyframes ct-tap {
+    0%,
+    6% {
+      opacity: 0;
+      scale: 1;
+    }
+    12%,
+    16% {
+      opacity: 1;
+      scale: 1;
+    }
+    19% {
+      scale: 0.78;
+    }
+    23% {
+      scale: 1;
+    }
+    76% {
+      opacity: 1;
+    }
+    82%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* One 4:3 window for every tab, so switching never reflows the section and
+     the screens get the full height of the card to be read at. Below the
+     stacking breakpoint the panel is two rows tall, so it sizes itself. */
+  @media (min-width: 901px) {
+    .ct {
+      aspect-ratio: 4 / 3;
+      container-type: inline-size;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* The screens are shorter than the window on purpose, so what the window
+       has spare is centred rather than left at the bottom of the card. */
+    .ct__panels {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      align-content: center;
+    }
+
+    /* Screen, notes, screen. The two notes meet in the middle column, one above
+       the other, each with a rule running out to the screen it describes.
+       `display: contents` drops the two sides so their notes and frames become
+       items of this grid — the alternative is a second markup shape for one
+       breakpoint, and then two of everything to keep in step. */
+    .ct__panel {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-rows: 1fr 1fr;
+      column-gap: var(--ct-gap);
+      row-gap: 16px;
+      align-items: center;
+    }
+
+    .ct__side,
+    .ct__side--old,
+    .ct__side--new {
+      display: contents;
+    }
+
+    .ct__side--old .ct__frame {
+      grid-area: 1 / 1 / 3 / 2;
+    }
+
+    .ct__side--new .ct__frame {
+      grid-area: 1 / 3 / 3 / 4;
+    }
+
+    /* Bottom of the first row and top of the second, so the pair sits together
+       at the middle of the window rather than at the quarter points. */
+    /* Each note is pushed to its own screen's side of the column and reads
+       towards it, so the rule is a short hop from the text rather than a stub
+       stranded across a wide gap. */
+    .ct__side--old .ct__note {
+      grid-area: 1 / 2 / 2 / 3;
+      align-self: end;
+      justify-self: start;
+      text-align: left;
+    }
+
+    .ct__side--new .ct__note {
+      grid-area: 2 / 2 / 3 / 3;
+      align-self: start;
+      justify-self: end;
+      text-align: right;
+    }
+
+    .ct__side--old .ct__which {
+      justify-content: flex-start;
+    }
+
+    .ct__side--new .ct__which {
+      justify-content: flex-end;
+    }
+
+    .ct__note {
+      flex: none;
+      max-width: 288px;
+    }
+
+    /* Height-led rather than width-led: the phone fills what the 4:3 window
+       leaves, and its aspect ratio supplies the width. Written against the
+       container's inline size rather than against the parent's height, which
+       would depend on this element in turn. */
+    .ct__frame {
+      width: auto;
+      height: calc(75cqw - var(--ct-chrome));
+    }
+
+    /* Wider than the tab bar and padding actually need, and the leftover is
+       split above and below by `align-items: center` — the screens were running
+       into the corners of the card at the height that just fit. */
+    .ct__bar + .ct__panels {
+      --ct-chrome: 176px;
+    }
+
+    .ct__radio + .ct__panels {
+      --ct-chrome: 144px;
+    }
+
+    .ct__bar + .ct__panels .ct__panel,
+    .ct__radio + .ct__panels .ct__panel {
+      padding: 24px 40px;
+    }
+  }
+
+  /* ── Stacked: old above new, each screen over its own note ── */
+  @media (max-width: 900px) {
+    .ct__panel {
+      grid-template-columns: 1fr;
+      gap: 32px;
+      justify-items: center;
+    }
+
+    /* Screen above its note on both sides — the note comes first in the DOM
+       so the reversal is what puts it underneath. */
+    .ct__side,
+    .ct__side--new,
+    .ct__side--old {
+      flex-direction: column-reverse;
+      gap: 12px;
+    }
+
+    .ct__note,
+    .ct__side--new .ct__note {
+      flex: none;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .ct__frame {
+      width: min(220px, 60vw);
+    }
+
+    /* Four labels cannot fit one row at this width, and wrapping leaves the
+       last one stranded on its own — so pair them up deliberately. */
+    .ct__bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ct__tab {
+      padding: 8px 12px;
+      text-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ct__swap,
+    .ct__scrim,
+    .ct__popup,
+    .ct__dot {
+      animation: none;
+      opacity: 0;
+    }
+  }
+</style>

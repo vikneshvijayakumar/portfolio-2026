@@ -3,8 +3,12 @@
 
    Loaded by the scrolling landing (alongside global.css) and by the canvas
    (alongside canvas/styles.css). Both stylesheets define the same token
-   vocabulary (--surface, --border, --text-soft, --primary, --space-*, …),
-   so every rule here resolves against whichever theme is in play.
+   vocabulary (--surface,
+--border,
+--text-soft,
+--primary,
+--space-*,
+…), so every rule here resolves against whichever theme is in play.
    ========================================================================== */
 
 .toolbar {
@@ -37,13 +41,18 @@
 
 .toolbar__panel--left {
   justify-self: start;
+  /* The pill hugs its content, so without a cap it grows straight past its
+     grid track and slides under the right-hand panel — which it did from
+     roughly 1400px down, hiding the last nav items. Capping it at the track
+     and letting the nav scroll inside fixes that at every width, and removed
+     the need for a separate 1560px breakpoint that only ever delayed it. */
+  max-width: 100%;
+  min-width: 0;
 }
 
 .toolbar__panel--right {
   justify-self: end;
-}
-
-.toolbar__left,
+}.toolbar__left,
 .toolbar__actions {
   display: flex;
   align-items: center;
@@ -84,9 +93,7 @@
   background: var(--surface-strong);
   border: 1px solid var(--border);
   box-shadow: inset 0 1px 0 rgba(var(--white-rgb), 0.35);
-}
-
-.toolbar__mark svg,
+}.toolbar__mark svg,
 .toolbar__mark img {
   width: 24px;
   height: 24px;
@@ -158,10 +165,14 @@
 .header-zone-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
+  /* `safe` falls back to flex-start once the items no longer fit, so a
+     scrolled nav starts at "Works" instead of being clipped at both ends. */
+  justify-content: safe center;
   gap: 8px;
   width: 100%;
-  overflow: visible;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .header-zone-nav::-webkit-scrollbar {
@@ -217,9 +228,7 @@
 
 .header-zone-nav__item.is-active .header-zone-nav__indicator {
   opacity: 1;
-}
-
-/* ---------- Actions ---------- */
+}/* ---------- Actions ---------- */
 
 /* Status badge, not a control: borderless, fully round, and faintly tinted with
    its own availability green so it reads apart from the square toggle buttons. */
@@ -265,9 +274,7 @@
     transform: scale(2.8);
     opacity: 0;
   }
-}
-
-/* Link across to the other landing — styled as the square theme-toggle
+}/* Link across to the other landing — styled as the square theme-toggle
    button beside it, just wider to hold its label. */
 .alt-landing-link {
   display: inline-flex;
@@ -299,9 +306,7 @@
   box-shadow:
     inset 0 1px 0 rgba(var(--white-rgb), 0.35),
     var(--shadow-sm);
-}
-
-.theme-toggle-minimal,
+}.theme-toggle-minimal,
 .legend-trigger {
   display: flex;
   align-items: center;
@@ -317,9 +322,7 @@
   padding: 0;
   transition: transform 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
   flex-shrink: 0;
-}
-
-.theme-toggle-minimal:hover,
+}.theme-toggle-minimal:hover,
 .legend-trigger:hover {
   transform: translateY(-1px);
   background: var(--surface);
@@ -372,7 +375,17 @@
 
 /* The toolbar runs out of room before ~1560px; drop the label so the link
    stays reachable without pushing the nav under the right-hand panel. */
-@media (max-width: 1560px) {
+
+
+/* ponytail: mobile is classic-mode only — the /canvas-landing URL still works
+   if hit directly, we just don't offer the switch here. */
+@media (max-width: 640px) {
+  .alt-landing-link {
+    display: none;
+  }
+}
+
+@media (max-width: 1200px) {
   .alt-landing-link__label {
     display: none;
   }
@@ -387,17 +400,7 @@
     width: 24px;
     height: 24px;
   }
-}
 
-/* ponytail: mobile is classic-mode only — the /canvas-landing URL still works
-   if hit directly, we just don't offer the switch here. */
-@media (max-width: 720px) {
-  .alt-landing-link {
-    display: none;
-  }
-}
-
-@media (max-width: 1200px) {
   .header-zone-nav {
     gap: 0;
   }
@@ -408,7 +411,7 @@
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 640px) {
   .toolbar {
     align-items: stretch;
     gap: 16px;

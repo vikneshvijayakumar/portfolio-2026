@@ -3,13 +3,14 @@
    fully readable without JavaScript.
 
    IMPORTANT: global.css nukes inline transforms inside these overlays
-   (`.obv3-overlay [style*="transform:"] { transform: none !important }`) so
+   (`.cs-overlay [style*="transform:"] { transform: none !important }`) so
    SSR content stays visible without JS. Every JS-driven transform here is
    therefore fed through a custom property, which that rule cannot match. */
 
 /* Scroll progress — inserted as a flex item directly after the topbar, so it
    sits below it with no magic offset. Sticky covers the studies whose overlay
-   is itself the scroller (Form Taking, AI Stylist). */
+   is itself the scroller (Form Taking,
+AI Stylist). */
 .csfx-progress {
   position: sticky;
   top: 0;
@@ -21,59 +22,7 @@
   transform: scaleX(var(--p, 0));
   transform-origin: left;
   pointer-events: none;
-}
-
-/* Masked word cascade on section headings */
-.csfx-words .w-mask {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: bottom;
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
-}
-
-.csfx-words .w-in {
-  display: inline-block;
-  transform: translateY(115%);
-  transition: transform 0.85s var(--ease-out-quart);
-  transition-delay: calc(var(--i) * 70ms);
-}
-
-.csfx-words.in .w-in {
-  transform: none;
-}
-
-/* Body content rise. The studies' own <RevealSection> Motion animations are
-   dead on arrival — the safety net above overrides their inline opacity and
-   transform — so prose, quotes and stats reveal through classes instead. */
-.csfx-rise {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.csfx-rise.in {
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 0.7s var(--ease-out-quart),
-    transform 0.7s var(--ease-out-quart);
-}
-
-/* Staggered child reveal for card grids and lists.
-   The hidden state carries no transition, so adding the class can't animate
-   content *out*; the transition only exists on the revealed state. */
-.csfx-stagger > * {
-  opacity: 0;
-  transform: translateY(22px);
-}
-
-.csfx-stagger.in > * {
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 0.65s var(--ease-out-quart),
-    transform 0.65s var(--ease-out-quart);
-}
+}/* Word cascade, body rise and grid stagger now live in styles/reveal.css, shared with the landing page. */
 
 /* Magnetic pull on primary actions. Tripled class outranks the buttons' own
    hover transforms (e.g. .download-button.download-button:hover). */
@@ -83,19 +32,9 @@
   will-change: transform;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .csfx-words .w-in,
-  .csfx-rise,
-  .csfx-stagger > * {
-    transform: none !important;
-    opacity: 1 !important;
-    transition: none !important;
-  }
-}
-
 /* ── Shared fullscreen lightbox (clinical images/video + output-builder feature
    videos). Markup lives once in CaseStudyLayout; the script moves media in/out. */
-.cd-lightbox {
+.cs-lightbox {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -110,12 +49,12 @@
   transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
-.cd-lightbox.is-open {
+.cs-lightbox.is-open {
   opacity: 1;
   visibility: visible;
 }
 
-.cd-lightbox__content {
+.cs-lightbox__content {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,11 +67,11 @@
   transition: transform 0.25s ease;
 }
 
-.cd-lightbox.is-open .cd-lightbox__content {
+.cs-lightbox.is-open .cs-lightbox__content {
   transform: scale(1);
 }
 
-.cd-lightbox__img {
+.cs-lightbox__img {
   /* Fit-to-screen at scale: 1 — bounded by the content wrapper, which fills the
      padded lightbox — so the user zooms in/out from a fitted baseline. */
   max-width: 100%;
@@ -147,7 +86,7 @@
   user-select: none;
 }
 
-@keyframes cd-lb-slide-next {
+@keyframes cs-lb-slide-next {
   from {
     opacity: 0;
     transform: translateX(40px);
@@ -158,7 +97,7 @@
   }
 }
 
-@keyframes cd-lb-slide-prev {
+@keyframes cs-lb-slide-prev {
   from {
     opacity: 0;
     transform: translateX(-40px);
@@ -170,7 +109,7 @@
 }
 
 /* Zoom toolbar (images only). */
-.cd-lightbox__zoom {
+.cs-lightbox__zoom {
   position: absolute;
   bottom: 24px;
   left: 50%;
@@ -186,11 +125,11 @@
   z-index: 1010;
 }
 
-.cd-lightbox__zoom[hidden] {
+.cs-lightbox__zoom[hidden] {
   display: none;
 }
 
-.cd-lightbox__zoom-btn {
+.cs-lightbox__zoom-btn {
   width: 36px;
   height: 36px;
   display: flex;
@@ -204,16 +143,16 @@
   transition: background 0.2s ease;
 }
 
-.cd-lightbox__zoom-btn:hover {
+.cs-lightbox__zoom-btn:hover {
   background: rgba(255, 255, 255, 0.14);
 }
 
-.cd-lightbox__zoom-btn svg {
+.cs-lightbox__zoom-btn svg {
   width: 20px;
   height: 20px;
 }
 
-.cd-lightbox__zoom-level {
+.cs-lightbox__zoom-level {
   min-width: 48px;
   text-align: center;
   color: rgba(255, 255, 255, 0.9);
@@ -221,19 +160,19 @@
   font-weight: 500;
 }
 
-.cd-lightbox__video-slot {
+.cs-lightbox__video-slot {
   display: flex;
   cursor: default;
 }
 
-.cd-lightbox__video-slot .cd-lightbox__img {
+.cs-lightbox__video-slot .cs-lightbox__img {
   width: auto;
   height: auto;
   max-width: min(100%, 90vw);
   max-height: 90vh;
 }
 
-.cd-lightbox__close {
+.cs-lightbox__close {
   position: absolute;
   top: 24px;
   right: 24px;
@@ -249,13 +188,13 @@
   cursor: pointer;
 }
 
-.cd-lightbox__close svg {
+.cs-lightbox__close svg {
   width: 18px;
   height: 18px;
 }
 
 /* Lightbox Navigation & Counter */
-.cd-lightbox__nav {
+.cs-lightbox__nav {
   display: none;
   position: absolute;
   top: 50%;
@@ -274,24 +213,24 @@
   transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
 }
 
-.cd-lightbox__nav:hover {
+.cs-lightbox__nav:hover {
   background: rgba(10, 10, 14, 0.9);
   transform: translateY(-50%) scale(1.08);
 }
 
-.cd-lightbox__nav:active {
+.cs-lightbox__nav:active {
   transform: translateY(-50%) scale(0.95);
 }
 
-.cd-lightbox__prev {
+.cs-lightbox__prev {
   left: 24px;
 }
 
-.cd-lightbox__next {
+.cs-lightbox__next {
   right: 24px;
 }
 
-.cd-lightbox__nav svg {
+.cs-lightbox__nav svg {
   width: 22px;
   height: 22px;
   fill: none;
@@ -299,10 +238,8 @@
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-/* Page counter now lives inside the zoom bar, left of the zoom buttons. */
-.cd-lightbox__counter {
+}/* Page counter now lives inside the zoom bar, left of the zoom buttons. */
+.cs-lightbox__counter {
   display: none;
   padding: 0 12px 0 8px;
   margin-right: 4px;
@@ -315,21 +252,21 @@
 }
 
 @media (max-width: 640px) {
-  .cd-lightbox__prev {
+  .cs-lightbox__prev {
     left: 12px;
   }
-  .cd-lightbox__next {
+  .cs-lightbox__next {
     right: 12px;
   }
-  .cd-lightbox__nav {
+  .cs-lightbox__nav {
     width: 40px;
     height: 40px;
   }
-  .cd-lightbox__nav svg {
+  .cs-lightbox__nav svg {
     width: 18px;
     height: 18px;
   }
-  .cd-lightbox__zoom-btn {
+  .cs-lightbox__zoom-btn {
     width: 44px;
     height: 44px;
   }

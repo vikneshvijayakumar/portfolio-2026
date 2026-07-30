@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="184" height="112" viewBox="0 0 46 28" fill="none" role="img" aria-label="Glass logo">
+  <defs>
+    <!-- glass body: light top-left to translucent bottom-right -->
+    <linearGradient id="glass" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#c7d2fe" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#6366f1" stop-opacity="0.45"/>
+    </linearGradient>
+    <!-- specular streak -->
+    <linearGradient id="streak" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- soft caustic glow behind -->
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+    <path id="mark" d="m23.475 4 4.463 3.016v.61L16.362 24.663l-.518.353h-8.73L5.077 28h-.615L0 24.984v-.61L13.84 4h.614l4.462 3.016v.61l-9.83 14.47v2.182L22.861 4h.614Zm18.063 0L46 7.016v.61L34.424 24.663l-.517.353h-8.73L23.138 28h-.614l-4.463-3.016v-.61L31.902 4h.614l4.462 3.016v.61l-9.83 14.47v2.182L40.923 4h.615Z"/>
+  </defs>
+
+  <!-- refracted glow -->
+  <use href="#mark" fill="#818cf8" fill-opacity="0.55" filter="url(#glow)"/>
+  <!-- glass fill -->
+  <use href="#mark" fill="url(#glass)"/>
+  <!-- specular highlight clipped to the mark -->
+  <clipPath id="clip"><use href="#mark"/></clipPath>
+  <g clip-path="url(#clip)">
+    <path d="M-4 6 L50 -6" stroke="url(#streak)" stroke-width="3"/>
+  </g>
+  <!-- crisp edge -->
+  <use href="#mark" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="0.4"/>
+</svg>

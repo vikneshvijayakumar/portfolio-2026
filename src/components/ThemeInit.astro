@@ -1,0 +1,17 @@
+---
+// Resolve the theme before first paint so dark mode never flashes white.
+// One copy, used by every page shell (Layout.astro and the canvas landing,
+// which has its own head because it doesn't load global.css).
+---
+
+<script is:inline>
+  (() => {
+    const saved = localStorage.getItem("viknesh-theme");
+    document.documentElement.dataset.theme =
+      saved === "ink" || saved === "paper"
+        ? saved
+        : matchMedia("(prefers-color-scheme: dark)").matches
+          ? "ink"
+          : "paper";
+  })();
+</script>

@@ -5,10 +5,11 @@ export const STAGE = {
 };
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
-const isMac = typeof navigator !== "undefined" && (
-  navigator.platform.toUpperCase().indexOf("MAC") >= 0 || 
-  navigator.userAgent.toUpperCase().indexOf("MAC") >= 0
-);
+// The one source for the shortcut modifier glyph. navigator.platform is
+// deprecated and userAgent already carries "Macintosh", so one test does it.
+const isMac =
+  typeof navigator !== "undefined" &&
+  navigator.userAgent.toUpperCase().includes("MAC");
 export const MODIFIER_KEY = isMac ? "⌘" : "Ctrl";
 
 export function getCardTransition(isMobile: boolean, index: number): import("motion/react").Transition {

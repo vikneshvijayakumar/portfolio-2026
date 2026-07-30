@@ -1,12 +1,15 @@
 import { memo } from "react";
 import { motion } from "motion/react";
 import { CanvasImage } from "../CanvasImage";
-import work1Img from "../assets/other-work-1.webp?url";
-import work2Img from "../assets/other-work-2.webp?url";
-import work3Img from "../assets/other-work-3.webp?url";
-import work4Img from "../assets/orgusta-otherwork.webp?url";
 import work7Img from "../assets/corporate-planning.webp?url";
-import work6Img from "../assets/investor-pitchdeck.webp?url";
+
+// Shared with the landing page's "other work" grid — served from public/assets
+// so the same bytes aren't also bundled here. corporate-planning is canvas-only.
+const work1Img = "/assets/other-work-1.webp";
+const work2Img = "/assets/other-work-2.webp";
+const work3Img = "/assets/other-work-3.webp";
+const work4Img = "/assets/orgusta-otherwork.webp";
+const work6Img = "/assets/investor-pitchdeck.webp";
 
 const items = [
   {

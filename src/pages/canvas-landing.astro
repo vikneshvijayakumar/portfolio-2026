@@ -2,11 +2,13 @@
 // Canvas landing — the Fignam-Codex pan/zoom canvas home, ported as a React
 // island with the site theme (IBM Plex fonts, indigo accent). Standalone head:
 // the canvas ships its own stylesheet, so it doesn't load global.css.
+import "../styles/fonts.css";
 import "../canvas/styles.css";
 import "../styles/header.css";
 import "../styles/glow.css";
 import "../styles/made-with.css";
 import CanvasApp from "../canvas/CanvasApp";
+import ThemeInit from "../components/ThemeInit.astro";
 
 const title = "Viknesh Vijayakumar — Lead Product Designer";
 const description =
@@ -16,18 +18,7 @@ const description =
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script is:inline>
-      // Resolve the theme before first paint so dark mode never flashes white.
-      (() => {
-        const saved = localStorage.getItem("viknesh-theme");
-        document.documentElement.dataset.theme =
-          saved === "ink" || saved === "paper"
-            ? saved
-            : matchMedia("(prefers-color-scheme: dark)").matches
-              ? "ink"
-              : "paper";
-      })();
-    </script>
+    <ThemeInit />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
@@ -35,9 +26,9 @@ const description =
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-serif-variable@2.0.0/fonts/split/woff2/IBM Plex Serif Var-Roman.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ibm/plex-sans-variable@0.2.0/fonts/split/woff2/IBM Plex Sans Var-Roman.min.css" />
+    <!-- Self-hosted (see styles/fonts.css) — preload so text doesn't wait on CSS parse. -->
+    <link rel="preload" href="/fonts/plex-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/plex-serif-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <CanvasApp client:only="react" />
