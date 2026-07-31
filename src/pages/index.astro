@@ -8,7 +8,6 @@ import "../styles/header.css";
 import "../styles/glow.css";
 import "../styles/made-with.css";
 import { buildAiBadgeMarkup } from "../lib/ai-badge";
-import { FORM_TAKING_DECK } from "../case-studies/shared";
 
 const aiBadgeMarkup = buildAiBadgeMarkup("home");
 const EMAIL = "hello@viknesh.me";
@@ -67,7 +66,6 @@ const base = [
     featured: false,
     draft: false,
     link: "/form-taking",
-    mobileLink: FORM_TAKING_DECK,
   },
   {
     tag: "draft / snapintake",
@@ -106,8 +104,6 @@ const caseStudies = base.map((cs, i) => ({
   tagColor: cs.featured ? "var(--ac)" : "var(--muted)",
   titleColor: cs.draft ? "var(--muted)" : "var(--text)",
   hasLink: !!cs.link,
-  // Only Form Taking carries one; the rest of the cards stay as they are.
-  mobileLink: "mobileLink" in cs ? cs.mobileLink : undefined,
 }));
 
 // Off-the-record gallery — ported from Fignam-Codex DribbbleCards
@@ -1199,7 +1195,6 @@ const personSchema = {
                 {cs.hasLink && (
                   <a
                     href={cs.link}
-                    data-mobile-href={cs.mobileLink}
                     aria-label={`View case study: ${cs.title}`}
                     class="btn-primary"
                     style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:12px 20px;border-radius:var(--radius-lg);background:var(--btn-bg);color:var(--btn-text);font-size:16px;font-weight:600;line-height: 1.6;box-shadow:0 6px 16px -8px rgba(0,46,113,.08),0 -1px 0 1px rgba(0,46,113,.16) inset;transition:background .2s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.34,1.56,.64,1)"
@@ -1232,7 +1227,6 @@ const personSchema = {
               {cs.hasLink && (
                 <a
                   href={cs.link}
-                  data-mobile-href={cs.mobileLink}
                   aria-label={`View case study: ${cs.title}`}
                   tabindex="-1"
                   style="position:absolute;inset:0;z-index:1"
@@ -1621,32 +1615,50 @@ const personSchema = {
           >
             I studied Visual Communication and started looking for jobs in VFX
             and 3D modeling. Then I took a job at a design agency as a backup
-            and rightly on time, Material design was introduced. I read the
+            and right on time, Material Design was introduced. I read the
             complete spec and started applying it to my designs. Ended up
-            teaching the team about it.
+            teaching the team about it. The renders never went to waste either.
+            Composition, depth and typography are still how I judge whether a
+            screen is any good.
           </p>
           <p
             style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
           >
-            This pulled me into product design. At Auxo Labs, now AmbientOne, I
-            started as a founding designer, to leading seven people by the end.
-            For 8 years, I worked across the entire healthcare AI platform, with
-            HITL workflows at a time when ChatGPT was just a lab experiment.
+            This pulled me into product design. At Auxo Labs I went from
+            founding designer to leading seven people by the end. For 8 years I
+            worked across the entire healthcare AI platform, building HITL
+            workflows before ChatGPT was a thing.
           </p>
           <p
             style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
           >
-            Then, COVID happened. I took freelancing. The design team from
-            Empyra found me in the middle of their .NET to React migration. I
-            took on admin workflows, and streamlined them, one module at a time.
+            Then COVID hit the company. Auxo rebranded to AmbientOne, laid off
+            most of the workforce, and kept me on as a contractor. Work was thin
+            for a long stretch, so I went freelance. The design team at Empyra
+            found me in the middle of their .NET to React migration.
           </p>
           <p
             style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
           >
-            I build with AI tools now. Prototyping ideas in code, and trying out
-            new design workflows that did not exist two years ago. Execution,
-            that took most of my time, gets offloaded, so I finally have time
-            for the small design decisions that always got overlooked.
+            I took on the admin workflows and streamlined them one module at a
+            time. The output generation one was supposed to be a screen
+            redesign, but the real problem sat underneath it, in a data model
+            that made engineers hand-map response codes into PDFs. I rebuilt
+            that first, then designed on top of it. Template creation went from
+            days to hours. That is mostly how I work. The system before the
+            screens.
+          </p>
+          <p
+            style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
+          >
+            I learned HTML and CSS to collaborate better with developers,
+            talking in flex, columns and rows instead of auto-layout. That
+            turned out to matter more than I expected. It is why AI tools
+            clicked for me quickly. I build with them now, prototyping ideas in
+            code and trying out design workflows that did not exist two years
+            ago. Execution, that took most of my time, gets offloaded, so I
+            finally have time for the small design decisions that always got
+            overlooked.
           </p>
           <p
             style="margin:16px 0 0;font-size:16px;line-height: 1.6;color:var(--muted);max-width:60ch"
@@ -1654,7 +1666,7 @@ const personSchema = {
             Outside work, you'll probably find me photographing my son at angles
             he did not agree to, caring for the plants that somehow survive all
             my experiments, or getting lost in YouTube rabbit holes about
-            design, tech engineering and history.
+            design, tech, engineering and history.
           </p>
         </div>
       </div>
@@ -1807,21 +1819,7 @@ const personSchema = {
     // before the reveal/measure passes below.
     import { initLanding } from "../scripts/landing-return";
     import { initReveals } from "../scripts/reveal";
-    import { DECK_ONLY_MQ } from "../case-studies/shared";
     initLanding();
-
-    // Cards that are really a slide deck point straight at it on phones rather
-    // than at a page that could only show a link. Both anchors on the card
-    // carry the attribute, so this covers the button and the full-card hit area.
-    if (window.matchMedia(DECK_ONLY_MQ).matches) {
-      document
-        .querySelectorAll<HTMLAnchorElement>("a[data-mobile-href]")
-        .forEach((a) => {
-          a.href = a.dataset.mobileHref!;
-          a.target = "_blank";
-          a.rel = "noopener";
-        });
-    }
 
     // Theme — same localStorage key as the canvas landing, so the choice
     // carries across both. Applied pre-paint by the inline script in <head>.
