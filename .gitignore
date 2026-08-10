@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # Kept on disk but not shipped: no page links to it, and it is 2.4 MB.
 public/assets/output-builder/generate-template.mp4
+Styles/.gen/
