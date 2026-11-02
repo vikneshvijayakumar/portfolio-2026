@@ -32,41 +32,40 @@ const EXPLORATION_IMAGES = [
 
 const NAV_SECTIONS = [
   { id: "cs-overview", label: "Overview" },
-  { id: "cs-scope", label: "Scope" },
-  { id: "cs-research", label: "Research" },
-  { id: "cs-discovery", label: "Discovery" },
-  { id: "cs-reframing", label: "Reframing" },
+  { id: "cs-origin", label: "Origin" },
+  { id: "cs-problem", label: "Problem" },
+  { id: "cs-constraint", label: "Constraint" },
   { id: "cs-datamodel", label: "Mapping Model" },
   { id: "cs-firstversion", label: "First version" },
-  { id: "cs-concerns", label: "Concerns" },
+  { id: "cs-concerns", label: "Scoping" },
   { id: "cs-solution", label: "Solution" },
   { id: "cs-impact", label: "Impact" },
-  { id: "cs-evolution", label: "Future" },
+  { id: "cs-evolution", label: "Next" },
   { id: "cs-reflection", label: "Reflection" },
 ];
 
 const FLOW = [
   {
     title: "Questionnaire",
-    desc: "A questionnaire is created, sometimes with fifty or more fields, and exported for output setup.",
+    desc: "A form is created by an admin, sometimes with 50+ fields, and then exported for output setup.",
     image: step1Questionnaire,
     alt: "Questionnaire editor with the Distance Learning Form questions listed",
   },
   {
     title: "Generate Codes",
-    desc: "The system generates a unique response code for every possible answer, so a single question can have many response codes.",
+    desc: "The system generates a unique response code for every element, so a single question can have many response codes.",
     image: step2ResponseCodes,
     alt: "Exported questionnaire data showing response codes for each question",
   },
   {
     title: "PDF & code mapping",
-    desc: "Required fields are recreated in PDF and the response codes are manually mapped for each.",
+    desc: "The PDF template is built manually, and the response codes are mapped to the correct field.",
     image: step3CreatePdf,
     alt: "PDF builder with a response code manually entered for a selected field",
   },
   {
     title: "Upload & test",
-    desc: "An output entry is created, the template is uploaded. If there are mistakes, the PDF is edited, upload again. This will repeat until everything is right.",
+    desc: "The template is uploaded. If a response code is wrong, the PDF is edited and uploaded again, until everything is right.",
     image: step4OutputEntry,
     alt: "Output entry screen for uploading and configuring the Distance Learning Contract PDF",
   },
@@ -92,9 +91,9 @@ const V1_FIGURES = [
   },
   {
     src: "/assets/output-builder/v1-theme.png",
-    alt: "First version theme panel with colour swatches and typography controls, close to a full design tool",
+    alt: "First version theme panel with color swatches and typography controls, close to a full design tool",
     caption:
-      "v1. Theme, colour, and typography controls. Close to a full design tool.",
+      "v1. Theme, color, and typography controls. Close to a full design tool.",
   },
 ];
 
@@ -109,7 +108,7 @@ const CONSTRAINTS_FIGURE = {
   src: "/assets/output-builder/stakeholder-constraints.png",
   alt: "Annotated screen of the initial builder exploration with consolidated stakeholder feedback marked across it",
   caption:
-    "The consolidated feedback on the initial exploration, gathered from across the teams. Limited editability with a standard layout, how simple and complex fields should format, and two questions the teams had not settled: whether a multiple choice answer should show the selected answer only or all options, and whether fields should sit in one column or two.",
+    "Feedback from across the teams on the first version. Two questions stayed open: whether a multiple choice answer shows only the selected option, and whether fields sit in one column or two.",
 };
 
 const CONCERNS = [
@@ -119,7 +118,7 @@ const CONCERNS = [
       "The drag & drop will confuse the admins. Not everyone using this will be technical.",
     color: "yellow",
     outcome:
-      "I kept a manual way to add fields along with drag and drop. The visual builder became the default while the PDF route was still retained.",
+      "I kept a manual way to add fields along with drag and drop. The visual builder became the default, and the PDF route stayed for legacy users.",
   },
   {
     team: "Engineers",
@@ -150,21 +149,20 @@ const CONCERNS = [
 const FEATURES = [
   {
     title: "Automated code mapping",
-    body: "Users select form questions from a list using an interface that focused on what they are trying to do, not how the system is doing it. The system handles response codes automatically in the backend.",
+    body: "Users pick form questions from a plain language list, in the words they already know. The system wires up the response codes in the background, so nobody sees or types one.",
     helps: [
       "Less cognitive load",
-      "No memorisation of codes",
+      "No memorization of codes",
       "Fewer mapping errors",
       "Easier for new users to pick up",
     ],
     videoPath: "/assets/output-builder/work-with-data.mp4",
     duration: "0:17",
-    caption:
-      "Picking form questions from a plain-language list; the matching response codes are wired up automatically in the background, never shown to the user.",
+    caption: "Picking questions by name.",
   },
   {
     title: "Visual builder",
-    body: "Template creation is now moved entirely inside the product. A visual builder without the bloated functions of a PDF tool is built within the product.",
+    body: "Template creation moved inside the product. Like Google Forms or Microsoft Forms, users drag and drop, only here they drag form questions onto the canvas and see the output as they build. A manual way to add questions stays alongside for admins who prefer it.",
     helps: [
       "Users can now see the output as they build",
       "No need to switch between the app and PDF tools",
@@ -176,21 +174,20 @@ const FEATURES = [
       "Dragging fields onto the canvas and watching the output update live as the template is built, all inside the product.",
   },
   {
-    title: "Flexible Customizations",
-    body: "Users can now adjust layouts and styling easily. Enough control to handle real variation without adding a new learning curve. System handles the column presentation by itself.",
+    title: "Compact or Comfortable",
+    body: "Users pick a compact or comfortable view, and the system arranges the fields on its own. The output still adapts to each form.",
     helps: [
-      "Simple yet flexible customisation",
-      "The system decides the layout, so users do not have to",
-      "No need for external PDF tools",
+      "No layout decisions to make",
+      "The system arranges the fields",
+      "Consistent outputs across forms",
     ],
     videoPath: "/assets/output-builder/flexible-customization.mp4",
     duration: "0:13",
-    caption:
-      "Adjusting layout and styling from a small set of controls; the system re-flows the columns on its own.",
+    caption: "Switching between the two views.",
   },
   {
-    title: "Smart Organizational Defaults",
-    body: "Most organizations were rebuilding output templates with similar headers and layouts from scratch every time. Predefined org defaults allows users to start from a default template and only work with the form fields.",
+    title: "Org Defaults",
+    body: "Most organizations rebuilt the same headers and layouts for every template. Now each org has a default template with its header fields set once, so users start from it and only work on the form questions.",
     helps: [
       "Faster setup",
       "Reduces repetitive work",
@@ -217,7 +214,7 @@ const playSvg =
 
 <CaseStudyLayout
   title="Output Builder Case Study | Viknesh Vijayakumar"
-  description="How Viknesh Vijayakumar reframed output template creation to remove a manual mapping step, cutting a 2 to 3 day engineering task down to hours."
+  description="How one question about a legacy .NET constraint turned a PDF editor request into a workflow redesign, and cut template creation from days to hours."
   ogImage="/assets/output-builder.webp"
 >
   <div
@@ -262,28 +259,29 @@ const playSvg =
           <div class="cs-hero__main">
             <div class="cs-hero__lede">
               <h1 class="cs-hero__title">
-                Cutting template creation from <em>days → hours</em>
+                The legacy workaround we almost rebuilt in React
               </h1>
               <p class="cs-hero__desc">
-                Reframing a document generation workflow to remove a 2 to 3 day
-                engineering bottleneck.
+                How one question about a legacy .NET constraint turned a PDF
+                editor request into a workflow redesign, and cut template
+                creation from days to hours.
               </p>
               <div class="cs-scroll-hint">Scroll to explore</div>
             </div>
             <div class="cs-hero__meta">
               <div class="cs-meta-item">
-                <span class="cs-meta-label">Role</span><span
-                  class="cs-meta-val">Solo Designer</span
+                <span class="cs-meta-label">Role</span><span class="cs-meta-val"
+                  >Solo Designer</span
                 >
               </div>
               <div class="cs-meta-item">
                 <span class="cs-meta-label">Outcomes</span><span
-                  class="cs-meta-val">90% Faster</span
+                  class="cs-meta-val">90% faster template creation</span
                 >
               </div>
               <div class="cs-meta-item">
-                <span class="cs-meta-label">Type</span><span
-                  class="cs-meta-val">Workflow Redesign</span
+                <span class="cs-meta-label">Type</span><span class="cs-meta-val"
+                  >Workflow Redesign</span
                 >
               </div>
               <div class="cs-meta-item">
@@ -294,8 +292,8 @@ const playSvg =
               <div class="cs-meta-item">
                 <span class="cs-meta-label">Skills</span><span
                   class="cs-meta-val"
-                  >Systems design, workflow redesign, feasibility, cross
-                  functional alignment</span
+                  >Workflow audit, contextual inquiry, systems design,
+                  feasibility, cross functional alignment</span
                 >
               </div>
             </div>
@@ -307,106 +305,72 @@ const playSvg =
         <div class="cs-section__inner">
           <div class="cs-section__number">01<span>Overview</span></div>
           <div>
-            <h2 class="cs-heading">
-              Days of engineering behind every document
-            </h2>
+            <h2 class="cs-heading">A module with one button</h2>
             <p class="cs-body">
-              Organizations on the platform use forms to collect student data
-              and generate official form outputs. Each output used a PDF
-              template built from the form fields, which was uploaded to the
-              system. User responses got filled into it automatically when they
-              submitted a form.
+              Organizations on the product used forms to collect student data
+              and generate official form outputs. An admin creates a form, a
+              student fills it in, and the system generates an output from the
+              responses.
             </p>
             <p class="cs-body">
-              But the workflow behind it required an engineer to recreate the
-              form layout in external PDF tools and do the data mapping manually
-              into the template, resulting in multiple validation cycles and
-              back and forth before the template reached production.
+              As the platform migrated from .NET to React, I was asked to
+              modernize the output builder first, along with the entire form
+              ecosystem. So I started with a workflow audit of the output setup.
+              But the output module just had an option to upload a PDF. And
+              nothing else.
             </p>
-            <p class="cs-body">
-              This case study presents my design process behind creating a
-              modern output builder that reduced template creation time from
-              days to hours.
+            <figure class="cs-figure">
+              <img
+                src={step4OutputEntry.src}
+                width={step4OutputEntry.width}
+                height={step4OutputEntry.height}
+                alt="Legacy output entry screen, where the only option was to upload a PDF template"
+                loading="lazy"
+                decoding="async"
+                data-lightbox-trigger
+                style="cursor: pointer;"
+              />
+              <button
+                type="button"
+                class="cs-media-maximize"
+                aria-label="Maximize image"
+                title="Maximize image"
+                data-lightbox-trigger
+                set:html={fullscreenSvg}
+              />
+              <figcaption>The legacy output module.</figcaption>
+            </figure>
+            <p class="cs-body" style="margin-top:24px; margin-bottom:0">
+              I usually find my way around new products easily, so this dead end
+              surprised me. If I couldn't figure out the setup, a regular admin
+              from an organization had no chance. So I sat with the engineers
+              and watched them build an actual template. My first question to
+              them was, why is PDF template is needed to create an output.
             </p>
           </div>
         </div>
       </section>
 
-      <section id="cs-scope" class="cs-section cs-section--overview">
+      <section id="cs-origin" class="cs-section cs-section--contrast">
         <div class="cs-section__inner">
-          <div class="cs-section__number">02<span>Scope</span></div>
+          <div class="cs-section__number">02<span>Origin</span></div>
           <div>
-            <h2 class="cs-heading">
-              Deconstructing the problem space and execution scope
-            </h2>
+            <h2 class="cs-heading">Why the PDF existed</h2>
             <p class="cs-body">
-              Most of the work went into understanding the legacy workflow and
-              designing the builder around what the system and the teams could
-              support. This case study covers the output builder, one module of
-              a form ecosystem I designed end to end.
+              That's when I understood it all. This was a legacy product built
+              on .NET. When it was built, the engineers didn't have an option to
+              create PDFs with the responses within the system. So they built an
+              output builder module which will hold an output template to map
+              the student respones and get their signatures.
             </p>
-
-            <div class="cs-scope-grid">
-              <div class="cs-scope-card">
-                <h3 class="cs-scope-card__title">Observation</h3>
-                <ul class="cs-scope-card__list">
-                  <li>Workflow mapping</li>
-                  <li>Legacy screen audit</li>
-                  <li>Template and code teardown</li>
-                  <li>Engineer walkthroughs</li>
-                  <li>Implementation team interview</li>
-                </ul>
-              </div>
-
-              <div class="cs-scope-card">
-                <h3 class="cs-scope-card__title">Analysis</h3>
-                <ul class="cs-scope-card__list">
-                  <li>Response code counting</li>
-                  <li>Obsolete feature tracing</li>
-                  <li>Feature carry over decisions</li>
-                  <li>Problem reframing</li>
-                </ul>
-              </div>
-
-              <div class="cs-scope-card">
-                <h3 class="cs-scope-card__title">Validation</h3>
-                <ul class="cs-scope-card__list">
-                  <li>Cross client template review</li>
-                  <li>Technical feasibility check</li>
-                  <li>PoC with engineering</li>
-                  <li>Stakeholder review</li>
-                </ul>
-              </div>
-
-              <div class="cs-scope-card">
-                <h3 class="cs-scope-card__title">Implementation</h3>
-                <ul class="cs-scope-card__list">
-                  <li>Design system reuse</li>
-                  <li>Builder interaction design</li>
-                  <li>Preset and constraint scoping</li>
-                  <li>Handoff specs</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="cs-research" class="cs-section cs-section--contrast">
-        <div class="cs-section__inner">
-          <div class="cs-section__number">03<span>Research</span></div>
-          <div>
-            <h2 class="cs-heading">
-              Learning the work from the people who did it
-            </h2>
             <p class="cs-body">
-              Before I designed anything, I spent time researching how this work
-              was actually done. I mapped the full workflow across users,
-              admins, engineers, and the system dependencies between them, to
-              understand where effort was actually going and who was affected by
-              it the most. I audited the legacy output setup screen by screen,
-              and opened existing templates and their response code exports to
-              see exactly how a finished output was wired.
+              The system didn't know what to do with the output template. It
+              didn't know which response went where. So the team added a unique
+              response code for every possible response, and the engineers, when
+              creating the PDF template, mapped these response codes to the
+              correct field. Then, the system could easily replace the response
+              codes in the template with the actual responses. Over the years,
+              that became the only way outputs were made.
             </p>
             <section
               class="cs-flow-container"
@@ -433,7 +397,10 @@ const playSvg =
                       <span
                         class="cs-flow-icon-wrap"
                         aria-hidden="true"
-                        set:html={(FLOW_ICONS[i] ?? FLOW_ICONS[0]).replaceAll("clip_", `clip${i}_`)}
+                        set:html={(FLOW_ICONS[i] ?? FLOW_ICONS[0]).replaceAll(
+                          "clip_",
+                          `clip${i}_`,
+                        )}
                       />
                       <span class="cs-flow-tab__copy">
                         <span class="cs-flow-eyebrow">
@@ -441,10 +408,7 @@ const playSvg =
                         </span>
                         <span class="cs-flow-title">{f.title}</span>
                       </span>
-                      <span
-                        class="cs-flow-tab__progress"
-                        aria-hidden="true"
-                      />
+                      <span class="cs-flow-tab__progress" aria-hidden="true" />
                     </button>
                   ))
                 }
@@ -493,78 +457,27 @@ const playSvg =
                 Showing step 1 of {FLOW.length}
               </p>
             </section>
-            <p class="cs-body">
-              The people building these templates were the engineers themselves.
-              So rather than running a formal study with unfamiliar
-              participants, I worked alongside the people who lived inside this
-              workflow every day.
-            </p>
-            <p
-              class="cs-body"
-              style={hasAsset(LEGACY_FIGURE.src) ? "" : "margin-bottom:0"}
-            >
-              I interviewed the implementation team manager whose team built
-              these outputs, to understand what they needed from a better tool.
-              Then I had the engineers walk me through building a form and
-              mapping its codes, step by step, the way they did it on a normal
-              day. This gave me a clear picture of what should carry over to the
-              new builder and what could be dropped.
-            </p>
-            {
-              hasAsset(LEGACY_FIGURE.src) && (
-                <figure class="cs-figure">
-                  <img
-                    src={LEGACY_FIGURE.src}
-                    alt={LEGACY_FIGURE.alt}
-                    loading="lazy"
-                    decoding="async"
-                    data-lightbox-trigger
-                    style="cursor: pointer;"
-                  />
-                  <button
-                    type="button"
-                    class="cs-media-maximize"
-                    aria-label="Maximize image"
-                    title="Maximize image"
-                    data-lightbox-trigger
-                    set:html={fullscreenSvg}
-                  />
-                  <figcaption>{LEGACY_FIGURE.caption}</figcaption>
-                </figure>
-              )
-            }
           </div>
         </div>
       </section>
 
-      <section id="cs-discovery" class="cs-section cs-section--overview">
+      <section id="cs-problem" class="cs-section cs-section--overview">
         <div class="cs-section__inner">
-          <div class="cs-section__number">04<span>Discovery</span></div>
+          <div class="cs-section__number">03<span>Problem</span></div>
           <div>
-            <h2 class="cs-heading">Where effort was actually being spent</h2>
+            <h2 class="cs-heading">Where the time went</h2>
             <p class="cs-body">
-              I found that most of the time was going into mapping the response
-              codes into the template rather than designing it.
+              Some forms had 50+ fields. Each question had multiple response
+              codes to map. The common form below had 23 questions and 45 codes.
+              Manually mapping them took most of an engineer's time, about 2 to
+              3 days per template from starting till publishing.
             </p>
-            <p class="cs-body">
-              Every answer carried its own response code. The example form below
-              was one of the most common, and it had twenty three questions, but
-              forty five codes to map. Every form requires at least one output
-              with all the fields mapped by default, and larger forms ended up
-              requiring hundreds of mappings per form.
-            </p>
-            <p class="cs-body">
-              Missing or mistyping a single code meant the field would not get
-              filled, or worse, wrong information would be filled in on an
-              official document.
-            </p>
-
             <figure class="cs-figure">
               <img
                 src={responsemapping.src}
                 width={responsemapping.width}
                 height={responsemapping.height}
-                alt="Response mapping for one form: 23 questions expand into 45 response codes, since every possible answer needs its own code"
+                alt="Response mapping for one form: 23 questions expand into 45 response codes, since every possible response needs its own code"
                 loading="lazy"
                 decoding="async"
                 data-lightbox-trigger
@@ -579,45 +492,55 @@ const playSvg =
                 set:html={fullscreenSvg}
               />
             </figure>
-
             <p class="cs-body" style="margin-top:24px">
-              The audit also turned up things nobody remembered the reason for.
-              One option, File Category, had been added for a single client and
-              carried through every build since, though no one used it and no
-              one could explain what it did. When I traced it, it turned out to
-              organize the generated PDFs inside the system. Since the new model
-              does not store PDFs at all, the option had no reason to exist, and
-              it was dropped.
+              One mistake in the response code mapping could print a wrong
+              response on an official document, like a student's enrollment form
+              or distance learning contract. So they had to be diligent and slow
+              to make everything right, and every template went through rounds
+              of upload, test, and fix.
+            </p>
+            <p class="cs-body">
+              The brief was to move PDF creation inside the system so engineers
+              could build templates easily. But as I worked through it with the
+              engineers, I found what was actually slowing them down.
+            </p>
+            <blockquote class="cs-blockquote">
+              The PDF was never the problem. The response codes were.
+            </blockquote>
+            <p class="cs-body" style="margin-bottom:0">
+              So I looked into options on how to make this workflow simple,
+              instead of just creating a PDF editor inside the system.
             </p>
           </div>
         </div>
       </section>
-      <section id="cs-reframing" class="cs-section cs-section--overview">
+
+      <section id="cs-constraint" class="cs-section cs-section--overview">
         <div class="cs-section__inner">
-          <div class="cs-section__number">05<span>Reframing</span></div>
+          <div class="cs-section__number">04<span>Constraint</span></div>
           <div>
-            <h2 class="cs-heading">
-              From building a PDF editor to redesigning the workflow
-            </h2>
-            <p class="cs-body">The original requirement was simple:</p>
-            <blockquote class="cs-blockquote">
-              “How might we make PDF creation easier?”
-            </blockquote>
+            <h2 class="cs-heading">The idea we ruled out</h2>
             <p class="cs-body">
-              But once I realised that it was the manual mapping that was taking
-              up the engineer's time, I rephrased the requirement:
+              I came from modernizing the staff dashboard with drag and drop
+              custom widgets, so I immediately thought of a visual drag and drop
+              WYSIWYG template builder. We had already built the tech, and it
+              would be an easier port.
             </p>
-            <blockquote class="cs-blockquote">
-              “How might we remove manual mapping, so the engineers just build
-              the layout?”
-            </blockquote>
             <p class="cs-body">
-              This reframing simplified the scope from building a brand new PDF
-              editor inside the platform to a workflow redesign. By removing
-              unnecessary steps, we would make the complex manual workflow
-              simple. The challenge was to build it without affecting the legacy
-              backend, and to build on the mental models users already
-              understood.
+              But how do we map the response codes? The product's form creation
+              and output modules were two independent modules, and the response
+              codes were the only common thing among them.
+            </p>
+            <p class="cs-body" style="margin-bottom:0">
+              At first I thought if we could rebuild the system for React, we
+              could completely do away with response codes. We could directly
+              show the form with user responses, like modern forms do, and
+              generate the PDF using React PDF libraries. I checked with the
+              devs and other stakeholders and found that it would take a lot of
+              time to rebuild everything, and lots of changes would be required
+              on the backend to make that happen. And that would affect all the
+              orgs that use the legacy instances. So I went back to the drawing
+              board.
             </p>
           </div>
         </div>
@@ -625,31 +548,24 @@ const playSvg =
 
       <section id="cs-datamodel" class="cs-section cs-section--overview">
         <div class="cs-section__inner">
-          <div class="cs-section__number">06<span>Mapping Model</span></div>
+          <div class="cs-section__number">05<span>Mapping Model</span></div>
           <div>
-            <h2 class="cs-heading">
-              Automating the mapping model before the interface
-            </h2>
+            <h2 class="cs-heading">Borrowing from clinical work</h2>
             <p class="cs-body">
-              There are two parts to the output builder: a mapping layer and the
-              layout builder. PDF was the container which had both of these
-              layers packed together.
+              Suddenly I remembered how we turned voice transcription reports
+              into EHR compatible JSON during my previous work on a clinical
+              healthcare platform. That was my eureka moment. This was a similar
+              problem. The response codes could become output builder compatible
+              JSON.
             </p>
             <p class="cs-body">
-              If layout is built into the system, why keep PDF as the container
-              at all? Can't the mapping data be stored separately as data
-              bindings? I had worked on similar mapping systems before and
-              immediately thought of JSON as a viable alternative.
+              A PDF template held the layout and the mapping packed together. If
+              those could live apart, the system could own the layout and the
+              mapping could live as JSON. The response codes could stay as they
+              were on the backend. I checked output templates built for several
+              clients, and they all followed a simple layout. Only the response
+              codes changed from one template to the next.
             </p>
-            <p class="cs-body">
-              That was my theory, so I went and checked it. I reviewed the
-              output templates built for several clients over the period and
-              found that the design of them all followed a simple layout
-              pattern, repetitive enough for the system to generate, while the
-              response code changed for every single response. So, keeping the
-              template builder decoupled from the codes will be more efficient.
-            </p>
-
             <div
               class="cs-datamodel-grid"
               style="--ink:#0f1524; --body:#253149; --soft:rgba(37,49,73,0.7); --muted:#5b6478; --line:rgba(79,70,229,0.16); --accent:#4f46e5; --accent-dim:#3730a3; --tint:rgba(79,70,229,0.06); --tint2:rgba(79,70,229,0.10); --red:#ef4444; --red-tint:rgba(239,68,68,0.06); --red-line:rgba(239,68,68,0.22); --mono:'IBM Plex Mono',Menlo,monospace; --serif:var(--font-title); --sans:var(--font); margin:32px 0 0; box-sizing:border-box; color:var(--body); font-family:var(--sans); display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:32px; align-items:start"
@@ -811,7 +727,7 @@ const playSvg =
                     style="display:flex; align-items:flex-start; gap:12px; font-family:var(--font); font-size:20px; line-height:1.5; color:var(--text-soft)"
                   >
                     <span style="flex:0 0 auto; color:#ef4444">✕</span><span
-                      >Large binary files, not machine-readable</span
+                      >Large binary files machines can't read</span
                     >
                   </li>
                   <li
@@ -961,7 +877,7 @@ const playSvg =
                     style="display:flex; align-items:flex-start; gap:12px; font-family:var(--font); font-size:20px; line-height:1.5; color:var(--text-soft)"
                   >
                     <span style="flex:0 0 auto; color:var(--primary)">✓</span
-                    ><span>Compact, machine-readable JSON schema</span>
+                    ><span>Compact JSON schema machines can read</span>
                   </li>
                   <li
                     style="display:flex; align-items:flex-start; gap:12px; font-family:var(--font); font-size:20px; line-height:1.5; color:var(--text-soft)"
@@ -978,46 +894,40 @@ const playSvg =
                 </ul>
               </div>
             </div>
-            <p class="cs-body" style="margin-top:40px;">
-              I took this idea to the react team and they did a PoC based on my
-              request and made my theory a reality. <strong
-                >It was faster and more efficient than creating a PDF document.
-                So we decided to adopt it.</strong
-              > The template became a structure that the system fills on demand, which
-              required no server side changes to the legacy backend.
+            <p class="cs-body" style="margin-top:40px">
+              But would this require a backend change? I didn't know. So I took
+              the idea to the React team and they built a PoC. They mapped the
+              response codes to JSON without a major backend rewrite. It was
+              also faster than creating a PDF. The template became a structure
+              the system fills on demand, with no PDFs stored at all.
+            </p>
+            <p class="cs-body" style="margin-bottom:0">
+              That also made some old options pointless. File Category, added
+              years ago for a single client, only organized stored PDFs, so it
+              was dropped.
             </p>
           </div>
         </div>
       </section>
 
-      <section
-        id="cs-firstversion"
-        class="cs-section cs-section--contrast"
-      >
+      <section id="cs-firstversion" class="cs-section cs-section--contrast">
         <div class="cs-section__inner">
-          <div class="cs-section__number">07<span>First version</span></div>
+          <div class="cs-section__number">06<span>First version</span></div>
           <div>
-            <h2 class="cs-heading">Going Wide on Purpose</h2>
+            <h2 class="cs-heading">Going wide on purpose</h2>
             <p class="cs-body">
-              For the builder I wanted to build on the mental models users
-              already understand. Like the modern form builders like Google
-              Forms and Microsoft Forms, only change is that instead of dragging
-              fields, users drag questions.
+              With the major problem of the workflow solved, I went on to
+              brainstorm how I could design the template builder. What features
+              to include. How much it had to look like a modern builder. I
+              didn't have answers to any of these.
             </p>
             <p class="cs-body">
-              To make this work seamlessly, I used existing react
-              functionalities that I already designed for a customizable staff
-              dashboard. It was already built and running. So, I took the core
-              idea of drag and drop and column layout systems, added more on top
-              and designed the first version to purposefully go wide. I wanted
-              to make it customisable enough for advanced users while still
-              allowing non technical users to build layouts without
-              customisation.
-            </p>
-            <p class="cs-body">
-              The point was to build a concrete foundation for the people to
-              react to. It was how I turned a vague brief into a real
-              conversation about what the product should and should not do.
+              I was torn. The user in me wanted to make it as simple as
+              possible. The stakeholders plainly wanted to use React to its
+              maximum extent. So I built the initial version with all the layout
+              building features we could get by reusing the setup used for the
+              dashboard. Advanced layouts, paddings, margins, columns, themes,
+              and so on. I presented it to the stakeholders and they liked it.
             </p>
             <div
               class="cs-exploration-container"
@@ -1085,17 +995,17 @@ const playSvg =
 
       <section id="cs-concerns" class="cs-section cs-section--contrast">
         <div class="cs-section__inner">
-          <div class="cs-section__number">08<span>Concerns</span></div>
+          <div class="cs-section__number">07<span>Scoping</span></div>
           <div>
-            <h2 class="cs-heading">
-              What each team <br /> was worried about
-            </h2>
+            <h2 class="cs-heading">What we kept</h2>
             <p class="cs-body">
-              Once stakeholders saw the initial designs, the concerns and
-              suggestions came in fast. Each one pointed at something in the
-              exploration that was too open, too risky, or too costly to
-              maintain. Some decisions were made and some open ended questions
-              were left for my decision.
+              But engineering dropped in and thankfully stopped it right there.
+              Building all these advanced features would take ages.
+            </p>
+            <p class="cs-body">
+              I had also collected reactions from each team separately:
+              stakeholders, frontend and backend engineers, sales and support.
+              Each group raised its own concern.
             </p>
             {
               hasAsset(CONSTRAINTS_FIGURE.src) && (
@@ -1120,7 +1030,6 @@ const playSvg =
                 </figure>
               )
             }
-
             <div class="cs-concerns">
               {
                 CONCERNS.map((c) => (
@@ -1140,18 +1049,31 @@ const playSvg =
                 ))
               }
             </div>
+            <p class="cs-body" style="margin-top:32px; margin-bottom:0">
+              Now that we knew what wasn't possible, we brainstormed and came up
+              with the minimum features we needed for the output builder. A
+              default org level template, a customizable header fields section,
+              and easier ways to add the form questions. That's it. No layout,
+              no column, nothing.
+            </p>
           </div>
         </div>
       </section>
 
       <section id="cs-solution" class="cs-section cs-section--solution">
         <div class="cs-section__inner">
-          <div class="cs-section__number">09<span>Solution</span></div>
+          <div class="cs-section__number">08<span>Solution</span></div>
           <div>
             <div class="cs-solution-info" style="margin-bottom:40px">
               <h2 class="cs-heading">
                 From manual workflows<br />to a visual system
               </h2>
+              <p class="cs-body" style="margin-bottom:0">
+                Each feature takes out a step from the old workflow. Picking a
+                question wires up its response codes in the background, so
+                nobody sees a string like Q_10235_RESPONSE. Compact or
+                comfortable is just a view, and the system arranges the fields.
+              </p>
             </div>
             <div class="cs-features-list">
               {
@@ -1200,7 +1122,9 @@ const playSvg =
                         </div>
                       </div>
                     </div>
-                    <p class="cs-caption cs-feature__caption">{feature.caption}</p>
+                    <p class="cs-caption cs-feature__caption">
+                      {feature.caption}
+                    </p>
                   </div>
                 ))
               }
@@ -1211,25 +1135,26 @@ const playSvg =
 
       <section id="cs-impact" class="cs-section cs-section--impact">
         <div class="cs-section__inner">
-          <div class="cs-section__number">10<span>Impact</span></div>
+          <div class="cs-section__number">09<span>Impact</span></div>
           <div>
             <h2 class="cs-heading">
-              A Faster Workflow,<br />and a Door It Opened
+              From days to hours,<br />and no longer only engineers
             </h2>
             <p class="cs-body">
-              The clearest win was speed. Time to create a template reduced from
-              multiple days to a few hours, even for the engineers who already
-              knew the old process. Onboarding new organizations got faster, and
-              customer requirements could be turned around more quickly instead
-              of joining a long queue.
+              With templates taking hours, new organizations get set up faster,
+              and customer requests no longer sit in a long queue.
             </p>
             <p class="cs-body">
-              The quieter win was what it opened up. With the mapping gone,
-              building a template no longer demanded engineering knowledge, only
-              an understanding of the form. Engineers still run the builder
-              today, but the work is no longer locked to them. The natural next
-              step is handing it to the organizations directly, so they can
-              update their own outputs without waiting on anyone.
+              We measured it with a timed side by side test. The team built one
+              real client output twice, once the old way and once in the new
+              builder. Several outputs were done in the new builder before the
+              manual one was finished.
+            </p>
+            <p class="cs-body">
+              With the mapping gone, building a template only needs an
+              understanding of the form. No engineering knowledge. Engineers
+              still run the builder today, but the work is no longer locked to
+              them.
             </p>
             <div class="cs-impact-stats">
               <div class="cs-impact-stat">
@@ -1240,8 +1165,8 @@ const playSvg =
                   >
                 </div>
                 <div class="cs-stat-desc">
-                  Days of engineer time down to less than an hour, even for
-                  engineers who knew the old process
+                  Days of engineer time down to a few hours, even for engineers
+                  who knew the old process
                 </div>
               </div>
               <div class="cs-impact-stat">
@@ -1281,9 +1206,9 @@ const playSvg =
                   After
                 </div>
                 <p>
-                  <span class="cs-emph-accent"> Less than an hour</span>,
-                  entirely inside the product, with no external tools and no
-                  manual mapping.
+                  <span class="cs-emph-accent"> A few hours</span>, entirely
+                  inside the product, with no external tools and no manual
+                  mapping.
                 </p>
               </div>
             </div>
@@ -1293,47 +1218,46 @@ const playSvg =
 
       <section id="cs-evolution" class="cs-section cs-section--evolution">
         <div class="cs-section__inner">
-          <div class="cs-section__number">11<span>Future</span></div>
+          <div class="cs-section__number">10<span>Next</span></div>
           <div>
-            <h2 class="cs-heading">Exploring a More Radical Idea</h2>
+            <h2 class="cs-heading">Designing the output first</h2>
             <p class="cs-body">
-              During discovery, I proposed a larger improvement that could make
-              the entire process even more seamless. The current workflow still
-              treated forms as the source of truth. But most of the information
-              users were collecting already existed somewhere in the platform.
+              The nearer step is handing the builder to organizations directly,
+              so they can update their own outputs without waiting on anyone.
+            </p>
+            <p class="cs-body">
+              During discovery I also proposed a bigger change. Most of the
+              information a form collects already exists somewhere in the
+              platform.
             </p>
             <div class="cs-evolution-box">
               <p class="cs-evolution-quote">
-                "What if we design the output first and let the system determine
-                what information is actually missing?"
+                "What if we designed the output first and let the system work
+                out what is missing?"
               </p>
             </div>
             <p class="cs-body cs-evolution-tail" style="margin-bottom:0">
-              This was out of scope for this release as it required rewriting
-              core system logic. But it shaped how we started thinking about
-              where the platform could go.
+              It needed platform level changes, so it stayed out of this
+              release. It did change how the team thought about where the
+              platform could go.
             </p>
           </div>
         </div>
       </section>
 
-      <section
-        id="cs-reflection"
-        class="cs-section cs-section--reflection"
-      >
+      <section id="cs-reflection" class="cs-section cs-section--reflection">
         <div class="cs-section__inner">
-          <div class="cs-section__number">12<span>Reflection</span></div>
+          <div class="cs-section__number">11<span>Reflection</span></div>
           <div>
             <p class="cs-body">
-              The ask was to make PDF creation easier. The real opportunity was
-              understanding why it was hard in the first place. Once I mapped
-              the workflow and found the hidden dependencies, I could remove a
-              major part of the workflow rather than just making it less
-              annoying.
+              The ask was to move PDF creation inside the system. My question
+              was why a PDF was needed to create an output.
             </p>
             <p class="cs-body" style="margin-bottom:0">
-              The result was more than a better interface. <span
-                class="cs-reflection-tail">It was a simpler system.</span
+              <span class="cs-reflection-tail"
+                >That's when I understood it all. The PDF was never the problem.
+                The response codes were. Removing that mapping did more than any
+                editor I could have designed.</span
               >
             </p>
           </div>
@@ -1374,9 +1298,7 @@ const playSvg =
         tab.tabIndex = selected ? 0 : -1;
 
         if (selected) {
-          const fill = tab.querySelector<HTMLElement>(
-            ".cs-flow-tab__progress",
-          );
+          const fill = tab.querySelector<HTMLElement>(".cs-flow-tab__progress");
           if (fill) {
             fill.style.animation = "none";
             void fill.offsetWidth;
